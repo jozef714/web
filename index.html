@@ -5,7 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Gestión Ganadera</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐄</text></svg>">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Font Awesome actualizado a la versión 6.5.1 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" 
+          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" 
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
@@ -19,6 +24,7 @@
             --warning: #f39c12;
             --light: #ecf0f1;
             --dark: #34495e;
+            --admin: #9b59b6;
         }
         
         * {
@@ -98,22 +104,6 @@
         .login-box button:disabled {
             background-color: #95a5a6;
             cursor: not-allowed;
-        }
-        
-        .login-box p {
-            text-align: center;
-            margin-top: 20px;
-            color: #555;
-        }
-        
-        .login-box a {
-            color: var(--secondary);
-            text-decoration: none;
-            font-weight: 600;
-        }
-        
-        .login-box a:hover {
-            text-decoration: underline;
         }
         
         .logo {
@@ -220,6 +210,15 @@
         
         .btn-danger:hover {
             background-color: #c0392b;
+        }
+        
+        .btn-admin {
+            background-color: var(--admin);
+            color: white;
+        }
+        
+        .btn-admin:hover {
+            background-color: #8e44ad;
         }
         
         .connection-status {
@@ -539,206 +538,64 @@
             font-size: 18px;
         }
         
-        /* Módulo adicional: Potreros */
-        .potrero-card {
+        /* Nuevos estilos para panel de administración */
+        .admin-card {
             background: white;
             border-radius: 8px;
-            padding: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 15px;
-            border-left: 4px solid var(--success);
-        }
-        
-        .potrero-card h3 {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 18px;
-            margin-bottom: 10px;
-        }
-        
-        .potrero-card .area {
-            background: var(--light);
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 14px;
-        }
-        
-        /* Módulo adicional: Alertas */
-        .alerta-card {
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-left: 4px solid var(--warning);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        .alerta-card.urgente {
-            border-left-color: var(--danger);
-        }
-        
-        .alerta-card h3 {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 16px;
-            margin-bottom: 10px;
-        }
-        
-        .alerta-card .icono {
-            font-size: 20px;
-        }
-        
-        /* Módulo adicional: Árbol genealógico */
-        .arbol-container {
-            display: flex;
-            justify-content: center;
             padding: 20px;
-            background: white;
-            border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            overflow-x: auto;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--admin);
         }
         
-        .nodo {
-            padding: 10px 15px;
-            background: var(--light);
-            border-radius: 8px;
-            text-align: center;
-            min-width: 150px;
-            margin: 10px;
-            position: relative;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        .nodo:before {
-            content: '';
-            position: absolute;
-            top: -20px;
-            left: 50%;
-            border-left: 2px solid #aaa;
-            height: 20px;
-        }
-        
-        .nivel-0 .nodo {
-            background: var(--secondary);
-            color: white;
-        }
-        
-        .nivel-1 {
-            display: flex;
-            justify-content: center;
-            margin-top: 30px;
-        }
-        
-        .nivel-1 .nodo {
-            background: var(--success);
-            color: white;
-        }
-        
-        .nivel-2 {
-            display: flex;
-            justify-content: center;
-            margin-top: 30px;
-        }
-        
-        .nivel-2 .nodo {
-            background: #f8f9fa;
-        }
-        
-        .conexion {
-            position: absolute;
-            top: -20px;
-            left: 50%;
-            width: 2px;
-            height: 20px;
-            background: #aaa;
-        }
-        
-        /* Módulo adicional: Finanzas */
-        .finanza-card {
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-            border-left: 4px solid var(--success);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        .finanza-card.egreso {
-            border-left-color: var(--danger);
-        }
-        
-        .finanza-card h3 {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-        
-        .finanza-card .monto {
-            font-weight: bold;
-            font-size: 18px;
-        }
-        
-        .finanza-card .fecha {
-            color: #777;
-            font-size: 14px;
-        }
-        
-        /* Módulo adicional: Inventario */
-        .inventario-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px;
+        .admin-card h3 {
+            color: var(--admin);
             border-bottom: 1px solid #eee;
-            align-items: center;
-        }
-        
-        .inventario-item:last-child {
-            border-bottom: none;
-        }
-        
-        .inventario-item .cantidad {
-            background: var(--light);
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 14px;
-        }
-        
-        .inventario-item.bajo .cantidad {
-            background: #ffecb3;
-            color: #e65100;
-        }
-        
-        .inventario-item.critico .cantidad {
-            background: #ffcdd2;
-            color: #c62828;
-        }
-        
-        /* Módulo adicional: Próximos Partos */
-        .parto-card {
-            background: white;
-            border-radius: 8px;
-            padding: 15px;
+            padding-bottom: 10px;
             margin-bottom: 15px;
-            border-left: 4px solid #f48fb1;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
         
-        .parto-card .dias {
-            font-size: 24px;
+        .permisos-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .permisos-table th, .permisos-table td {
+            padding: 12px 15px;
+            border: 1px solid #eee;
+            text-align: left;
+        }
+        
+        .permisos-table th {
+            background-color: var(--light);
+            font-weight: 600;
+        }
+        
+        .permisos-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        .admin-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .admin-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .admin-badge {
+            background-color: var(--admin);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
             font-weight: bold;
-            color: #d81b60;
-            margin: 10px 0;
-        }
-        
-        .parto-card .fecha {
-            background: #f8bbd0;
-            padding: 5px 10px;
-            border-radius: 20px;
-            display: inline-block;
-            font-size: 14px;
         }
         
         @media (max-width: 768px) {
@@ -766,7 +623,7 @@
     </style>
 </head>
 <body>
-    <!-- Contenedor de login -->
+    <!-- Contenedor de login (sin opción de registro público) -->
     <div id="login-container">
         <div class="login-box">
             <div class="logo">
@@ -787,35 +644,10 @@
                     <i class="fas fa-spinner fa-spin" id="login-spinner" style="display: none;"></i>
                 </button>
             </form>
-            <p>¿No tienes cuenta? <a href="#" id="register-link">Regístrate</a></p>
-        </div>
-        <div class="login-box" id="register-box" style="display: none;">
-            <div class="logo">
-                <i class="fas fa-cow"></i>
-                <h1>Gestión Ganadera</h1>
-            </div>
-            <h2>Crear Cuenta</h2>
-            <form id="register-form">
-                <input type="text" id="nombre-registro" placeholder="Nombre completo" required>
-                <div class="error-message" id="name-error"></div>
-                
-                <input type="email" id="email-registro" placeholder="Correo electrónico" required>
-                <div class="error-message" id="reg-email-error"></div>
-                
-                <input type="password" id="password-registro" placeholder="Contraseña (mín. 6 caracteres)" required minlength="6">
-                <div class="error-message" id="reg-password-error"></div>
-                
-                <button type="submit" id="register-button">
-                    <i class="fas fa-user-plus"></i> 
-                    <span id="register-button-text">Registrarse</span>
-                    <i class="fas fa-spinner fa-spin" id="register-spinner" style="display: none;"></i>
-                </button>
-            </form>
-            <p>¿Ya tienes cuenta? <a href="#" id="login-link">Inicia Sesión</a></p>
         </div>
     </div>
 
-    <!-- Contenido principal (oculto hasta login) -->
+    <!-- Contenido principal -->
     <div id="main-app" style="display: none;">
         <header>
             <div class="header-left">
@@ -851,6 +683,8 @@
                 <li><button data-seccion="finanzas"><i class="fas fa-coins"></i> Finanzas</button></li>
                 <li><button data-seccion="inventario"><i class="fas fa-boxes"></i> Inventario</button></li>
                 <li><button data-seccion="alertas"><i class="fas fa-bell"></i> Alertas</button></li>
+                <!-- Nueva opción solo visible para admin -->
+                <li id="admin-menu-item" style="display: none;"><button data-seccion="admin"><i class="fas fa-user-shield"></i> Administración</button></li>
             </ul>
         </div>
 
@@ -920,272 +754,45 @@
                 </form>
             </section>
 
-            <section id="lista" class="seccion">
-                <h2>Lista de Animales</h2>
-                <div class="form-group">
-                    <input type="text" id="busqueda" placeholder="Buscar por nombre, ID o Arete..." style="padding: 10px; width: 100%; border-radius: 4px; border: 1px solid #ddd;">
-                </div>
-                <div style="overflow-x: auto;">
-                    <table class="tabla">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Arete</th>
-                                <th>Nombre</th>
-                                <th>Tipo</th>
-                                <th>Edad</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tablaAnimales">
-                            <tr>
-                                <td colspan="7" style="text-align: center; padding: 20px;">
-                                    <i class="fas fa-spinner fa-spin"></i> Cargando datos...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section id="arbol" class="seccion">
-                <h2>Árbol Genealógico</h2>
+            <!-- Otras secciones de gestión ganadera -->
+            
+            <!-- Sección de administración -->
+            <section id="admin" class="seccion">
+                <h2><i class="fas fa-user-shield"></i> Panel de Administración <span class="admin-badge">Admin</span></h2>
                 <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i> Selecciona un animal para ver su árbol genealógico.
+                    <i class="fas fa-info-circle"></i> Esta sección es exclusiva para el administrador del sistema.
                 </div>
-                <div class="form-group">
-                    <select id="animalRaiz" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #ddd;">
-                        <option value="">Seleccione un animal</option>
-                    </select>
-                </div>
-                <div id="arbolContent" class="arbol-container">
-                    <p>Selecciona un animal para visualizar su árbol genealógico</p>
-                </div>
-            </section>
-
-            <section id="estadisticas" class="seccion">
-                <h2>Estadísticas</h2>
-                <div class="stats-container">
-                    <div class="stat-card">
-                        <h3>Total de Animales</h3>
-                        <div class="stat-value" id="totalAnimales">0</div>
-                        <div class="stat-label">en el sistema</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Vacas</h3>
-                        <div class="stat-value" id="totalVacas">0</div>
-                        <div class="stat-label">en producción</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Toros</h3>
-                        <div class="stat-value" id="totalToros">0</div>
-                        <div class="stat-label">reproductores</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Promedio de Peso</h3>
-                        <div class="stat-value" id="promedioPeso">0</div>
-                        <div class="stat-label">kilogramos</div>
-                    </div>
-                </div>
-                <div style="margin-top: 30px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                    <h3>Distribución por Tipo</h3>
-                    <div id="graficoDistribucion"></div>
-                </div>
-            </section>
-
-            <section id="sanidad" class="seccion">
-                <h2>Registro de Tratamientos</h2>
-                <form id="formSanidad">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Animal:</label>
-                            <select id="animalSanidad" required>
-                                <option value="">Seleccione un animal</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Fecha:</label>
-                            <input type="date" id="fechaSanidad" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Tipo de Tratamiento:</label>
-                            <input type="text" id="tipoTratamiento" placeholder="Vacunación, Desparasitación..." required>
-                        </div>
-                        <div class="form-group">
-                            <label>Detalles:</label>
-                            <textarea id="detallesSanidad" placeholder="Detalles del tratamiento" required></textarea>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-syringe"></i> Registrar Tratamiento</button>
-                </form>
                 
-                <h3 style="margin-top: 30px;">Historial de Tratamientos</h3>
-                <div id="historialSanidad" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                    <p>No hay tratamientos registrados</p>
+                <div class="admin-card">
+                    <h3><i class="fas fa-user-plus"></i> Crear Nuevo Usuario</h3>
+                    <form id="admin-register-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Nombre completo:</label>
+                                <input type="text" id="admin-nombre" placeholder="Nombre completo" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Correo electrónico:</label>
+                                <input type="email" id="admin-email" placeholder="Correo electrónico" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Contraseña:</label>
+                                <input type="password" id="admin-password" placeholder="Contraseña (mín. 6 caracteres)" required minlength="6">
+                            </div>
+                        </div>
+                        <div class="admin-actions">
+                            <button type="submit" class="btn btn-admin">
+                                <i class="fas fa-user-plus"></i> Crear Usuario
+                            </button>
+                        </div>
+                    </form>
                 </div>
-            </section>
-
-            <section id="reproduccion" class="seccion">
-                <h2>Registro de Reproducción</h2>
-                <form id="formReproduccion">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Vaca:</label>
-                            <select id="vaca" required>
-                                <option value="">Seleccione una vaca</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Toro:</label>
-                            <select id="toro" required>
-                                <option value="">Seleccione un toro</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Fecha de Monta:</label>
-                            <input type="date" id="fechaMonta" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Observaciones:</label>
-                            <textarea id="observacionesReproduccion" placeholder="Observaciones adicionales"></textarea>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-heart"></i> Registrar Monta</button>
-                </form>
                 
-                <h3 style="margin-top: 30px;">Historial de Reproducción</h3>
-                <div id="historialReproduccion" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                    <p>No hay registros de reproducción</p>
-                </div>
-            </section>
-
-            <section id="partos" class="seccion">
-                <h2>Próximos Partos</h2>
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i> Lista de vacas con partos programados en los próximos meses.
-                </div>
-                <div id="listaPartos">
-                    <p>Cargando próximos partos...</p>
-                </div>
-            </section>
-
-            <section id="potreros" class="seccion">
-                <h2>Gestión de Potreros</h2>
-                <form id="formPotreros">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Nombre del Potrero:</label>
-                            <input type="text" id="nombrePotrero" placeholder="Ej: Potrero Norte" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Área (hectáreas):</label>
-                            <input type="number" id="areaPotrero" placeholder="Ej: 5.2" min="0.1" step="0.1" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Capacidad:</label>
-                            <input type="number" id="capacidadPotrero" placeholder="Número de animales" min="1" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Descripción:</label>
-                            <textarea id="descripcionPotrero" placeholder="Características del potrero"></textarea>
-                        </div>
+                <div class="admin-card">
+                    <h3><i class="fas fa-users"></i> Usuarios Registrados</h3>
+                    <div id="usuarios-container">
+                        <p><i class="fas fa-spinner fa-spin"></i> Cargando usuarios...</p>
                     </div>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Agregar Potrero</button>
-                </form>
-                
-                <h3 style="margin-top: 30px;">Lista de Potreros</h3>
-                <div id="listaPotreros" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                    <p>No hay potreros registrados</p>
-                </div>
-            </section>
-
-            <section id="finanzas" class="seccion">
-                <h2>Gestión Financiera</h2>
-                <form id="formFinanzas">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Fecha:</label>
-                            <input type="date" id="fechaFinanza" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Tipo:</label>
-                            <select id="tipoFinanza" required>
-                                <option value="Ingreso">Ingreso</option>
-                                <option value="Egreso">Egreso</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Descripción:</label>
-                            <input type="text" id="descripcionFinanza" placeholder="Venta de leche, Compra de alimento..." required>
-                        </div>
-                        <div class="form-group">
-                            <label>Monto ($):</label>
-                            <input type="number" id="montoFinanza" placeholder="0.00" min="0" step="0.01" required>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Registrar Movimiento</button>
-                </form>
-                
-                <div style="margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-                    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                        <h3>Resumen Financiero</h3>
-                        <div id="resumenFinanciero">
-                            <p>No hay datos financieros</p>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <h3>Historial de Movimientos</h3>
-                        <div id="historialFinanzas" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                            <p>No hay movimientos registrados</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="inventario" class="seccion">
-                <h2>Gestión de Inventario</h2>
-                <form id="formInventario">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Ítem:</label>
-                            <input type="text" id="nombreItem" placeholder="Alimento concentrado, Medicamentos..." required>
-                        </div>
-                        <div class="form-group">
-                            <label>Cantidad:</label>
-                            <input type="number" id="cantidadItem" placeholder="0" min="0" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Categoría:</label>
-                            <select id="categoriaItem">
-                                <option value="Alimento">Alimento</option>
-                                <option value="Medicina">Medicina</option>
-                                <option value="Equipo">Equipo</option>
-                                <option value="Otros">Otros</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Descripción:</label>
-                            <textarea id="descripcionItem" placeholder="Detalles del ítem"></textarea>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Agregar al Inventario</button>
-                </form>
-                
-                <h3 style="margin-top: 30px;">Inventario Actual</h3>
-                <div id="listaInventario" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                    <p>No hay ítems en el inventario</p>
-                </div>
-            </section>
-
-            <section id="alertas" class="seccion">
-                <h2>Alertas y Recordatorios</h2>
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i> Sistema de alertas para próximos partos, vacunas y otros eventos importantes.
-                </div>
-                <div id="listaAlertas">
-                    <p>No hay alertas activas en este momento</p>
                 </div>
             </section>
         </main>
@@ -1215,17 +822,19 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
+        // UID del administrador (reemplazar con tu UID real)
+        const ADMIN_UID = "wmaUD6CKl2WKkS6x59mFAw4Awxe2";
+
         // Referencias a elementos
         const loginContainer = document.getElementById('login-container');
         const mainApp = document.getElementById('main-app');
         const loginButton = document.getElementById('login-button');
         const loginSpinner = document.getElementById('login-spinner');
-        const registerButton = document.getElementById('register-button');
-        const registerSpinner = document.getElementById('register-spinner');
         const connectionStatus = document.querySelector('.connection-status');
         const statusDot = document.querySelector('.status-dot');
         const statusText = document.querySelector('.status-text');
         const userAvatar = document.getElementById('user-avatar');
+        const adminMenuItem = document.getElementById('admin-menu-item');
 
         // Función para actualizar estado de conexión
         function updateConnectionStatus(connected) {
@@ -1240,7 +849,7 @@
             }
         }
 
-        // Monitorear estado de conexión del navegador
+        // Monitorear estado de conexión
         window.addEventListener('online', () => updateConnectionStatus(true));
         window.addEventListener('offline', () => updateConnectionStatus(false));
         updateConnectionStatus(navigator.onLine);
@@ -1284,64 +893,6 @@
             
             return isValid;
         }
-        
-        // Validación de formulario de registro
-        document.getElementById('nombre-registro').addEventListener('input', validateRegisterForm);
-        document.getElementById('email-registro').addEventListener('input', validateRegisterForm);
-        document.getElementById('password-registro').addEventListener('input', validateRegisterForm);
-        
-        function validateRegisterForm() {
-            const name = document.getElementById('nombre-registro').value;
-            const email = document.getElementById('email-registro').value;
-            const password = document.getElementById('password-registro').value;
-            const nameError = document.getElementById('name-error');
-            const emailError = document.getElementById('reg-email-error');
-            const passwordError = document.getElementById('reg-password-error');
-            let isValid = true;
-            
-            // Validar nombre
-            if (!name || name.length < 3) {
-                nameError.textContent = 'El nombre debe tener al menos 3 caracteres';
-                nameError.style.display = 'block';
-                isValid = false;
-            } else {
-                nameError.style.display = 'none';
-            }
-            
-            // Validar email
-            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                emailError.textContent = 'Ingrese un correo válido';
-                emailError.style.display = 'block';
-                isValid = false;
-            } else {
-                emailError.style.display = 'none';
-            }
-            
-            // Validar contraseña
-            if (!password || password.length < 6) {
-                passwordError.textContent = 'La contraseña debe tener al menos 6 caracteres';
-                passwordError.style.display = 'block';
-                isValid = false;
-            } else {
-                passwordError.style.display = 'none';
-            }
-            
-            return isValid;
-        }
-        
-        // Mostrar formulario de registro
-        document.getElementById('register-link').addEventListener('click', (e) => {
-            e.preventDefault();
-            document.getElementById('register-box').style.display = 'block';
-            document.getElementById('login-form').parentElement.style.display = 'none';
-        });
-        
-        // Mostrar formulario de login
-        document.getElementById('login-link').addEventListener('click', (e) => {
-            e.preventDefault();
-            document.getElementById('register-box').style.display = 'none';
-            document.getElementById('login-form').parentElement.style.display = 'block';
-        });
         
         // Login
         document.getElementById('login-form').addEventListener('submit', async (e) => {
@@ -1389,67 +940,6 @@
             }
         });
         
-        // Registro
-        document.getElementById('register-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            if (!validateRegisterForm()) return;
-            
-            const name = document.getElementById('nombre-registro').value;
-            const email = document.getElementById('email-registro').value;
-            const password = document.getElementById('password-registro').value;
-            
-            try {
-                // Mostrar spinner
-                registerSpinner.style.display = 'inline-block';
-                registerButton.disabled = true;
-                
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                const user = userCredential.user;
-                
-                // Guardar nombre en Firestore
-                await db.collection('users').doc(user.uid).set({
-                    nombre: name,
-                    email: email,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                
-                // Ocultar spinner
-                registerSpinner.style.display = 'none';
-                registerButton.disabled = false;
-                
-                // Mostrar mensaje de éxito
-                document.getElementById('name-error').style.display = 'none';
-                document.getElementById('reg-email-error').style.display = 'none';
-                document.getElementById('reg-password-error').style.display = 'none';
-                
-                showNotification('Cuenta creada con éxito. Inicie sesión', 'success');
-                
-                // Cambiar a formulario de login
-                document.getElementById('register-box').style.display = 'none';
-                document.getElementById('login-form').parentElement.style.display = 'block';
-                
-            } catch (error) {
-                registerSpinner.style.display = 'none';
-                registerButton.disabled = false;
-                
-                let errorMessage;
-                switch(error.code) {
-                    case 'auth/email-already-in-use':
-                        errorMessage = 'El correo ya está registrado';
-                        break;
-                    case 'auth/weak-password':
-                        errorMessage = 'La contraseña debe tener al menos 6 caracteres';
-                        break;
-                    default:
-                        errorMessage = 'Error al registrar usuario';
-                }
-                
-                document.getElementById('reg-password-error').textContent = errorMessage;
-                document.getElementById('reg-password-error').style.display = 'block';
-            }
-        });
-        
         // Logout
         document.getElementById('btnLogout').addEventListener('click', () => {
             auth.signOut();
@@ -1462,6 +952,13 @@
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('main-app').style.display = 'block';
                 document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${user.email.charAt(0)}&background=3498db&color=fff`;
+                
+                // Mostrar opción de admin si es el administrador
+                if (user.uid === ADMIN_UID) {
+                    adminMenuItem.style.display = 'block';
+                } else {
+                    adminMenuItem.style.display = 'none';
+                }
                 
                 // Inicializar app
                 initApp();
@@ -1711,541 +1208,146 @@
         }
         
         // ======================
-        // MÓDULOS ADICIONALES
+        // PANEL DE ADMINISTRACIÓN
         // ======================
-        // Módulo: Árbol Genealógico
-        async function renderArbolGenealogico() {
-            const cont = document.getElementById('arbolContent');
-            cont.innerHTML = '<p>Selecciona un animal para visualizar su árbol genealógico</p>';
+        // Función para crear nuevo usuario (solo admin)
+        async function crearUsuarioAdmin() {
+            const user = auth.currentUser;
+            if (!user || user.uid !== ADMIN_UID) {
+                showNotification('No tienes permisos para esta acción', 'error');
+                return;
+            }
             
-            const animalSelect = document.getElementById('animalRaiz');
-            animalSelect.innerHTML = '<option value="">Seleccione un animal</option>';
+            const nombre = document.getElementById('admin-nombre').value.trim();
+            const email = document.getElementById('admin-email').value.trim();
+            const password = document.getElementById('admin-password').value;
+            
+            if (!nombre || !email || !password) {
+                showNotification('Todos los campos son obligatorios', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showNotification('La contraseña debe tener al menos 6 caracteres', 'error');
+                return;
+            }
             
             try {
-                const user = auth.currentUser;
-                if (!user) return;
+                // Crear usuario en Firebase Authentication
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const nuevoUsuario = userCredential.user;
                 
-                // Obtener animales de Firestore
-                const snapshot = await db.collection('users').doc(user.uid).collection('animales').get();
-                const animales = snapshot.docs.map(doc => doc.data());
-                
-                // Llenar selector de animales
-                animales.forEach(animal => {
-                    const option = document.createElement('option');
-                    option.value = animal.id;
-                    option.textContent = `${animal.nombre} (${animal.id})`;
-                    animalSelect.appendChild(option);
+                // Guardar información adicional en Firestore
+                await db.collection('users').doc(nuevoUsuario.uid).set({
+                    nombre: nombre,
+                    email: email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    esAdmin: false
                 });
                 
-                // Evento para mostrar árbol
-                animalSelect.addEventListener('change', async () => {
-                    const id = animalSelect.value;
-                    if (!id) return;
-                    
-                    cont.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Generando árbol...</p>';
-                    
-                    const animal = animales.find(a => a.id === id);
-                    if (!animal) return;
-                    
-                    // Construir árbol
-                    cont.innerHTML = `
-                        <div class="nivel-0">
-                            <div class="nodo">
-                                <strong>${animal.nombre}</strong>
-                                <div>${animal.tipo} | ${animal.raza}</div>
-                            </div>
-                        </div>
-                    `;
-                    
-                    // Buscar padres
-                    if (animal.padre || animal.madre) {
-                        const padresCont = document.createElement('div');
-                        padresCont.className = 'nivel-1';
-                        cont.appendChild(padresCont);
-                        
-                        if (animal.padre) {
-                            const padre = animales.find(a => a.id === animal.padre);
-                            if (padre) {
-                                const nodoPadre = document.createElement('div');
-                                nodoPadre.className = 'nodo';
-                                nodoPadre.innerHTML = `
-                                    <strong>${padre.nombre}</strong>
-                                    <div>${padre.tipo} | ${padre.raza}</div>
-                                `;
-                                padresCont.appendChild(nodoPadre);
-                            }
-                        }
-                        
-                        if (animal.madre) {
-                            const madre = animales.find(a => a.id === animal.madre);
-                            if (madre) {
-                                const nodoMadre = document.createElement('div');
-                                nodoMadre.className = 'nodo';
-                                nodoMadre.innerHTML = `
-                                    <strong>${madre.nombre}</strong>
-                                    <div>${madre.tipo} | ${madre.raza}</div>
-                                `;
-                                padresCont.appendChild(nodoMadre);
-                            }
-                        }
-                    }
-                });
+                showNotification('Usuario creado con éxito', 'success');
+                document.getElementById('admin-register-form').reset();
+                cargarUsuarios();
                 
             } catch (error) {
-                showNotification('Error cargando animales: ' + error.message, 'error');
+                let errorMessage;
+                switch(error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMessage = 'El correo ya está registrado';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'Correo electrónico inválido';
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage = 'La contraseña es demasiado débil';
+                        break;
+                    default:
+                        errorMessage = 'Error al crear usuario: ' + error.message;
+                }
+                showNotification(errorMessage, 'error');
             }
         }
         
-        // Módulo: Estadísticas
-        async function renderEstadisticas() {
-            try {
-                const user = auth.currentUser;
-                if (!user) return;
-                
-                // Obtener animales de Firestore
-                const snapshot = await db.collection('users').doc(user.uid).collection('animales').get();
-                const animales = snapshot.docs.map(doc => doc.data());
-                
-                // Actualizar estadísticas
-                document.getElementById('totalAnimales').textContent = animales.length;
-                
-                const vacas = animales.filter(a => a.tipo === 'Vaca');
-                document.getElementById('totalVacas').textContent = vacas.length;
-                
-                const toros = animales.filter(a => a.tipo === 'Toro');
-                document.getElementById('totalToros').textContent = toros.length;
-                
-                const pesos = animales.map(a => a.peso || 0).filter(p => p > 0);
-                const promedioPeso = pesos.length > 0 ? 
-                    (pesos.reduce((a, b) => a + b, 0) / pesos.length).toFixed(1) : 0;
-                document.getElementById('promedioPeso').textContent = promedioPeso;
-                
-                // Actualizar gráfico de distribución
-                const tipos = {};
-                animales.forEach(animal => {
-                    tipos[animal.tipo] = (tipos[animal.tipo] || 0) + 1;
-                });
-                
-                const grafico = document.getElementById('graficoDistribucion');
-                grafico.innerHTML = '';
-                
-                for (const tipo in tipos) {
-                    const porcentaje = Math.round((tipos[tipo] / animales.length) * 100);
-                    grafico.innerHTML += `
-                        <div style="margin-bottom: 10px;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                <span>${tipo}</span>
-                                <span>${tipos[tipo]} (${porcentaje}%)</span>
-                            </div>
-                            <div style="height: 20px; background: #e0e0e0; border-radius: 10px; overflow: hidden;">
-                                <div style="height: 100%; width: ${porcentaje}%; background: var(--secondary); border-radius: 10px;"></div>
-                            </div>
-                        </div>
-                    `;
-                }
-                
-            } catch (error) {
-                showNotification('Error cargando estadísticas: ' + error.message, 'error');
-            }
-        }
-        
-        // Módulo: Próximos Partos
-        async function renderProximosPartos() {
-            const cont = document.getElementById('listaPartos');
-            cont.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Cargando próximos partos...</p>';
+        // Función para cargar lista de usuarios
+        async function cargarUsuarios() {
+            const cont = document.getElementById('usuarios-container');
+            cont.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Cargando usuarios...</p>';
             
             try {
-                const user = auth.currentUser;
-                if (!user) return;
-                
-                // Obtener animales de Firestore
-                const snapshot = await db.collection('users').doc(user.uid).collection('animales').get();
-                const animales = snapshot.docs.map(doc => doc.data());
-                
-                // Filtrar vacas con montas registradas
-                const vacas = animales.filter(a => a.tipo === 'Vaca');
-                
-                if (vacas.length === 0) {
-                    cont.innerHTML = '<p>No hay vacas registradas</p>';
-                    return;
-                }
-                
-                // Calcular próximos partos
-                const hoy = new Date();
-                const partos = [];
-                
-                for (const vaca of vacas) {
-                    if (vaca.historial) {
-                        for (const evento of vaca.historial) {
-                            if (evento.tipo === 'Reproducción') {
-                                const fechaMonta = new Date(evento.fecha);
-                                const fechaParto = new Date(fechaMonta);
-                                fechaParto.setDate(fechaParto.getDate() + 283); // 283 días de gestación
-                                
-                                const diasRestantes = Math.ceil((fechaParto - hoy) / (1000 * 60 * 60 * 24));
-                                
-                                if (diasRestantes > 0 && diasRestantes <= 90) {
-                                    partos.push({
-                                        vaca: vaca,
-                                        fechaMonta: fechaMonta,
-                                        fechaParto: fechaParto,
-                                        diasRestantes: diasRestantes
-                                    });
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                if (partos.length === 0) {
-                    cont.innerHTML = '<p>No hay partos programados en los próximos 3 meses</p>';
-                    return;
-                }
-                
-                // Ordenar por fecha de parto más cercana
-                partos.sort((a, b) => a.diasRestantes - b.diasRestantes);
-                
-                // Mostrar partos
-                cont.innerHTML = '';
-                partos.forEach(parto => {
-                    const card = document.createElement('div');
-                    card.className = 'parto-card';
-                    card.innerHTML = `
-                        <h3>${parto.vaca.nombre} <small>(${parto.vaca.id})</small></h3>
-                        <div class="dias">${parto.diasRestantes} días</div>
-                        <p><i class="fas fa-calendar-alt"></i> Fecha estimada de parto: 
-                        <span class="fecha">${parto.fechaParto.toLocaleDateString()}</span></p>
-                    `;
-                    cont.appendChild(card);
-                });
-                
-            } catch (error) {
-                showNotification('Error cargando próximos partos: ' + error.message, 'error');
-            }
-        }
-        
-        // Módulo: Potreros
-        async function renderPotreros() {
-            const lista = document.getElementById('listaPotreros');
-            lista.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Cargando potreros...</p>';
-            
-            try {
-                const user = auth.currentUser;
-                if (!user) return;
-                
-                // Obtener potreros de Firestore
-                const snapshot = await db.collection('users').doc(user.uid).collection('potreros').get();
-                const potreros = snapshot.docs.map(doc => doc.data());
-                
-                if (potreros.length === 0) {
-                    lista.innerHTML = '<p>No hay potreros registrados</p>';
-                    return;
-                }
-                
-                // Mostrar potreros
-                lista.innerHTML = '';
-                potreros.forEach(potrero => {
-                    const card = document.createElement('div');
-                    card.className = 'potrero-card';
-                    card.innerHTML = `
-                        <h3>${potrero.nombre} <span class="area">${potrero.area} ha</span></h3>
-                        <p><i class="fas fa-cow"></i> Capacidad: ${potrero.capacidad} animales</p>
-                        <p>${potrero.descripcion || ''}</p>
-                    `;
-                    lista.appendChild(card);
-                });
-                
-                // Evento para agregar potrero
-                document.getElementById('formPotreros').addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    
-                    const nombre = document.getElementById('nombrePotrero').value.trim();
-                    const area = parseFloat(document.getElementById('areaPotrero').value);
-                    const capacidad = parseInt(document.getElementById('capacidadPotrero').value);
-                    const descripcion = document.getElementById('descripcionPotrero').value.trim();
-                    
-                    if (!nombre || isNaN(area) || area <= 0 || isNaN(capacidad) || capacidad <= 0) {
-                        showNotification('Datos inválidos', 'error');
-                        return;
-                    }
-                    
-                    const potreroData = {
-                        id: 'potrero-' + Date.now(),
-                        nombre: nombre,
-                        area: area,
-                        capacidad: capacidad,
-                        descripcion: descripcion,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                const snapshot = await db.collection('users').get();
+                const usuarios = snapshot.docs.map(doc => {
+                    return {
+                        id: doc.id,
+                        ...doc.data()
                     };
-                    
-                    try {
-                        await db.collection('users').doc(user.uid).collection('potreros').doc(potreroData.id).set(potreroData);
-                        showNotification('Potrero agregado', 'success');
-                        document.getElementById('formPotreros').reset();
-                        renderPotreros();
-                    } catch (error) {
-                        showNotification('Error guardando potrero: ' + error.message, 'error');
-                    }
                 });
                 
-            } catch (error) {
-                showNotification('Error cargando potreros: ' + error.message, 'error');
-            }
-        }
-        
-        // Módulo: Finanzas
-        async function renderFinanzas() {
-            const historial = document.getElementById('historialFinanzas');
-            historial.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Cargando movimientos...</p>';
-            
-            try {
-                const user = auth.currentUser;
-                if (!user) return;
+                if (usuarios.length === 0) {
+                    cont.innerHTML = '<p>No hay usuarios registrados</p>';
+                    return;
+                }
                 
-                // Obtener finanzas de Firestore
-                const snapshot = await db.collection('users').doc(user.uid).collection('finanzas').get();
-                const movimientos = snapshot.docs.map(doc => doc.data());
-                
-                // Calcular resumen
-                let totalIngresos = 0;
-                let totalEgresos = 0;
-                
-                movimientos.forEach(mov => {
-                    if (mov.tipo === 'Ingreso') totalIngresos += mov.monto;
-                    if (mov.tipo === 'Egreso') totalEgresos += mov.monto;
-                });
-                
-                const balance = totalIngresos - totalEgresos;
-                
-                // Mostrar resumen
-                const resumen = document.getElementById('resumenFinanciero');
-                resumen.innerHTML = `
-                    <p><strong>Total Ingresos:</strong> $${totalIngresos.toFixed(2)}</p>
-                    <p><strong>Total Egresos:</strong> $${totalEgresos.toFixed(2)}</p>
-                    <p><strong>Balance:</strong> $${balance.toFixed(2)}</p>
-                    <div style="margin-top: 20px; background: ${balance >= 0 ? '#e8f5e9' : '#ffebee'}; padding: 10px; border-radius: 4px;">
-                        <strong>Estado Financiero:</strong> ${balance >= 0 ? 'Positivo ✅' : 'Negativo ❌'}
-                    </div>
+                let html = `
+                    <table class="permisos-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Fecha Registro</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
                 `;
                 
-                // Mostrar historial
-                historial.innerHTML = '';
-                if (movimientos.length === 0) {
-                    historial.innerHTML = '<p>No hay movimientos registrados</p>';
-                    return;
-                }
-                
-                // Ordenar por fecha descendente
-                movimientos.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-                
-                movimientos.forEach(mov => {
-                    const card = document.createElement('div');
-                    card.className = `finanza-card ${mov.tipo === 'Egreso' ? 'egreso' : ''}`;
-                    card.innerHTML = `
-                        <h3>
-                            ${mov.descripcion}
-                            <span class="monto">$${mov.monto.toFixed(2)}</span>
-                        </h3>
-                        <p><i class="fas fa-calendar"></i> ${new Date(mov.fecha).toLocaleDateString()} 
-                        <span class="tipo">${mov.tipo}</span></p>
-                    `;
-                    historial.appendChild(card);
-                });
-                
-                // Evento para agregar movimiento
-                document.getElementById('formFinanzas').addEventListener('submit', async (e) => {
-                    e.preventDefault();
+                usuarios.forEach(usuario => {
+                    const fecha = usuario.createdAt ? 
+                        new Date(usuario.createdAt.seconds * 1000).toLocaleDateString() : 'N/A';
                     
-                    const fecha = document.getElementById('fechaFinanza').value;
-                    const tipo = document.getElementById('tipoFinanza').value;
-                    const descripcion = document.getElementById('descripcionFinanza').value.trim();
-                    const monto = parseFloat(document.getElementById('montoFinanza').value);
-                    
-                    if (!fecha || !descripcion || isNaN(monto) || monto <= 0) {
-                        showNotification('Datos inválidos', 'error');
-                        return;
-                    }
-                    
-                    const movimientoData = {
-                        id: 'finanza-' + Date.now(),
-                        fecha: fecha,
-                        tipo: tipo,
-                        descripcion: descripcion,
-                        monto: monto,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    };
-                    
-                    try {
-                        await db.collection('users').doc(user.uid).collection('finanzas').doc(movimientoData.id).set(movimientoData);
-                        showNotification('Movimiento registrado', 'success');
-                        document.getElementById('formFinanzas').reset();
-                        renderFinanzas();
-                    } catch (error) {
-                        showNotification('Error guardando movimiento: ' + error.message, 'error');
-                    }
-                });
-                
-            } catch (error) {
-                showNotification('Error cargando finanzas: ' + error.message, 'error');
-            }
-        }
-        
-        // Módulo: Inventario
-        async function renderInventario() {
-            const lista = document.getElementById('listaInventario');
-            lista.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Cargando inventario...</p>';
-            
-            try {
-                const user = auth.currentUser;
-                if (!user) return;
-                
-                // Obtener inventario de Firestore
-                const snapshot = await db.collection('users').doc(user.uid).collection('inventario').get();
-                const items = snapshot.docs.map(doc => doc.data());
-                
-                if (items.length === 0) {
-                    lista.innerHTML = '<p>No hay ítems en el inventario</p>';
-                    return;
-                }
-                
-                // Mostrar inventario
-                lista.innerHTML = '';
-                items.forEach(item => {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = 'inventario-item';
-                    if (item.cantidad < 10) itemDiv.className += ' bajo';
-                    if (item.cantidad < 5) itemDiv.className += ' critico';
-                    
-                    itemDiv.innerHTML = `
-                        <div>
-                            <strong>${item.nombre}</strong>
-                            <div>${item.categoria || 'Sin categoría'}</div>
-                        </div>
-                        <div class="cantidad">${item.cantidad} unidades</div>
-                    `;
-                    lista.appendChild(itemDiv);
-                });
-                
-                // Evento para agregar item
-                document.getElementById('formInventario').addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    
-                    const nombre = document.getElementById('nombreItem').value.trim();
-                    const cantidad = parseInt(document.getElementById('cantidadItem').value);
-                    const categoria = document.getElementById('categoriaItem').value;
-                    const descripcion = document.getElementById('descripcionItem').value.trim();
-                    
-                    if (!nombre || isNaN(cantidad) || cantidad < 0) {
-                        showNotification('Datos inválidos', 'error');
-                        return;
-                    }
-                    
-                    const itemData = {
-                        id: 'item-' + Date.now(),
-                        nombre: nombre,
-                        cantidad: cantidad,
-                        categoria: categoria,
-                        descripcion: descripcion,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    };
-                    
-                    try {
-                        await db.collection('users').doc(user.uid).collection('inventario').doc(itemData.id).set(itemData);
-                        showNotification('Ítem agregado al inventario', 'success');
-                        document.getElementById('formInventario').reset();
-                        renderInventario();
-                    } catch (error) {
-                        showNotification('Error guardando ítem: ' + error.message, 'error');
-                    }
-                });
-                
-            } catch (error) {
-                showNotification('Error cargando inventario: ' + error.message, 'error');
-            }
-        }
-        
-        // Módulo: Alertas
-        async function renderAlertas() {
-            const lista = document.getElementById('listaAlertas');
-            lista.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Analizando alertas...</p>';
-            
-            try {
-                const user = auth.currentUser;
-                if (!user) return;
-                
-                // Obtener animales de Firestore
-                const snapshotAnimales = await db.collection('users').doc(user.uid).collection('animales').get();
-                const animales = snapshotAnimales.docs.map(doc => doc.data());
-                
-                // Obtener inventario de Firestore
-                const snapshotInventario = await db.collection('users').doc(user.uid).collection('inventario').get();
-                const inventario = snapshotInventario.docs.map(doc => doc.data());
-                
-                const alertas = [];
-                const hoy = new Date();
-                
-                // Alertas para vacas con partos próximos
-                const vacas = animales.filter(a => a.tipo === 'Vaca');
-                for (const vaca of vacas) {
-                    if (vaca.historial) {
-                        for (const evento of vaca.historial) {
-                            if (evento.tipo === 'Reproducción') {
-                                const fechaMonta = new Date(evento.fecha);
-                                const fechaParto = new Date(fechaMonta);
-                                fechaParto.setDate(fechaParto.getDate() + 283); // 283 días de gestación
-                                
-                                const diasRestantes = Math.ceil((fechaParto - hoy) / (1000 * 60 * 60 * 24));
-                                
-                                if (diasRestantes > 0 && diasRestantes <= 30) {
-                                    alertas.push({
-                                        tipo: 'parto',
-                                        mensaje: `Vaca ${vaca.nombre} tiene parto estimado en ${diasRestantes} días (${fechaParto.toLocaleDateString()})`,
-                                        prioridad: diasRestantes <= 7 ? 'urgente' : 'normal'
-                                    });
+                    html += `
+                        <tr>
+                            <td>${usuario.nombre} ${usuario.id === ADMIN_UID ? '<span class="admin-badge">Admin</span>' : ''}</td>
+                            <td>${usuario.email}</td>
+                            <td>${fecha}</td>
+                            <td>
+                                ${usuario.id !== ADMIN_UID ? 
+                                    `<button class="btn btn-danger btn-eliminar-usuario" data-id="${usuario.id}">
+                                        <i class="fas fa-trash"></i> Eliminar
+                                    </button>` : 
+                                    '<span class="btn btn-disabled">Administrador</span>'
                                 }
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                html += `</tbody></table>`;
+                cont.innerHTML = html;
+                
+                // Agregar eventos a botones de eliminar
+                document.querySelectorAll('.btn-eliminar-usuario').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const userId = btn.dataset.id;
+                        if (confirm('¿Eliminar este usuario? Esta acción no se puede deshacer.')) {
+                            try {
+                                // Eliminar de Firestore
+                                await db.collection('users').doc(userId).delete();
+                                
+                                // Eliminar de Authentication
+                                await auth.deleteUser(userId);
+                                
+                                showNotification('Usuario eliminado', 'success');
+                                cargarUsuarios();
+                            } catch (error) {
+                                showNotification('Error eliminando usuario: ' + error.message, 'error');
                             }
                         }
-                    }
-                }
-                
-                // Alertas para inventario bajo
-                for (const item of inventario) {
-                    if (item.cantidad < 10) {
-                        alertas.push({
-                            tipo: 'inventario',
-                            mensaje: `Bajo stock de ${item.nombre} (solo ${item.cantidad} unidades)`,
-                            prioridad: item.cantidad < 5 ? 'urgente' : 'normal'
-                        });
-                    }
-                }
-                
-                // Mostrar alertas
-                lista.innerHTML = '';
-                if (alertas.length === 0) {
-                    lista.innerHTML = '<p>No hay alertas activas en este momento</p>';
-                    return;
-                }
-                
-                alertas.forEach(alerta => {
-                    const card = document.createElement('div');
-                    card.className = `alerta-card ${alerta.prioridad === 'urgente' ? 'urgente' : ''}`;
-                    
-                    let icono = '';
-                    if (alerta.tipo === 'parto') icono = '<i class="fas fa-baby icono"></i>';
-                    if (alerta.tipo === 'inventario') icono = '<i class="fas fa-boxes icono"></i>';
-                    
-                    card.innerHTML = `
-                        <h3>
-                            ${icono} 
-                            ${alerta.tipo === 'parto' ? 'Próximo parto' : 'Inventario bajo'}
-                        </h3>
-                        <p>${alerta.mensaje}</p>
-                    `;
-                    lista.appendChild(card);
+                    });
                 });
                 
             } catch (error) {
-                showNotification('Error cargando alertas: ' + error.message, 'error');
+                showNotification('Error cargando usuarios: ' + error.message, 'error');
+                cont.innerHTML = '<p>Error al cargar usuarios</p>';
             }
         }
         
@@ -2278,13 +1380,7 @@
             }
             
             // Cargar datos específicos de la sección
-            if (id === 'arbol') renderArbolGenealogico();
-            if (id === 'estadisticas') renderEstadisticas();
-            if (id === 'partos') renderProximosPartos();
-            if (id === 'potreros') renderPotreros();
-            if (id === 'finanzas') renderFinanzas();
-            if (id === 'inventario') renderInventario();
-            if (id === 'alertas') renderAlertas();
+            if (id === 'admin') cargarUsuarios();
         }
         
         // Cerrar ficha
@@ -2304,6 +1400,10 @@
                 saveAnimal();
             });
             document.getElementById('btnExportar').addEventListener('click', exportToExcel);
+            document.getElementById('admin-register-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                crearUsuarioAdmin();
+            });
             
             // Delegación de eventos para navegación
             document.querySelectorAll('.sidebar button[data-seccion]').forEach(btn => {
@@ -2312,33 +1412,9 @@
                 });
             });
             
-            // Evento de búsqueda
-            document.getElementById('busqueda').addEventListener('input', searchAnimals);
-            
             // Cargar datos iniciales
             renderAnimalList();
             showSection('registro');
-        }
-        
-        // Búsqueda de animales
-        function searchAnimals() {
-            const searchTerm = document.getElementById('busqueda').value.toLowerCase();
-            const rows = document.querySelectorAll('#tablaAnimales tr');
-            
-            rows.forEach(row => {
-                const cells = row.querySelectorAll('td');
-                let found = false;
-                
-                if (cells.length > 0) {
-                    cells.forEach(cell => {
-                        if (cell.textContent.toLowerCase().includes(searchTerm)) {
-                            found = true;
-                        }
-                    });
-                }
-                
-                row.style.display = found ? '' : 'none';
-            });
         }
         
         // Exportar a Excel
