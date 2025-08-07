@@ -26,6 +26,7 @@
             --admin: #9b59b6;
             --male: #3498db;
             --female: #e84393;
+            --reproduction: #e91e63;
         }
         
         * {
@@ -218,6 +219,15 @@
         
         .btn-admin:hover {
             background-color: #8e44ad;
+        }
+        
+        .btn-reproduction {
+            background-color: var(--reproduction);
+            color: white;
+        }
+        
+        .btn-reproduction:hover {
+            background-color: #c2185b;
         }
         
         .connection-status {
@@ -763,6 +773,27 @@
             height: 20px;
             background: #999;
         }
+        
+        /* Estilos para reproducción */
+        .reproduccion-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--reproduction);
+        }
+        
+        .reproduccion-card h4 {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .reproduccion-card .fecha {
+            font-size: 14px;
+            color: #777;
+        }
 
         @media (max-width: 768px) {
             .sidebar {
@@ -1074,18 +1105,23 @@
 
             <section id="reproduccion" class="seccion">
                 <h2>Registro de Reproducción</h2>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Registra las montas para llevar un control de la reproducción en tu ganado.
+                </div>
                 <form id="formReproduccion">
                     <div class="form-grid">
                         <div class="form-group">
                             <label>Vaca:</label>
                             <select id="vaca" required>
                                 <option value="">Seleccione una vaca</option>
+                                <!-- Se llenará dinámicamente -->
                             </select>
                         </div>
                         <div class="form-group">
                             <label>Toro:</label>
                             <select id="toro" required>
                                 <option value="">Seleccione un toro</option>
+                                <!-- Se llenará dinámicamente -->
                             </select>
                         </div>
                         <div class="form-group">
@@ -1093,11 +1129,18 @@
                             <input type="date" id="fechaMonta" required>
                         </div>
                         <div class="form-group">
+                            <label>Método:</label>
+                            <select id="metodo">
+                                <option value="Natural">Natural</option>
+                                <option value="Inseminación">Inseminación Artificial</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label>Observaciones:</label>
-                            <textarea id="observacionesReproduccion" placeholder="Observaciones adicionales"></textarea>
+                            <textarea id="observacionesReproduccion" placeholder="Detalles de la monta, comportamiento, etc."></textarea>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-heart"></i> Registrar Monta</button>
+                    <button type="submit" class="btn btn-reproduction"><i class="fas fa-heart"></i> Registrar Monta</button>
                 </form>
                 
                 <h3 style="margin-top: 30px;">Historial de Reproducción</h3>
@@ -1314,6 +1357,7 @@
 
         // Variables globales
         let animalesData = []; // Almacena todos los animales para uso global
+        let reproduccionData = []; // Almacena los registros de reproducción
 
         // Función para actualizar estado de conexión
         function updateConnectionStatus(connected) {
@@ -1746,6 +1790,161 @@
                 loadAnimalsForSelects();
             } catch (error) {
                 showNotification('Error eliminando animal: ' + error.message, 'error');
+            }
+        }
+        
+        // ======================
+        // MÓDULO DE REPRODUCCIÓN CORREGIDO
+        // ======================
+        // Cargar vacas y toros para reproducción
+        async function loadReproduccionAnimals() {
+            const vacaSelect = document.getElementById('vaca');
+            const toroSelect = document.getElementById('toro');
+            
+            vacaSelect.innerHTML = '<option value="">Seleccione una vaca</option>';
+            toroSelect.innerHTML = '<option value="">Seleccione un toro</option>';
+            
+            if (animalesData.length === 0) {
+                await loadAllAnimals();
+            }
+            
+            // Filtrar vacas (hembras adultas)
+            const vacas = animalesData.filter(a => 
+                a.sexo === 'Hembra' && 
+                (a.categoria === 'Vaca' || a.categoria === 'Novilla') && 
+                a.estado === 'Activo'
+            );
+            
+            // Filtrar toros (machos adultos)
+            const toros = animalesData.filter(a => 
+                a.sexo === 'Macho' && 
+                (a.categoria === 'Toro' || a.categoria === 'Novillo') && 
+                a.estado === 'Activo'
+            );
+            
+            // Llenar selector de vacas
+            vacas.forEach(vaca => {
+                const option = document.createElement('option');
+                option.value = vaca.id;
+                option.textContent = `${vaca.nombre} (${vaca.id})`;
+                vacaSelect.appendChild(option);
+            });
+            
+            // Llenar selector de toros
+            toros.forEach(toro => {
+                const option = document.createElement('option');
+                option.value = toro.id;
+                option.textContent = `${toro.nombre} (${toro.id})`;
+                toroSelect.appendChild(option);
+            });
+        }
+        
+        // Guardar registro de reproducción
+        async function saveReproduccion() {
+            const user = auth.currentUser;
+            if (!user) {
+                showNotification('Debe iniciar sesión', 'error');
+                return;
+            }
+            
+            const vacaId = document.getElementById('vaca').value;
+            const toroId = document.getElementById('toro').value;
+            const fechaMonta = document.getElementById('fechaMonta').value;
+            const metodo = document.getElementById('metodo').value;
+            const observaciones = document.getElementById('observacionesReproduccion').value.trim();
+            
+            if (!vacaId || !toroId || !fechaMonta) {
+                showNotification('Seleccione una vaca, un toro y la fecha de monta', 'error');
+                return;
+            }
+            
+            // Buscar animales
+            const vaca = animalesData.find(a => a.id === vacaId);
+            const toro = animalesData.find(a => a.id === toroId);
+            
+            if (!vaca || !toro) {
+                showNotification('No se encontraron los animales seleccionados', 'error');
+                return;
+            }
+            
+            const reproduccionData = {
+                vaca: {
+                    id: vaca.id,
+                    nombre: vaca.nombre
+                },
+                toro: {
+                    id: toro.id,
+                    nombre: toro.nombre
+                },
+                fechaMonta: fechaMonta,
+                metodo: metodo,
+                observaciones: observaciones,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            try {
+                // Guardar en Firestore
+                await db.collection('users').doc(user.uid).collection('reproduccion').add(reproduccionData);
+                
+                showNotification('Registro de reproducción guardado', 'success');
+                
+                // Limpiar formulario
+                document.getElementById('formReproduccion').reset();
+                
+                // Actualizar historial
+                loadReproduccionHistorial();
+            } catch (error) {
+                showNotification('Error guardando registro: ' + error.message, 'error');
+            }
+        }
+        
+        // Cargar historial de reproducción
+        async function loadReproduccionHistorial() {
+            const cont = document.getElementById('historialReproduccion');
+            cont.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Cargando historial...</p>';
+            
+            try {
+                const user = auth.currentUser;
+                if (!user) return;
+                
+                const snapshot = await db.collection('users').doc(user.uid).collection('reproduccion')
+                    .orderBy('createdAt', 'desc')
+                    .get();
+                    
+                reproduccionData = snapshot.docs.map(doc => {
+                    return {
+                        id: doc.id,
+                        ...doc.data()
+                    };
+                });
+                
+                if (reproduccionData.length === 0) {
+                    cont.innerHTML = '<p>No hay registros de reproducción</p>';
+                    return;
+                }
+                
+                let html = '';
+                reproduccionData.forEach(reg => {
+                    const fecha = new Date(reg.createdAt.seconds * 1000).toLocaleDateString();
+                    html += `
+                        <div class="reproduccion-card">
+                            <h4>
+                                <span>${reg.vaca.nombre} (Vaca)</span>
+                                <span class="fecha">${fecha}</span>
+                            </h4>
+                            <p><strong>Toro:</strong> ${reg.toro.nombre}</p>
+                            <p><strong>Fecha Monta:</strong> ${reg.fechaMonta}</p>
+                            <p><strong>Método:</strong> ${reg.metodo}</p>
+                            ${reg.observaciones ? `<p><strong>Observaciones:</strong> ${reg.observaciones}</p>` : ''}
+                        </div>
+                    `;
+                });
+                
+                cont.innerHTML = html;
+                
+            } catch (error) {
+                showNotification('Error cargando historial: ' + error.message, 'error');
+                cont.innerHTML = '<p>Error al cargar historial</p>';
             }
         }
         
@@ -2193,6 +2392,10 @@
             if (id === 'admin') cargarUsuarios();
             if (id === 'arbol') renderArbolGenealogico();
             if (id === 'estadisticas') renderEstadisticas();
+            if (id === 'reproduccion') {
+                loadReproduccionAnimals();
+                loadReproduccionHistorial();
+            }
         }
         
         // Cerrar ficha
@@ -2210,6 +2413,10 @@
             document.getElementById('formRegistro').addEventListener('submit', (e) => {
                 e.preventDefault();
                 saveAnimal();
+            });
+            document.getElementById('formReproduccion').addEventListener('submit', (e) => {
+                e.preventDefault();
+                saveReproduccion();
             });
             document.getElementById('btnExportar').addEventListener('click', exportToExcel);
             document.getElementById('admin-register-form').addEventListener('submit', (e) => {
