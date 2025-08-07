@@ -24,6 +24,8 @@
             --light: #ecf0f1;
             --dark: #34495e;
             --admin: #9b59b6;
+            --male: #3498db;
+            --female: #e84393;
         }
         
         * {
@@ -485,8 +487,15 @@
         .stat-value {
             font-size: 36px;
             font-weight: 700;
-            color: var(--secondary);
             margin-bottom: 10px;
+        }
+        
+        .stat-male {
+            color: var(--male);
+        }
+        
+        .stat-female {
+            color: var(--female);
         }
         
         .stat-label {
@@ -647,7 +656,6 @@
             font-size: 14px;
         }
 
-        /* Nuevos estilos para árbol genealógico */
         .arbol-genealogico {
             display: flex;
             flex-direction: column;
@@ -672,12 +680,19 @@
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             position: relative;
             z-index: 1;
-            border: 2px solid var(--success);
+        }
+        
+        .nodo-arbol.macho {
+            border: 2px solid var(--male);
+        }
+        
+        .nodo-arbol.hembra {
+            border: 2px solid var(--female);
         }
         
         .nodo-arbol.raiz {
             background-color: #d5f5e3;
-            border-color: var(--success);
+            border-width: 3px;
         }
         
         .nodo-arbol .nombre {
@@ -778,6 +793,10 @@
             .nodo-arbol {
                 margin: 5px;
             }
+            
+            .stats-container {
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            }
         }
     </style>
 </head>
@@ -865,11 +884,21 @@
                             <input type="text" id="nombre" placeholder="Nombre" required>
                         </div>
                         <div class="form-group">
-                            <label>Tipo:</label>
-                            <select id="tipo" required>
+                            <label>Categoría:</label>
+                            <select id="categoria" required>
                                 <option value="Vaca">Vaca</option>
                                 <option value="Toro">Toro</option>
                                 <option value="Ternero">Ternero</option>
+                                <option value="Novillo">Novillo</option>
+                                <option value="Becerro">Becerro</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Sexo:</label>
+                            <select id="sexo" required>
+                                <option value="Macho">Macho</option>
+                                <option value="Hembra">Hembra</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -928,7 +957,8 @@
                                 <th>ID</th>
                                 <th>Arete</th>
                                 <th>Nombre</th>
-                                <th>Tipo</th>
+                                <th>Categoría</th>
+                                <th>Sexo</th>
                                 <th>Edad</th>
                                 <th>Estado</th>
                                 <th>Acciones</th>
@@ -936,7 +966,7 @@
                         </thead>
                         <tbody id="tablaAnimales">
                             <tr>
-                                <td colspan="7" style="text-align: center; padding: 20px;">
+                                <td colspan="8" style="text-align: center; padding: 20px;">
                                     <i class="fas fa-spinner fa-spin"></i> Cargando datos...
                                 </td>
                             </tr>
@@ -971,12 +1001,32 @@
                     <div class="stat-card">
                         <h3>Vacas</h3>
                         <div class="stat-value" id="totalVacas">0</div>
-                        <div class="stat-label">en producción</div>
+                        <div class="stat-label">hembras adultas</div>
                     </div>
                     <div class="stat-card">
                         <h3>Toros</h3>
                         <div class="stat-value" id="totalToros">0</div>
-                        <div class="stat-label">reproductores</div>
+                        <div class="stat-label">machos adultos</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Machos Pequeños</h3>
+                        <div class="stat-value stat-male" id="totalMachosPeq">0</div>
+                        <div class="stat-label">terneros/novillos</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Hembras Pequeñas</h3>
+                        <div class="stat-value stat-female" id="totalHembrasPeq">0</div>
+                        <div class="stat-label">terneras/novillas</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Machos</h3>
+                        <div class="stat-value stat-male" id="totalMachos">0</div>
+                        <div class="stat-label">en la finca</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Hembras</h3>
+                        <div class="stat-value stat-female" id="totalHembras">0</div>
+                        <div class="stat-label">en la finca</div>
                     </div>
                     <div class="stat-card">
                         <h3>Promedio de Peso</h3>
@@ -985,7 +1035,7 @@
                     </div>
                 </div>
                 <div style="margin-top: 30px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                    <h3>Distribución por Tipo</h3>
+                    <h3>Distribución por Categoría</h3>
                     <div id="graficoDistribucion"></div>
                 </div>
             </section>
@@ -1445,11 +1495,11 @@
         async function loadAnimalsForSelects() {
             await loadAllAnimals();
             
-            // Cargar selector de padre (solo toros)
+            // Cargar selector de padre (solo machos adultos)
             const selectPadre = document.getElementById('padre');
             selectPadre.innerHTML = '<option value="">Seleccionar padre</option>';
             animalesData
-                .filter(animal => animal.tipo === 'Toro')
+                .filter(animal => animal.sexo === 'Macho' && (animal.categoria === 'Toro' || animal.categoria === 'Novillo'))
                 .forEach(animal => {
                     const option = document.createElement('option');
                     option.value = animal.id;
@@ -1457,11 +1507,11 @@
                     selectPadre.appendChild(option);
                 });
             
-            // Cargar selector de madre (solo vacas)
+            // Cargar selector de madre (solo hembras adultas)
             const selectMadre = document.getElementById('madre');
             selectMadre.innerHTML = '<option value="">Seleccionar madre</option>';
             animalesData
-                .filter(animal => animal.tipo === 'Vaca')
+                .filter(animal => animal.sexo === 'Hembra' && (animal.categoria === 'Vaca' || animal.categoria === 'Novilla'))
                 .forEach(animal => {
                     const option = document.createElement('option');
                     option.value = animal.id;
@@ -1482,7 +1532,8 @@
                 id: document.getElementById('id').value || 'id-' + Date.now(),
                 arete: document.getElementById('arete').value.trim(),
                 nombre: document.getElementById('nombre').value.trim(),
-                tipo: document.getElementById('tipo').value,
+                categoria: document.getElementById('categoria').value,
+                sexo: document.getElementById('sexo').value,
                 raza: document.getElementById('raza').value.trim(),
                 peso: parseFloat(document.getElementById('peso').value) || 0,
                 fechaNacimiento: document.getElementById('fechaNacimiento').value,
@@ -1512,7 +1563,7 @@
                 document.getElementById('formRegistro').reset();
                 document.getElementById('id').value = '';
                 
-                // Actualizar lista
+                // Actualizar datos
                 await loadAllAnimals();
                 renderAnimalList();
                 loadAnimalsForSelects();
@@ -1529,11 +1580,11 @@
                 return;
             }
             
-            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;"><i class="fas fa-spinner fa-spin"></i> Cargando datos...</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;"><i class="fas fa-spinner fa-spin"></i> Cargando datos...</td></tr>';
             
             try {
                 if (animalesData.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">No hay animales registrados</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;">No hay animales registrados</td></tr>';
                     return;
                 }
                 
@@ -1546,7 +1597,8 @@
                             <td>${animal.id}</td>
                             <td>${animal.arete || '-'}</td>
                             <td>${animal.nombre}</td>
-                            <td>${animal.tipo}</td>
+                            <td>${animal.categoria}</td>
+                            <td>${animal.sexo}</td>
                             <td>${edad}</td>
                             <td>${animal.estado}</td>
                             <td>
@@ -1575,7 +1627,7 @@
                 
             } catch (error) {
                 showNotification('Error cargando animales: ' + error.message, 'error');
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #e74c3c;">Error cargando datos</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px; color: #e74c3c;">Error cargando datos</td></tr>';
             }
         }
         
@@ -1600,13 +1652,14 @@
                 
                 const cont = document.getElementById('fichaContent');
                 cont.innerHTML = `
-                    <h3>${animal.nombre} (${animal.tipo})</h3>
+                    <h3>${animal.nombre} (${animal.categoria})</h3>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
                         <div>
                             <p><strong>ID:</strong> ${animal.id}</p>
                             <p><strong>Arete:</strong> ${animal.arete || "N/A"}</p>
                             <p><strong>Raza:</strong> ${animal.raza}</p>
                             <p><strong>Peso:</strong> ${animal.peso} kg</p>
+                            <p><strong>Sexo:</strong> ${animal.sexo}</p>
                         </div>
                         <div>
                             <p><strong>Edad:</strong> ${calcularEdad(animal.fechaNacimiento)}</p>
@@ -1636,7 +1689,8 @@
                 document.getElementById('id').value = animal.id;
                 document.getElementById('arete').value = animal.arete || '';
                 document.getElementById('nombre').value = animal.nombre;
-                document.getElementById('tipo').value = animal.tipo;
+                document.getElementById('categoria').value = animal.categoria;
+                document.getElementById('sexo').value = animal.sexo;
                 document.getElementById('raza').value = animal.raza;
                 document.getElementById('peso').value = animal.peso;
                 document.getElementById('fechaNacimiento').value = animal.fechaNacimiento;
@@ -1868,9 +1922,9 @@
         // Función auxiliar para crear un nodo del árbol
         function crearNodoArbol(animal, tipo = '', esRaiz = false) {
             const nodo = document.createElement('div');
-            nodo.className = `nodo-arbol ${esRaiz ? 'raiz' : ''}`;
             
             if (!animal) {
+                nodo.className = `nodo-arbol`;
                 nodo.innerHTML = `
                     <div class="nombre">Desconocido</div>
                     <div class="tipo">${tipo}</div>
@@ -1878,10 +1932,14 @@
                 return nodo;
             }
             
+            // Asignar clase según el sexo
+            const sexoClase = animal.sexo === 'Macho' ? 'macho' : 'hembra';
+            nodo.className = `nodo-arbol ${sexoClase} ${esRaiz ? 'raiz' : ''}`;
+            
             nodo.innerHTML = `
                 <div class="nombre">${animal.nombre}</div>
                 <div class="id">${animal.id}</div>
-                <div class="tipo">${tipo} (${animal.tipo})</div>
+                <div class="tipo">${tipo} (${animal.categoria})</div>
             `;
             return nodo;
         }
@@ -2039,37 +2097,57 @@
                 if (animalesData.length === 0) {
                     await loadAllAnimals();
                 }
-                
+
                 // Actualizar estadísticas
                 document.getElementById('totalAnimales').textContent = animalesData.length;
-                
-                const vacas = animalesData.filter(a => a.tipo === 'Vaca');
+
+                const vacas = animalesData.filter(a => a.categoria === 'Vaca');
                 document.getElementById('totalVacas').textContent = vacas.length;
-                
-                const toros = animalesData.filter(a => a.tipo === 'Toro');
+
+                const toros = animalesData.filter(a => a.categoria === 'Toro');
                 document.getElementById('totalToros').textContent = toros.length;
-                
+
+                // Machos pequeños (terneros, novillos, becerros)
+                const machosPeq = animalesData.filter(a => 
+                    a.sexo === 'Macho' && 
+                    (a.categoria === 'Ternero' || a.categoria === 'Novillo' || a.categoria === 'Becerro')
+                );
+                document.getElementById('totalMachosPeq').textContent = machosPeq.length;
+
+                // Hembras pequeñas (terneras, novillas, becerras)
+                const hembrasPeq = animalesData.filter(a => 
+                    a.sexo === 'Hembra' && 
+                    (a.categoria === 'Ternero' || a.categoria === 'Novillo' || a.categoria === 'Becerro')
+                );
+                document.getElementById('totalHembrasPeq').textContent = hembrasPeq.length;
+
+                // Totales por sexo
+                const totalMachos = animalesData.filter(a => a.sexo === 'Macho').length;
+                const totalHembras = animalesData.filter(a => a.sexo === 'Hembra').length;
+                document.getElementById('totalMachos').textContent = totalMachos;
+                document.getElementById('totalHembras').textContent = totalHembras;
+
                 const pesos = animalesData.map(a => a.peso || 0).filter(p => p > 0);
                 const promedioPeso = pesos.length > 0 ? 
                     (pesos.reduce((a, b) => a + b, 0) / pesos.length).toFixed(1) : 0;
                 document.getElementById('promedioPeso').textContent = promedioPeso;
-                
+
                 // Actualizar gráfico de distribución
-                const tipos = {};
+                const categorias = {};
                 animalesData.forEach(animal => {
-                    tipos[animal.tipo] = (tipos[animal.tipo] || 0) + 1;
+                    categorias[animal.categoria] = (categorias[animal.categoria] || 0) + 1;
                 });
-                
+
                 const grafico = document.getElementById('graficoDistribucion');
                 grafico.innerHTML = '';
-                
-                for (const tipo in tipos) {
-                    const porcentaje = Math.round((tipos[tipo] / animalesData.length) * 100);
+
+                for (const categoria in categorias) {
+                    const porcentaje = Math.round((categorias[categoria] / animalesData.length) * 100);
                     grafico.innerHTML += `
                         <div style="margin-bottom: 10px;">
                             <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                <span>${tipo}</span>
-                                <span>${tipos[tipo]} (${porcentaje}%)</span>
+                                <span>${categoria}</span>
+                                <span>${categorias[categoria]} (${porcentaje}%)</span>
                             </div>
                             <div style="height: 20px; background: #e0e0e0; border-radius: 10px; overflow: hidden;">
                                 <div style="height: 100%; width: ${porcentaje}%; background: var(--secondary); border-radius: 10px;"></div>
@@ -2077,7 +2155,7 @@
                         </div>
                     `;
                 }
-                
+
             } catch (error) {
                 showNotification('Error cargando estadísticas: ' + error.message, 'error');
             }
@@ -2194,7 +2272,8 @@
                     'ID': animal.id,
                     'Arete': animal.arete || '',
                     'Nombre': animal.nombre,
-                    'Tipo': animal.tipo,
+                    'Categoría': animal.categoria,
+                    'Sexo': animal.sexo,
                     'Raza': animal.raza,
                     'Peso (kg)': animal.peso,
                     'Fecha Nacimiento': animal.fechaNacimiento,
