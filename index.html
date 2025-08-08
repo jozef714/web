@@ -27,6 +27,7 @@
             --male: #3498db;
             --female: #e84393;
             --reproduction: #e91e63;
+            --offline: #7f8c8d;
         }
         
         * {
@@ -230,6 +231,11 @@
             background-color: #c2185b;
         }
         
+        .btn-offline {
+            background-color: var(--offline);
+            color: white;
+        }
+        
         .connection-status {
             display: flex;
             align-items: center;
@@ -253,6 +259,10 @@
         
         .status-dot.disconnected {
             background-color: #e74c3c;
+        }
+        
+        .status-dot.offline {
+            background-color: var(--offline);
         }
         
         .user-info {
@@ -440,6 +450,12 @@
             border: 1px solid #ffeeba;
         }
         
+        .alert-offline {
+            background-color: #e0e0e0;
+            color: #333;
+            border: 1px solid #bdbdbd;
+        }
+        
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -536,6 +552,10 @@
         
         .notification.warning {
             background-color: var(--warning);
+        }
+        
+        .notification.offline {
+            background-color: var(--offline);
         }
         
         @keyframes slideIn {
@@ -794,6 +814,214 @@
             font-size: 14px;
             color: #777;
         }
+        
+        /* Offline indicator */
+        .offline-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--offline);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 2000;
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        .offline-indicator i {
+            font-size: 18px;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Resolución de conflictos */
+        .conflict-resolver {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 5000;
+            display: none;
+        }
+        
+        .conflict-box {
+            background: white;
+            width: 90%;
+            max-width: 700px;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .conflict-header {
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light);
+        }
+        
+        .conflict-header h3 {
+            color: var(--warning);
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .conflict-versions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .version-card {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 15px;
+            border: 1px solid #eee;
+        }
+        
+        .version-card.current {
+            border-color: var(--success);
+            background: #f0fff4;
+        }
+        
+        .version-card.pending {
+            border-color: var(--warning);
+            background: #fffaf0;
+        }
+        
+        .version-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #ddd;
+        }
+        
+        .version-title {
+            font-weight: bold;
+        }
+        
+        .version-meta {
+            font-size: 12px;
+            color: #777;
+        }
+        
+        .conflict-field {
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .field-label {
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .field-value {
+            padding: 8px;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid #eee;
+        }
+        
+        .field-diff {
+            color: var(--danger);
+            font-weight: bold;
+        }
+        
+        .conflict-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .conflict-actions button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-keep-current {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-keep-pending {
+            background: var(--warning);
+            color: white;
+        }
+        
+        .btn-merge {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .history-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 3px solid #ddd;
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .history-user {
+            font-weight: bold;
+            color: var(--dark);
+        }
+        
+        .history-time {
+            font-size: 12px;
+            color: #777;
+        }
+        
+        .history-changes {
+            font-size: 14px;
+            color: #555;
+        }
+        
+        .history-change-item {
+            margin-bottom: 5px;
+            display: flex;
+            gap: 5px;
+        }
+        
+        .history-change-field {
+            font-weight: 500;
+        }
 
         @media (max-width: 768px) {
             .sidebar {
@@ -827,6 +1055,14 @@
             
             .stats-container {
                 grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            }
+            
+            .conflict-versions {
+                grid-template-columns: 1fr;
+            }
+            
+            .conflict-actions {
+                flex-direction: column;
             }
         }
     </style>
@@ -900,6 +1136,9 @@
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle"></i> Completa todos los campos para registrar un nuevo animal en el sistema.
                 </div>
+                <div id="offline-registro-alert" class="alert alert-offline" style="display: none;">
+                    <i class="fas fa-cloud-download-alt"></i> Estás trabajando sin conexión. Los datos se guardarán localmente y se sincronizarán cuando recuperes conexión.
+                </div>
                 <form id="formRegistro">
                     <div class="form-grid">
                         <div class="form-group">
@@ -957,14 +1196,12 @@
                             <label>ID Padre:</label>
                             <select id="padre">
                                 <option value="">Seleccionar padre</option>
-                                <!-- Se llenará con toros -->
                             </select>
                         </div>
                         <div class="form-group">
                             <label>ID Madre:</label>
                             <select id="madre">
                                 <option value="">Seleccionar madre</option>
-                                <!-- Se llenará con vacas -->
                             </select>
                         </div>
                     </div>
@@ -972,12 +1209,22 @@
                         <label>Observaciones:</label>
                         <textarea id="observaciones" placeholder="Observaciones adicionales..."></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Guardar Animal</button>
+                    <button type="submit" class="btn btn-primary" id="btnGuardarAnimal">
+                        <i class="fas fa-save"></i> 
+                        <span id="guardar-text">Guardar Animal</span>
+                        <i class="fas fa-spinner fa-spin" id="guardar-spinner" style="display: none;"></i>
+                    </button>
                 </form>
             </section>
 
             <section id="lista" class="seccion">
                 <h2>Lista de Animales</h2>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Lista completa de animales registrados en el sistema.
+                </div>
+                <div id="offline-lista-alert" class="alert alert-offline" style="display: none;">
+                    <i class="fas fa-cloud-download-alt"></i> Estás viendo datos almacenados localmente. Algunos datos pueden estar desactualizados.
+                </div>
                 <div class="form-group">
                     <input type="text" id="busqueda" placeholder="Buscar por nombre, ID o Arete...">
                 </div>
@@ -1114,14 +1361,12 @@
                             <label>Vaca:</label>
                             <select id="vaca" required>
                                 <option value="">Seleccione una vaca</option>
-                                <!-- Se llenará dinámicamente -->
                             </select>
                         </div>
                         <div class="form-group">
                             <label>Toro:</label>
                             <select id="toro" required>
                                 <option value="">Seleccione un toro</option>
-                                <!-- Se llenará dinámicamente -->
                             </select>
                         </div>
                         <div class="form-group">
@@ -1322,6 +1567,56 @@
             <button class="cerrarFicha">×</button>
             <div id="fichaContent"></div>
         </div>
+        
+        <div id="conflictResolver" class="conflict-resolver">
+            <div class="conflict-box">
+                <div class="conflict-header">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Resolver Conflicto</h3>
+                    <p>Se detectó un conflicto entre tus cambios locales y los cambios en el servidor.</p>
+                </div>
+                
+                <div class="conflict-versions">
+                    <div class="version-card current">
+                        <div class="version-header">
+                            <div class="version-title">Versión Actual (Servidor)</div>
+                            <div class="version-meta">
+                                <i class="fas fa-cloud"></i>
+                                <span id="serverTimestamp">Hace 5 minutos</span>
+                            </div>
+                        </div>
+                        <div id="serverVersionContent"></div>
+                    </div>
+                    
+                    <div class="version-card pending">
+                        <div class="version-header">
+                            <div class="version-title">Tus Cambios (Locales)</div>
+                            <div class="version-meta">
+                                <i class="fas fa-laptop"></i>
+                                <span id="localTimestamp">Hace 2 minutos</span>
+                            </div>
+                        </div>
+                        <div id="localVersionContent"></div>
+                    </div>
+                </div>
+                
+                <div class="conflict-actions">
+                    <button class="btn-keep-current" id="btnKeepServer">
+                        <i class="fas fa-cloud-download-alt"></i> Mantener versión del servidor
+                    </button>
+                    <button class="btn-keep-pending" id="btnKeepLocal">
+                        <i class="fas fa-laptop"></i> Mantener mis cambios
+                    </button>
+                    <button class="btn-merge" id="btnMerge">
+                        <i class="fas fa-code-merge"></i> Combinar cambios
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="offline-indicator" class="offline-indicator" style="display: none;">
+            <i class="fas fa-wifi-slash"></i>
+            <span>Sin conexión</span>
+        </div>
     </div>
 
     <script>
@@ -1341,6 +1636,18 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
+        // Habilitar persistencia de datos para funcionamiento offline
+        db.enablePersistence()
+            .catch((err) => {
+                if (err.code === 'failed-precondition') {
+                    console.warn("Persistencia fallida: Múltiples pestañas abiertas");
+                } else if (err.code === 'unimplemented') {
+                    console.warn("Persistencia no soportada en este navegador");
+                } else {
+                    console.error("Error al habilitar persistencia: ", err);
+                }
+            });
+
         // UID del administrador
         const ADMIN_UID = "wmaUD6CKl2WKkS6x59mFAw4Awxe2";
 
@@ -1354,21 +1661,47 @@
         const statusText = document.querySelector('.status-text');
         const userAvatar = document.getElementById('user-avatar');
         const adminMenuItem = document.getElementById('admin-menu-item');
+        const offlineIndicator = document.getElementById('offline-indicator');
+        const offlineRegistroAlert = document.getElementById('offline-registro-alert');
+        const offlineListaAlert = document.getElementById('offline-lista-alert');
 
         // Variables globales
         let animalesData = []; // Almacena todos los animales para uso global
         let reproduccionData = []; // Almacena los registros de reproducción
+        let isOnline = navigator.onLine;
+        let pendingWrites = []; // Operaciones pendientes para cuando se recupere la conexión
 
         // Función para actualizar estado de conexión
         function updateConnectionStatus(connected) {
+            isOnline = connected;
+            
             if (connected) {
                 statusDot.classList.add('connected');
-                statusDot.classList.remove('disconnected');
+                statusDot.classList.remove('disconnected', 'offline');
                 statusText.textContent = 'Conectado';
+                offlineIndicator.style.display = 'none';
+                
+                // Ocultar alertas offline
+                offlineRegistroAlert.style.display = 'none';
+                offlineListaAlert.style.display = 'none';
+                
+                // Intentar sincronizar operaciones pendientes
+                syncPendingWrites();
             } else {
                 statusDot.classList.add('disconnected');
-                statusDot.classList.remove('connected');
+                statusDot.classList.remove('connected', 'offline');
                 statusText.textContent = 'Sin conexión';
+                offlineIndicator.style.display = 'flex';
+                
+                // Mostrar alertas offline en secciones activas
+                if (document.getElementById('registro').classList.contains('active')) {
+                    offlineRegistroAlert.style.display = 'block';
+                }
+                if (document.getElementById('lista').classList.contains('active')) {
+                    offlineListaAlert.style.display = 'block';
+                }
+                
+                showNotification('Se perdió la conexión. Trabajando en modo offline', 'offline');
             }
         }
 
@@ -1377,10 +1710,239 @@
         window.addEventListener('offline', () => updateConnectionStatus(false));
         updateConnectionStatus(navigator.onLine);
 
-        // Monitorear estado de conexión de Firestore
-        db.enableNetwork()
-            .then(() => updateConnectionStatus(true))
-            .catch(() => updateConnectionStatus(false));
+        // ======================
+        // FUNCIONALIDAD OFFLINE
+        // ======================
+        
+        // Guardar datos localmente para acceso offline
+        function saveLocalData(key, data) {
+            localStorage.setItem(key, JSON.stringify(data));
+        }
+        
+        // Obtener datos locales
+        function getLocalData(key) {
+            const data = localStorage.getItem(key);
+            return data ? JSON.parse(data) : null;
+        }
+        
+        // Sincronizar operaciones pendientes
+        async function syncPendingWrites() {
+            if (pendingWrites.length === 0 || !isOnline) return;
+            
+            const user = auth.currentUser;
+            if (!user) return;
+            
+            showNotification('Sincronizando datos pendientes...', 'warning');
+            
+            try {
+                // Procesar cada operación pendiente
+                for (let i = 0; i < pendingWrites.length; i++) {
+                    const operation = pendingWrites[i];
+                    
+                    if (operation.type === 'saveAnimal') {
+                        const animalRef = db.collection('users').doc(user.uid)
+                            .collection('animales').doc(operation.data.id);
+                            
+                        const serverDoc = await animalRef.get();
+                        const serverData = serverDoc.data();
+                        
+                        // Comprobar conflictos
+                        if (serverDoc.exists && serverData.version && serverData.version > (operation.data.version || 0)) {
+                            // Hay conflicto - mostrar al usuario
+                            showConflictResolver(serverData, operation.data);
+                            
+                            // Quitar de pendientes y salir del bucle
+                            pendingWrites.splice(i, 1);
+                            localStorage.setItem('pendingWrites', JSON.stringify(pendingWrites));
+                            return;
+                        }
+                        
+                        // Sin conflicto - guardar en servidor
+                        operation.data.version = serverDoc.exists ? (serverData.version || 0) + 1 : 1;
+                        operation.data.pendingSync = null; // Quitar bandera
+                        await animalRef.set(operation.data);
+                    }
+                }
+                
+                // Limpiar operaciones pendientes después de sincronizar
+                pendingWrites = [];
+                localStorage.removeItem('pendingWrites');
+                
+                showNotification('Datos sincronizados correctamente', 'success');
+                
+                // Actualizar datos locales
+                await loadAllAnimals();
+                renderAnimalList();
+                loadAnimalsForSelects();
+                
+            } catch (error) {
+                showNotification('Error sincronizando datos: ' + error.message, 'error');
+            }
+        }
+        
+        // Guardar operación pendiente para sincronización posterior
+        function addPendingWrite(type, data) {
+            pendingWrites.push({ type, data });
+            localStorage.setItem('pendingWrites', JSON.stringify(pendingWrites));
+        }
+        
+        // Cargar operaciones pendientes desde localStorage al iniciar
+        function loadPendingWrites() {
+            const savedWrites = localStorage.getItem('pendingWrites');
+            if (savedWrites) {
+                pendingWrites = JSON.parse(savedWrites);
+            }
+        }
+
+        // ======================
+        // RESOLUCIÓN DE CONFLICTOS
+        // ======================
+        
+        // Mostrar resolución de conflictos
+        function showConflictResolver(serverData, localData) {
+            const resolver = document.getElementById('conflictResolver');
+            const serverContent = document.getElementById('serverVersionContent');
+            const localContent = document.getElementById('localVersionContent');
+            const serverTime = document.getElementById('serverTimestamp');
+            const localTime = document.getElementById('localTimestamp');
+            
+            // Mostrar fechas
+            serverTime.textContent = formatTimeDifference(serverData.lastUpdated);
+            localTime.textContent = formatTimeDifference(localData.lastUpdated);
+            
+            // Generar comparación de campos
+            serverContent.innerHTML = generateVersionHTML(serverData, localData);
+            localContent.innerHTML = generateVersionHTML(localData, serverData);
+            
+            // Configurar botones
+            document.getElementById('btnKeepServer').onclick = () => resolveConflict('server', serverData, localData);
+            document.getElementById('btnKeepLocal').onclick = () => resolveConflict('local', serverData, localData);
+            document.getElementById('btnMerge').onclick = () => resolveConflict('merge', serverData, localData);
+            
+            resolver.style.display = 'flex';
+        }
+        
+        // Formatear diferencia de tiempo
+        function formatTimeDifference(timestamp) {
+            if (!timestamp) return 'Desconocido';
+            
+            const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+            const now = new Date();
+            const diff = Math.floor((now - date) / 1000); // Diferencia en segundos
+            
+            if (diff < 60) return 'Hace unos segundos';
+            if (diff < 3600) return `Hace ${Math.floor(diff/60)} minutos`;
+            if (diff < 86400) return `Hace ${Math.floor(diff/3600)} horas`;
+            return `Hace ${Math.floor(diff/86400)} días`;
+        }
+        
+        // Generar HTML para comparación de versiones
+        function generateVersionHTML(data, compareData) {
+            let html = '';
+            const fields = ['nombre', 'categoria', 'sexo', 'raza', 'peso', 'estado', 'padre', 'madre', 'observaciones'];
+            
+            fields.forEach(field => {
+                const value = data[field] || '';
+                const compareValue = compareData[field] || '';
+                const isDifferent = value !== compareValue;
+                
+                html += `
+                    <div class="conflict-field">
+                        <div class="field-label">
+                            ${field.charAt(0).toUpperCase() + field.slice(1)}
+                            ${isDifferent ? '<i class="fas fa-exchange-alt field-diff"></i>' : ''}
+                        </div>
+                        <div class="field-value">${value || '<span style="color:#999">Vacío</span>'}</div>
+                    </div>
+                `;
+            });
+            
+            return html;
+        }
+        
+        // Resolver conflicto
+        function resolveConflict(decision, serverData, localData) {
+            const resolver = document.getElementById('conflictResolver');
+            resolver.style.display = 'none';
+            
+            const user = auth.currentUser;
+            if (!user) return;
+            
+            switch(decision) {
+                case 'server':
+                    // Descarta los cambios locales y mantiene la versión del servidor
+                    showNotification('Se mantuvo la versión del servidor. Tus cambios locales fueron descartados.', 'warning');
+                    break;
+                    
+                case 'local':
+                    // Sobrescribe el servidor con los cambios locales
+                    db.collection('users').doc(user.uid).collection('animales')
+                        .doc(localData.id).set(localData)
+                        .then(() => {
+                            showNotification('Tus cambios locales se aplicaron al servidor', 'success');
+                        })
+                        .catch(error => {
+                            showNotification('Error aplicando cambios: ' + error.message, 'error');
+                        });
+                    break;
+                    
+                case 'merge':
+                    // Combinación inteligente de cambios
+                    const mergedData = mergeChanges(serverData, localData);
+                    
+                    db.collection('users').doc(user.uid).collection('animales')
+                        .doc(mergedData.id).set(mergedData)
+                        .then(() => {
+                            showNotification('Cambios combinados exitosamente', 'success');
+                        })
+                        .catch(error => {
+                            showNotification('Error combinando cambios: ' + error.message, 'error');
+                        });
+                    break;
+            }
+            
+            // Actualizar datos locales
+            loadAllAnimals().then(() => {
+                renderAnimalList();
+                loadAnimalsForSelects();
+            });
+        }
+        
+        // Combinar cambios de dos versiones
+        function mergeChanges(serverData, localData) {
+            // Estrategia de combinación:
+            // 1. Mantener los campos modificados localmente que no hayan cambiado en el servidor
+            // 2. Para campos modificados en ambos, priorizar los cambios locales
+            // 3. Conservar el último timestamp
+            
+            const merged = {...serverData};
+            const fields = ['nombre', 'categoria', 'sexo', 'raza', 'peso', 'estado', 'padre', 'madre', 'observaciones'];
+            
+            fields.forEach(field => {
+                // Si el campo fue modificado localmente
+                if (localData[field] !== serverData[field]) {
+                    merged[field] = localData[field];
+                }
+            });
+            
+            // Actualizar marca de tiempo
+            merged.lastUpdated = firebase.firestore.FieldValue.serverTimestamp();
+            merged.lastLocalUpdate = new Date().toISOString();
+            
+            // Registrar el proceso de combinación
+            if (!merged.changeHistory) merged.changeHistory = [];
+            merged.changeHistory.push({
+                action: 'merge',
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                serverVersion: serverData.version || 1,
+                localVersion: localData.version || 1
+            });
+            
+            // Incrementar versión
+            merged.version = Math.max(serverData.version || 1, localData.version || 1) + 1;
+            
+            return merged;
+        }
 
         // ======================
         // AUTENTICACIÓN
@@ -1526,8 +2088,19 @@
                 const user = auth.currentUser;
                 if (!user) return [];
                 
+                // Primero intentar cargar desde caché local
+                const localAnimals = getLocalData(`animales_${user.uid}`);
+                if (localAnimals) {
+                    animalesData = localAnimals;
+                    return animalesData;
+                }
+                
                 const snapshot = await db.collection('users').doc(user.uid).collection('animales').get();
                 animalesData = snapshot.docs.map(doc => doc.data());
+                
+                // Guardar en caché local para acceso offline
+                saveLocalData(`animales_${user.uid}`, animalesData);
+                
                 return animalesData;
             } catch (error) {
                 showNotification('Error cargando animales: ' + error.message, 'error');
@@ -1572,8 +2145,10 @@
                 return;
             }
             
+            const animalId = document.getElementById('id').value || 'id-' + Date.now();
+            
             const animalData = {
-                id: document.getElementById('id').value || 'id-' + Date.now(),
+                id: animalId,
                 arete: document.getElementById('arete').value.trim(),
                 nombre: document.getElementById('nombre').value.trim(),
                 categoria: document.getElementById('categoria').value,
@@ -1585,7 +2160,8 @@
                 padre: document.getElementById('padre').value.trim(),
                 madre: document.getElementById('madre').value.trim(),
                 observaciones: document.getElementById('observaciones').value.trim(),
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                lastLocalUpdate: new Date().toISOString(),
+                lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
             };
             
             if (!animalData.nombre) {
@@ -1593,36 +2169,93 @@
                 return;
             }
             
+            // Mostrar spinner
+            const guardarSpinner = document.getElementById('guardar-spinner');
+            const guardarText = document.getElementById('guardar-text');
+            guardarSpinner.style.display = 'inline-block';
+            guardarText.textContent = isOnline ? 'Guardando...' : 'Guardando localmente...';
+            
             try {
-                // Guardar en Firestore
-                await db.collection('users').doc(user.uid).collection('animales').doc(animalData.id).set(animalData);
+                if (isOnline) {
+                    // Verificar si ya existe una versión más reciente en el servidor
+                    const animalRef = db.collection('users').doc(user.uid).collection('animales').doc(animalId);
+                    const serverDoc = await animalRef.get();
+                    
+                    if (serverDoc.exists) {
+                        const serverData = serverDoc.data();
+                        
+                        // Comprobar si hay conflicto de versiones
+                        if (serverData.version && animalData.version && serverData.version > animalData.version) {
+                            // Mostrar resolución de conflictos
+                            guardarSpinner.style.display = 'none';
+                            guardarText.textContent = 'Guardar Animal';
+                            showConflictResolver(serverData, animalData);
+                            return;
+                        }
+                    }
+                    
+                    // Si no hay conflicto, guardar normalmente
+                    animalData.version = serverDoc.exists ? (serverData.version || 0) + 1 : 1;
+                    
+                    // Registrar en historial de cambios
+                    if (!animalData.changeHistory) animalData.changeHistory = [];
+                    animalData.changeHistory.push({
+                        action: document.getElementById('id').value ? 'update' : 'create',
+                        user: user.uid,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        fields: Object.keys(animalData)
+                    });
+                    
+                    await animalRef.set(animalData);
+                    
+                    showNotification(
+                        document.getElementById('id').value ? 
+                        'Animal actualizado' : 'Animal registrado', 
+                        'success'
+                    );
+                } else {
+                    // Modo offline: guardar localmente con bandera de pendiente
+                    animalData.pendingSync = true;
+                    animalData.offlineVersion = Date.now(); // Identificador único para cambios offline
+                }
                 
-                showNotification(
-                    document.getElementById('id').value ? 
-                    'Animal actualizado' : 'Animal registrado', 
-                    'success'
-                );
+                // Actualizar datos locales
+                const index = animalesData.findIndex(a => a.id === animalData.id);
+                if (index !== -1) {
+                    animalesData[index] = animalData;
+                } else {
+                    animalesData.push(animalData);
+                }
+                
+                // Guardar en caché local
+                saveLocalData(`animales_${user.uid}`, animalesData);
+                
+                if (!isOnline) {
+                    // Agregar a operaciones pendientes
+                    addPendingWrite('saveAnimal', animalData);
+                    showNotification('Animal guardado localmente. Se sincronizará cuando recuperes conexión', 'offline');
+                }
                 
                 // Limpiar formulario
                 document.getElementById('formRegistro').reset();
                 document.getElementById('id').value = '';
                 
-                // Actualizar datos
-                await loadAllAnimals();
+                // Actualizar UI
                 renderAnimalList();
                 loadAnimalsForSelects();
+                
             } catch (error) {
                 showNotification('Error guardando animal: ' + error.message, 'error');
+            } finally {
+                guardarSpinner.style.display = 'none';
+                guardarText.textContent = 'Guardar Animal';
             }
         }
         
         // Renderizar lista de animales
         async function renderAnimalList() {
             const tbody = document.getElementById('tablaAnimales');
-            if (!tbody) {
-                console.error('No se encontró tablaAnimales');
-                return;
-            }
+            if (!tbody) return;
             
             tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 20px;"><i class="fas fa-spinner fa-spin"></i> Cargando datos...</td></tr>';
             
@@ -1794,7 +2427,7 @@
         }
         
         // ======================
-        // MÓDULO DE REPRODUCCIÓN CORREGIDO
+        // MÓDULO DE REPRODUCCIÓN
         // ======================
         // Cargar vacas y toros para reproducción
         async function loadReproduccionAnimals() {
@@ -1949,7 +2582,7 @@
         }
         
         // ======================
-        // ÁRBOL GENEALÓGICO MEJORADO
+        // ÁRBOL GENEALÓGICO
         // ======================
         // Función para renderizar el árbol genealógico
         async function renderArbolGenealogico() {
@@ -2144,6 +2777,78 @@
         }
         
         // ======================
+        // ESTADÍSTICAS
+        // ======================
+        async function renderEstadisticas() {
+            try {
+                if (animalesData.length === 0) {
+                    await loadAllAnimals();
+                }
+
+                // Actualizar estadísticas
+                document.getElementById('totalAnimales').textContent = animalesData.length;
+
+                const vacas = animalesData.filter(a => a.categoria === 'Vaca');
+                document.getElementById('totalVacas').textContent = vacas.length;
+
+                const toros = animalesData.filter(a => a.categoria === 'Toro');
+                document.getElementById('totalToros').textContent = toros.length;
+
+                // Machos pequeños (terneros, novillos, becerros)
+                const machosPeq = animalesData.filter(a => 
+                    a.sexo === 'Macho' && 
+                    (a.categoria === 'Ternero' || a.categoria === 'Novillo' || a.categoria === 'Becerro')
+                );
+                document.getElementById('totalMachosPeq').textContent = machosPeq.length;
+
+                // Hembras pequeñas (terneras, novillas, becerras)
+                const hembrasPeq = animalesData.filter(a => 
+                    a.sexo === 'Hembra' && 
+                    (a.categoria === 'Ternero' || a.categoria === 'Novillo' || a.categoria === 'Becerro')
+                );
+                document.getElementById('totalHembrasPeq').textContent = hembrasPeq.length;
+
+                // Totales por sexo
+                const totalMachos = animalesData.filter(a => a.sexo === 'Macho').length;
+                const totalHembras = animalesData.filter(a => a.sexo === 'Hembra').length;
+                document.getElementById('totalMachos').textContent = totalMachos;
+                document.getElementById('totalHembras').textContent = totalHembras;
+
+                const pesos = animalesData.map(a => a.peso || 0).filter(p => p > 0);
+                const promedioPeso = pesos.length > 0 ? 
+                    (pesos.reduce((a, b) => a + b, 0) / pesos.length).toFixed(1) : 0;
+                document.getElementById('promedioPeso').textContent = promedioPeso;
+
+                // Actualizar gráfico de distribución
+                const categorias = {};
+                animalesData.forEach(animal => {
+                    categorias[animal.categoria] = (categorias[animal.categoria] || 0) + 1;
+                });
+
+                const grafico = document.getElementById('graficoDistribucion');
+                grafico.innerHTML = '';
+
+                for (const categoria in categorias) {
+                    const porcentaje = Math.round((categorias[categoria] / animalesData.length) * 100);
+                    grafico.innerHTML += `
+                        <div style="margin-bottom: 10px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span>${categoria}</span>
+                                <span>${categorias[categoria]} (${porcentaje}%)</span>
+                            </div>
+                            <div style="height: 20px; background: #e0e0e0; border-radius: 10px; overflow: hidden;">
+                                <div style="height: 100%; width: ${porcentaje}%; background: var(--secondary); border-radius: 10px;"></div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                showNotification('Error cargando estadísticas: ' + error.message, 'error');
+            }
+        }
+        
+        // ======================
         // PANEL DE ADMINISTRACIÓN
         // ======================
         // Función para crear nuevo usuario (solo admin)
@@ -2288,79 +2993,6 @@
         }
         
         // ======================
-        // MÓDULOS ADICIONALES
-        // ======================
-        // Módulo: Estadísticas
-        async function renderEstadisticas() {
-            try {
-                if (animalesData.length === 0) {
-                    await loadAllAnimals();
-                }
-
-                // Actualizar estadísticas
-                document.getElementById('totalAnimales').textContent = animalesData.length;
-
-                const vacas = animalesData.filter(a => a.categoria === 'Vaca');
-                document.getElementById('totalVacas').textContent = vacas.length;
-
-                const toros = animalesData.filter(a => a.categoria === 'Toro');
-                document.getElementById('totalToros').textContent = toros.length;
-
-                // Machos pequeños (terneros, novillos, becerros)
-                const machosPeq = animalesData.filter(a => 
-                    a.sexo === 'Macho' && 
-                    (a.categoria === 'Ternero' || a.categoria === 'Novillo' || a.categoria === 'Becerro')
-                );
-                document.getElementById('totalMachosPeq').textContent = machosPeq.length;
-
-                // Hembras pequeñas (terneras, novillas, becerras)
-                const hembrasPeq = animalesData.filter(a => 
-                    a.sexo === 'Hembra' && 
-                    (a.categoria === 'Ternero' || a.categoria === 'Novillo' || a.categoria === 'Becerro')
-                );
-                document.getElementById('totalHembrasPeq').textContent = hembrasPeq.length;
-
-                // Totales por sexo
-                const totalMachos = animalesData.filter(a => a.sexo === 'Macho').length;
-                const totalHembras = animalesData.filter(a => a.sexo === 'Hembra').length;
-                document.getElementById('totalMachos').textContent = totalMachos;
-                document.getElementById('totalHembras').textContent = totalHembras;
-
-                const pesos = animalesData.map(a => a.peso || 0).filter(p => p > 0);
-                const promedioPeso = pesos.length > 0 ? 
-                    (pesos.reduce((a, b) => a + b, 0) / pesos.length).toFixed(1) : 0;
-                document.getElementById('promedioPeso').textContent = promedioPeso;
-
-                // Actualizar gráfico de distribución
-                const categorias = {};
-                animalesData.forEach(animal => {
-                    categorias[animal.categoria] = (categorias[animal.categoria] || 0) + 1;
-                });
-
-                const grafico = document.getElementById('graficoDistribucion');
-                grafico.innerHTML = '';
-
-                for (const categoria in categorias) {
-                    const porcentaje = Math.round((categorias[categoria] / animalesData.length) * 100);
-                    grafico.innerHTML += `
-                        <div style="margin-bottom: 10px;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
-                                <span>${categoria}</span>
-                                <span>${categorias[categoria]} (${porcentaje}%)</span>
-                            </div>
-                            <div style="height: 20px; background: #e0e0e0; border-radius: 10px; overflow: hidden;">
-                                <div style="height: 100%; width: ${porcentaje}%; background: var(--secondary); border-radius: 10px;"></div>
-                            </div>
-                        </div>
-                    `;
-                }
-
-            } catch (error) {
-                showNotification('Error cargando estadísticas: ' + error.message, 'error');
-            }
-        }
-        
-        // ======================
         // NAVEGACIÓN Y UI
         // ======================
         // Alternar menú
@@ -2407,6 +3039,9 @@
         // INICIALIZACIÓN DE LA APP
         // ======================
         function initApp() {
+            // Cargar operaciones pendientes
+            loadPendingWrites();
+            
             // Configurar event listeners
             document.getElementById('menuHamburguesa').addEventListener('click', toggleMenu);
             document.querySelector('.cerrarFicha').addEventListener('click', closeAnimalCard);
@@ -2438,6 +3073,7 @@
             loadAllAnimals().then(() => {
                 renderAnimalList();
                 loadAnimalsForSelects();
+                renderEstadisticas();
             });
             showSection('registro');
         }
