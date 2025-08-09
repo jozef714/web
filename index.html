@@ -2136,8 +2136,27 @@
                     selectMadre.appendChild(option);
                 });
         }
+
+        // Función para cargar animales en el selector de sanidad
+        async function loadSanidadAnimals() {
+            const selectAnimal = document.getElementById('animalSanidad');
+            selectAnimal.innerHTML = '<option value="">Seleccione un animal</option>';
+            
+            if (animalesData.length === 0) {
+                await loadAllAnimals();
+            }
+            
+            animalesData
+                .filter(animal => animal.estado === 'Activo') // Solo animales activos
+                .forEach(animal => {
+                    const option = document.createElement('option');
+                    option.value = animal.id;
+                    option.textContent = `${animal.nombre} (${animal.id})`;
+                    selectAnimal.appendChild(option);
+                });
+        }
         
-        // Función para guardar animal
+        // Función para guardar animal (CORRECCIÓN DEL ERROR serverData is not defined)
         async function saveAnimal() {
             const user = auth.currentUser;
             if (!user) {
@@ -2181,6 +2200,7 @@
                     const animalRef = db.collection('users').doc(user.uid).collection('animales').doc(animalId);
                     const serverDoc = await animalRef.get();
                     
+                    // CORRECCIÓN: Verificar si el documento existe antes de acceder a sus datos
                     if (serverDoc.exists) {
                         const serverData = serverDoc.data();
                         
@@ -2195,7 +2215,7 @@
                     }
                     
                     // Si no hay conflicto, guardar normalmente
-                    animalData.version = serverDoc.exists ? (serverData.version || 0) + 1 : 1;
+                    animalData.version = serverDoc.exists ? (serverDoc.data().version || 0) + 1 : 1;
                     
                     // Registrar en historial de cambios
                     if (!animalData.changeHistory) animalData.changeHistory = [];
@@ -2243,6 +2263,7 @@
                 // Actualizar UI
                 renderAnimalList();
                 loadAnimalsForSelects();
+                loadSanidadAnimals(); // Actualizar selector de sanidad
                 
             } catch (error) {
                 showNotification('Error guardando animal: ' + error.message, 'error');
@@ -2424,6 +2445,129 @@
             } catch (error) {
                 showNotification('Error eliminando animal: ' + error.message, 'error');
             }
+        }
+        
+        // ======================
+        // MÓDULO DE SANIDAD (CORRECCIÓN DEL SELECTOR)
+        // ======================
+        // Guardar tratamiento de sanidad
+        async function saveTratamientoSanidad() {
+            const user = auth.currentUser;
+            if (!user) {
+                showNotification('Debe iniciar sesión', 'error');
+                return;
+            }
+            
+            const animalId = document.getElementById('animalSanidad').value;
+            const fecha = document.getElementById('fechaSanidad').value;
+            const tipo = document.getElementById('tipoTratamiento').value.trim();
+            const detalles = document.getElementById('detallesSanidad').value.trim();
+            
+            if (!animalId || !fecha || !tipo) {
+                showNotification('Seleccione un animal, fecha y tipo de tratamiento', 'error');
+                return;
+            }
+            
+            const tratamientoData = {
+                animalId: animalId,
+                fecha: fecha,
+                tipo: tipo,
+                detalles: detalles,
+                lastLocalUpdate: new Date().toISOString(),
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            try {
+                if (isOnline) {
+                    // Guardar en Firestore
+                    await db.collection('users').doc(user.uid).collection('tratamientos').add(tratamientoData);
+                    showNotification('Tratamiento registrado', 'success');
+                } else {
+                    // Modo offline: guardar localmente
+                    tratamientoData.pendingSync = true;
+                    tratamientoData.offlineId = 'tratamiento_' + Date.now(); // ID temporal
+                    
+                    // Agregar a operaciones pendientes
+                    addPendingWrite('saveTratamiento', tratamientoData);
+                    showNotification('Tratamiento guardado localmente. Se sincronizará cuando recuperes conexión', 'offline');
+                }
+                
+                // Limpiar formulario
+                document.getElementById('formSanidad').reset();
+                
+                // Actualizar historial
+                loadTratamientosHistorial();
+                
+            } catch (error) {
+                showNotification('Error guardando tratamiento: ' + error.message, 'error');
+            }
+        }
+        
+        // Cargar historial de tratamientos
+        async function loadTratamientosHistorial() {
+            const cont = document.getElementById('historialSanidad');
+            cont.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Cargando historial...</p>';
+            
+            try {
+                const user = auth.currentUser;
+                if (!user) return;
+                
+                // Intentar cargar desde caché local primero
+                const localTratamientos = getLocalData(`tratamientos_${user.uid}`);
+                if (localTratamientos) {
+                    renderTratamientosHistorial(localTratamientos, cont);
+                    return;
+                }
+                
+                // Cargar desde Firestore
+                const snapshot = await db.collection('users').doc(user.uid).collection('tratamientos')
+                    .orderBy('createdAt', 'desc')
+                    .get();
+                    
+                const tratamientosData = snapshot.docs.map(doc => {
+                    return {
+                        id: doc.id,
+                        ...doc.data()
+                    };
+                });
+                
+                // Guardar en caché local
+                saveLocalData(`tratamientos_${user.uid}`, tratamientosData);
+                
+                renderTratamientosHistorial(tratamientosData, cont);
+                
+            } catch (error) {
+                showNotification('Error cargando historial: ' + error.message, 'error');
+                cont.innerHTML = '<p>Error al cargar historial</p>';
+            }
+        }
+        
+        // Renderizar historial de tratamientos
+        function renderTratamientosHistorial(tratamientosData, cont) {
+            if (tratamientosData.length === 0) {
+                cont.innerHTML = '<p>No hay tratamientos registrados</p>';
+                return;
+            }
+            
+            let html = '';
+            tratamientosData.forEach(tratamiento => {
+                const animal = animalesData.find(a => a.id === tratamiento.animalId) || {};
+                const fecha = tratamiento.fecha || (tratamiento.createdAt?.toDate 
+                    ? tratamiento.createdAt.toDate().toLocaleDateString() 
+                    : 'N/A');
+                
+                html += `
+                    <div class="alerta-card">
+                        <h4>
+                            <span>${animal.nombre || 'Animal desconocido'} (${tratamiento.tipo})</span>
+                            <span class="fecha">${fecha}</span>
+                        </h4>
+                        <p><strong>Detalles:</strong> ${tratamiento.detalles}</p>
+                    </div>
+                `;
+            });
+            
+            cont.innerHTML = html;
         }
         
         // ======================
@@ -2836,8 +2980,8 @@
                                 <span>${categoria}</span>
                                 <span>${categorias[categoria]} (${porcentaje}%)</span>
                             </div>
-                            <div style="height: 20px; background: #e0e0e0; border-radius: 10px; overflow: hidden;">
-                                <div style="height: 100%; width: ${porcentaje}%; background: var(--secondary); border-radius: 10px;"></div>
+                            <div style="height: 20px; background: #e0e0e0; border-radius: 4px; overflow: hidden;">
+                                <div style="height: 100%; width: ${porcentaje}%; background: var(--secondary); border-radius: 4px;"></div>
                             </div>
                         </div>
                     `;
@@ -3001,7 +3145,7 @@
             sidebar.classList.toggle('show');
         }
         
-        // Mostrar sección
+        // Mostrar sección (ACTUALIZADO PARA CARGAR SANIDAD)
         function showSection(id) {
             document.querySelectorAll('.seccion').forEach(sec => sec.classList.remove('active'));
             document.querySelectorAll('.sidebar button').forEach(btn => btn.classList.remove('active'));
@@ -3028,6 +3172,10 @@
                 loadReproduccionAnimals();
                 loadReproduccionHistorial();
             }
+            if (id === 'sanidad') {
+                loadSanidadAnimals();  // Cargar animales en el selector
+                loadTratamientosHistorial(); // Cargar historial de tratamientos
+            }
         }
         
         // Cerrar ficha
@@ -3049,6 +3197,13 @@
                 e.preventDefault();
                 saveAnimal();
             });
+            
+            // Nuevo: Evento para formulario de sanidad
+            document.getElementById('formSanidad').addEventListener('submit', (e) => {
+                e.preventDefault();
+                saveTratamientoSanidad();
+            });
+            
             document.getElementById('formReproduccion').addEventListener('submit', (e) => {
                 e.preventDefault();
                 saveReproduccion();
@@ -3073,6 +3228,7 @@
             loadAllAnimals().then(() => {
                 renderAnimalList();
                 loadAnimalsForSelects();
+                loadSanidadAnimals(); // Cargar selector de sanidad
                 renderEstadisticas();
             });
             showSection('registro');
