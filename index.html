@@ -1784,6 +1784,7 @@
                 await loadAllAnimals();
                 renderAnimalList();
                 loadAnimalsForSelects();
+                loadAnimalsForSanidad();
                 
             } catch (error) {
                 showNotification('Error sincronizando datos: ' + error.message, 'error');
@@ -1915,6 +1916,7 @@
             loadAllAnimals().then(() => {
                 renderAnimalList();
                 loadAnimalsForSelects();
+                loadAnimalsForSanidad();
             });
         }
         
@@ -1943,7 +1945,7 @@
             if (!merged.changeHistory) merged.changeHistory = [];
             merged.changeHistory.push({
                 action: 'merge',
-                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                timestamp: new Date().toISOString(), // Usar fecha ISO en lugar de FieldValue
                 serverVersion: serverData.version || 1,
                 localVersion: localData.version || 1
             });
@@ -2187,9 +2189,15 @@
                 padre: document.getElementById('padre').value.trim(),
                 madre: document.getElementById('madre').value.trim(),
                 observaciones: document.getElementById('observaciones').value.trim(),
-                lastLocalUpdate: new Date().toISOString(),
-                lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+                lastLocalUpdate: new Date().toISOString()
             };
+            
+            // Agregar timestamp según si estamos online o no
+            if (isOnline) {
+                animalData.lastUpdated = firebase.firestore.FieldValue.serverTimestamp();
+            } else {
+                animalData.lastUpdated = new Date().toISOString();
+            }
             
             if (!animalData.nombre) {
                 showNotification('El nombre es obligatorio', 'error');
@@ -2232,7 +2240,7 @@
                     animalData.changeHistory.push({
                         action: document.getElementById('id').value ? 'update' : 'create',
                         user: user.uid,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        timestamp: new Date().toISOString(), // Usar fecha ISO en lugar de FieldValue
                         fields: Object.keys(animalData)
                     });
                     
@@ -2247,6 +2255,15 @@
                     // Modo offline: guardar localmente con bandera de pendiente
                     animalData.pendingSync = true;
                     animalData.offlineVersion = Date.now(); // Identificador único para cambios offline
+                    
+                    // Registrar en historial de cambios para offline
+                    if (!animalData.changeHistory) animalData.changeHistory = [];
+                    animalData.changeHistory.push({
+                        action: document.getElementById('id').value ? 'update' : 'create',
+                        user: user.uid,
+                        timestamp: new Date().toISOString(),
+                        fields: Object.keys(animalData)
+                    });
                 }
                 
                 // Actualizar datos locales
