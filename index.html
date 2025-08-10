@@ -15,7 +15,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <style>
-        /* Estilos CSS (iguales al original) */
+        /* Estilos CSS completos (iguales al original) */
         :root {
             --primary: #2c3e50;
             --secondary: #3498db;
@@ -1024,6 +1024,15 @@
             font-weight: 500;
         }
 
+        .offline-badge {
+            background-color: var(--offline);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            margin-left: 5px;
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 width: 220px;
@@ -1721,7 +1730,7 @@
         updateConnectionStatus(navigator.onLine);
 
         // ======================
-        // FUNCIONALIDAD OFFLINE
+        // FUNCIONALIDAD OFFLINE MEJORADA
         // ======================
         
         // Guardar datos localmente para acceso offline
@@ -1771,14 +1780,35 @@
                         operation.data.version = serverDoc.exists ? (serverData.version || 0) + 1 : 1;
                         operation.data.pendingSync = null; // Quitar bandera
                         await animalRef.set(operation.data);
+                        
+                        // Actualizar datos locales
+                        const index = animalesData.findIndex(a => a.id === operation.data.id);
+                        if (index !== -1) {
+                            animalesData[index] = operation.data;
+                        }
+                        
+                        // Eliminar operación pendiente
+                        pendingWrites.splice(i, 1);
+                        i--; // Ajustar índice después de eliminar
+                    } else if (operation.type === 'deleteAnimal') {
+                        // Eliminar animal del servidor
+                        await db.collection('users').doc(user.uid)
+                            .collection('animales').doc(operation.data.id).delete();
+                        
+                        // Eliminar operación pendiente
+                        pendingWrites.splice(i, 1);
+                        i--; // Ajustar índice después de eliminar
                     }
                 }
                 
-                // Limpiar operaciones pendientes después de sincronizar
-                pendingWrites = [];
-                localStorage.removeItem('pendingWrites');
+                // Guardar operaciones pendientes actualizadas
+                localStorage.setItem('pendingWrites', JSON.stringify(pendingWrites));
                 
-                showNotification('Datos sincronizados correctamente', 'success');
+                if (pendingWrites.length === 0) {
+                    showNotification('Datos sincronizados correctamente', 'success');
+                } else {
+                    showNotification('Algunos datos pendientes requieren atención', 'warning');
+                }
                 
                 // Actualizar datos locales
                 await loadAllAnimals();
@@ -2264,6 +2294,10 @@
                         timestamp: new Date().toISOString(),
                         fields: Object.keys(animalData)
                     });
+                    
+                    // Agregar a operaciones pendientes
+                    addPendingWrite('saveAnimal', animalData);
+                    showNotification('Animal guardado localmente. Se sincronizará cuando recuperes conexión', 'offline');
                 }
                 
                 // Actualizar datos locales
@@ -2276,12 +2310,6 @@
                 
                 // Guardar en caché local
                 saveLocalData(`animales_${user.uid}`, animalesData);
-                
-                if (!isOnline) {
-                    // Agregar a operaciones pendientes
-                    addPendingWrite('saveAnimal', animalData);
-                    showNotification('Animal guardado localmente. Se sincronizará cuando recuperes conexión', 'offline');
-                }
                 
                 // Limpiar formulario
                 document.getElementById('formRegistro').reset();
@@ -2317,9 +2345,10 @@
                 let html = '';
                 animalesData.forEach(animal => {
                     const edad = calcularEdad(animal.fechaNacimiento);
+                    const isPending = animal.pendingSync;
                     html += `
                         <tr>
-                            <td>${animal.id}</td>
+                            <td>${animal.id} ${isPending ? '<span class="offline-badge">(offline)</span>' : ''}</td>
                             <td>${animal.arete || '-'}</td>
                             <td>${animal.nombre}</td>
                             <td>${animal.categoria}</td>
@@ -2454,22 +2483,69 @@
             }
         }
         
-        // Eliminar animal
+        // Eliminar animal (mejorada para offline)
         async function deleteAnimal(id) {
+            const user = auth.currentUser;
+            if (!user) return;
+            
+            const animalIndex = animalesData.findIndex(a => a.id === id);
+            if (animalIndex === -1) return;
+            
+            const animal = animalesData[animalIndex];
+            
+            // Si el animal fue creado offline y aún no se sincronizó
+            if (animal.pendingSync) {
+                if (confirm('Este animal no se ha sincronizado aún. ¿Desea eliminarlo localmente?')) {
+                    // Eliminar de datos locales
+                    animalesData.splice(animalIndex, 1);
+                    saveLocalData(`animales_${user.uid}`, animalesData);
+                    
+                    // Eliminar cualquier operación pendiente relacionada
+                    const pendingOps = pendingWrites.filter(op => 
+                        op.type === 'saveAnimal' && op.data.id === id
+                    );
+                    
+                    pendingOps.forEach(op => {
+                        const index = pendingWrites.indexOf(op);
+                        if (index !== -1) {
+                            pendingWrites.splice(index, 1);
+                        }
+                    });
+                    
+                    // Guardar operaciones pendientes actualizadas
+                    localStorage.setItem('pendingWrites', JSON.stringify(pendingWrites));
+                    
+                    showNotification('Animal eliminado localmente', 'success');
+                    renderAnimalList();
+                    loadAnimalsForSelects();
+                    loadAnimalsForSanidad();
+                }
+                return;
+            }
+            
+            // Para animales ya sincronizados
             if (!confirm('¿Eliminar este animal? Esta acción no se puede deshacer.')) return;
             
             try {
-                const user = auth.currentUser;
-                if (!user) return;
+                if (isOnline) {
+                    // Eliminar del servidor
+                    await db.collection('users').doc(user.uid)
+                        .collection('animales').doc(id).delete();
+                } else {
+                    // En modo offline: agregar operación de eliminación pendiente
+                    addPendingWrite('deleteAnimal', { id });
+                    showNotification('Animal marcado para eliminación. Se eliminará cuando recuperes conexión', 'offline');
+                }
                 
-                await db.collection('users').doc(user.uid).collection('animales').doc(id).delete();
+                // Eliminar de datos locales
+                animalesData.splice(animalIndex, 1);
+                saveLocalData(`animales_${user.uid}`, animalesData);
+                
                 showNotification('Animal eliminado', 'success');
-                
-                // Actualizar datos
-                animalesData = animalesData.filter(animal => animal.id !== id);
                 renderAnimalList();
                 loadAnimalsForSelects();
                 loadAnimalsForSanidad();
+                
             } catch (error) {
                 showNotification('Error eliminando animal: ' + error.message, 'error');
             }
