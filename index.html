@@ -5,12 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Gestión Ganadera</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐄</text></svg>">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" 
+          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" 
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <style>
+        /* Estilos CSS (iguales al original) */
         :root {
             --primary: #2c3e50;
             --secondary: #3498db;
@@ -97,6 +102,11 @@
         
         .login-box button:hover {
             background-color: #219653;
+        }
+        
+        .login-box button:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
         }
         
         .logo {
@@ -222,6 +232,11 @@
             background-color: #c2185b;
         }
         
+        .btn-offline {
+            background-color: var(--offline);
+            color: white;
+        }
+        
         .connection-status {
             display: flex;
             align-items: center;
@@ -245,6 +260,10 @@
         
         .status-dot.disconnected {
             background-color: #e74c3c;
+        }
+        
+        .status-dot.offline {
+            background-color: var(--offline);
         }
         
         .user-info {
@@ -309,6 +328,11 @@
         
         .sidebar button:hover, .sidebar button.active {
             background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar button i {
+            width: 20px;
+            text-align: center;
         }
         
         main {
@@ -1230,8 +1254,76 @@
                 </div>
             </section>
 
+            <section id="arbol" class="seccion">
+                <h2>Árbol Genealógico</h2>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Selecciona un animal para ver su árbol genealógico.
+                </div>
+                <div class="form-group">
+                    <select id="animalRaiz">
+                        <option value="">Seleccione un animal</option>
+                    </select>
+                </div>
+                <div id="arbolContent" class="arbol-container">
+                    <p>Selecciona un animal para visualizar su árbol genealógico</p>
+                </div>
+            </section>
+
+            <section id="estadisticas" class="seccion">
+                <h2>Estadísticas</h2>
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <h3>Total de Animales</h3>
+                        <div class="stat-value" id="totalAnimales">0</div>
+                        <div class="stat-label">en el sistema</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Vacas</h3>
+                        <div class="stat-value" id="totalVacas">0</div>
+                        <div class="stat-label">hembras adultas</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Toros</h3>
+                        <div class="stat-value" id="totalToros">0</div>
+                        <div class="stat-label">machos adultos</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Machos Pequeños</h3>
+                        <div class="stat-value stat-male" id="totalMachosPeq">0</div>
+                        <div class="stat-label">terneros/novillos</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Hembras Pequeñas</h3>
+                        <div class="stat-value stat-female" id="totalHembrasPeq">0</div>
+                        <div class="stat-label">terneras/novillas</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Machos</h3>
+                        <div class="stat-value stat-male" id="totalMachos">0</div>
+                        <div class="stat-label">en la finca</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Total Hembras</h3>
+                        <div class="stat-value stat-female" id="totalHembras">0</div>
+                        <div class="stat-label">en la finca</div>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Promedio de Peso</h3>
+                        <div class="stat-value" id="promedioPeso">0</div>
+                        <div class="stat-label">kilogramos</div>
+                    </div>
+                </div>
+                <div style="margin-top: 30px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <h3>Distribución por Categoría</h3>
+                    <div id="graficoDistribucion"></div>
+                </div>
+            </section>
+
             <section id="sanidad" class="seccion">
                 <h2>Registro de Tratamientos</h2>
+                <div id="offline-sanidad-alert" class="alert alert-offline" style="display: none;">
+                    <i class="fas fa-cloud-download-alt"></i> Trabajando sin conexión. Los datos se guardarán localmente.
+                </div>
                 <form id="formSanidad">
                     <div class="form-grid">
                         <div class="form-group">
@@ -1262,13 +1354,267 @@
                 </div>
             </section>
 
-            <!-- Resto de secciones permanecen igual -->
-            
+            <section id="reproduccion" class="seccion">
+                <h2>Registro de Reproducción</h2>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Registra las montas para llevar un control de la reproducción en tu ganado.
+                </div>
+                <form id="formReproduccion">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Vaca:</label>
+                            <select id="vaca" required>
+                                <option value="">Seleccione una vaca</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Toro:</label>
+                            <select id="toro" required>
+                                <option value="">Seleccione un toro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha de Monta:</label>
+                            <input type="date" id="fechaMonta" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Método:</label>
+                            <select id="metodo">
+                                <option value="Natural">Natural</option>
+                                <option value="Inseminación">Inseminación Artificial</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Observaciones:</label>
+                            <textarea id="observacionesReproduccion" placeholder="Detalles de la monta, comportamiento, etc."></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-reproduction"><i class="fas fa-heart"></i> Registrar Monta</button>
+                </form>
+                
+                <h3 style="margin-top: 30px;">Historial de Reproducción</h3>
+                <div id="historialReproduccion" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <p>No hay registros de reproducción</p>
+                </div>
+            </section>
+
+            <section id="partos" class="seccion">
+                <h2>Próximos Partos</h2>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Lista de vacas con partos programados en los próximos meses.
+                </div>
+                <div id="listaPartos">
+                    <p>Cargando próximos partos...</p>
+                </div>
+            </section>
+
+            <section id="potreros" class="seccion">
+                <h2>Gestión de Potreros</h2>
+                <form id="formPotreros">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nombre del Potrero:</label>
+                            <input type="text" id="nombrePotrero" placeholder="Ej: Potrero Norte" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Área (hectáreas):</label>
+                            <input type="number" id="areaPotrero" placeholder="Ej: 5.2" min="0.1" step="0.1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Capacidad:</label>
+                            <input type="number" id="capacidadPotrero" placeholder="Número de animales" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Descripción:</label>
+                            <textarea id="descripcionPotrero" placeholder="Características del potrero"></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Agregar Potrero</button>
+                </form>
+                
+                <h3 style="margin-top: 30px;">Lista de Potreros</h3>
+                <div id="listaPotreros" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <p>No hay potreros registrados</p>
+                </div>
+            </section>
+
+            <section id="finanzas" class="seccion">
+                <h2>Gestión Financiera</h2>
+                <form id="formFinanzas">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Fecha:</label>
+                            <input type="date" id="fechaFinanza" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo:</label>
+                            <select id="tipoFinanza" required>
+                                <option value="Ingreso">Ingreso</option>
+                                <option value="Egreso">Egreso</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Descripción:</label>
+                            <input type="text" id="descripcionFinanza" placeholder="Venta de leche, Compra de alimento..." required>
+                        </div>
+                        <div class="form-group">
+                            <label>Monto ($):</label>
+                            <input type="number" id="montoFinanza" placeholder="0.00" min="0" step="0.01" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Registrar Movimiento</button>
+                </form>
+                
+                <div style="margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                    <div style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                        <h3>Resumen Financiero</h3>
+                        <div id="resumenFinanciero">
+                            <p>No hay datos financieros</p>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3>Historial de Movimientos</h3>
+                        <div id="historialFinanzas" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                            <p>No hay movimientos registrados</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="inventario" class="seccion">
+                <h2>Gestión de Inventario</h2>
+                <form id="formInventario">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Ítem:</label>
+                            <input type="text" id="nombreItem" placeholder="Alimento concentrado, Medicamentos..." required>
+                        </div>
+                        <div class="form-group">
+                            <label>Cantidad:</label>
+                            <input type="number" id="cantidadItem" placeholder="0" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Categoría:</label>
+                            <select id="categoriaItem">
+                                <option value="Alimento">Alimento</option>
+                                <option value="Medicina">Medicina</option>
+                                <option value="Equipo">Equipo</option>
+                                <option value="Otros">Otros</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Descripción:</label>
+                            <textarea id="descripcionItem" placeholder="Detalles del ítem"></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Agregar al Inventario</button>
+                </form>
+                
+                <h3 style="margin-top: 30px;">Inventario Actual</h3>
+                <div id="listaInventario" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                    <p>No hay ítems en el inventario</p>
+                </div>
+            </section>
+
+            <section id="alertas" class="seccion">
+                <h2>Alertas y Recordatorios</h2>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Sistema de alertas para próximos partos, vacunas y otros eventos importantes.
+                </div>
+                <div id="listaAlertas">
+                    <p>No hay alertas activas en este momento</p>
+                </div>
+            </section>
+
+            <section id="admin" class="seccion">
+                <h2><i class="fas fa-user-shield"></i> Panel de Administración <span class="admin-badge">Admin</span></h2>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Esta sección es exclusiva para el administrador del sistema.
+                </div>
+                
+                <div class="admin-card">
+                    <h3><i class="fas fa-user-plus"></i> Crear Nuevo Usuario</h3>
+                    <form id="admin-register-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Nombre completo:</label>
+                                <input type="text" id="admin-nombre" placeholder="Nombre completo" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Correo electrónico:</label>
+                                <input type="email" id="admin-email" placeholder="Correo electrónico" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Contraseña:</label>
+                                <input type="password" id="admin-password" placeholder="Contraseña (mín. 6 caracteres)" required minlength="6">
+                            </div>
+                        </div>
+                        <div class="admin-actions">
+                            <button type="submit" class="btn btn-admin">
+                                <i class="fas fa-user-plus"></i> Crear Usuario
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="admin-card">
+                    <h3><i class="fas fa-users"></i> Usuarios Registrados</h3>
+                    <div id="usuarios-container">
+                        <p><i class="fas fa-spinner fa-spin"></i> Cargando usuarios...</p>
+                    </div>
+                </div>
+            </section>
         </main>
 
         <div id="fichaIndividual" class="ficha" style="display: none;">
             <button class="cerrarFicha">×</button>
             <div id="fichaContent"></div>
+        </div>
+        
+        <div id="conflictResolver" class="conflict-resolver">
+            <div class="conflict-box">
+                <div class="conflict-header">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Resolver Conflicto</h3>
+                    <p>Se detectó un conflicto entre tus cambios locales y los cambios en el servidor.</p>
+                </div>
+                
+                <div class="conflict-versions">
+                    <div class="version-card current">
+                        <div class="version-header">
+                            <div class="version-title">Versión Actual (Servidor)</div>
+                            <div class="version-meta">
+                                <i class="fas fa-cloud"></i>
+                                <span id="serverTimestamp">Hace 5 minutos</span>
+                            </div>
+                        </div>
+                        <div id="serverVersionContent"></div>
+                    </div>
+                    
+                    <div class="version-card pending">
+                        <div class="version-header">
+                            <div class="version-title">Tus Cambios (Locales)</div>
+                            <div class="version-meta">
+                                <i class="fas fa-laptop"></i>
+                                <span id="localTimestamp">Hace 2 minutos</span>
+                            </div>
+                        </div>
+                        <div id="localVersionContent"></div>
+                    </div>
+                </div>
+                
+                <div class="conflict-actions">
+                    <button class="btn-keep-current" id="btnKeepServer">
+                        <i class="fas fa-cloud-download-alt"></i> Mantener versión del servidor
+                    </button>
+                    <button class="btn-keep-pending" id="btnKeepLocal">
+                        <i class="fas fa-laptop"></i> Mantener mis cambios
+                    </button>
+                    <button class="btn-merge" id="btnMerge">
+                        <i class="fas fa-code-merge"></i> Combinar cambios
+                    </button>
+                </div>
+            </div>
         </div>
         
         <div id="offline-indicator" class="offline-indicator" style="display: none;">
@@ -1322,11 +1668,14 @@
         const offlineIndicator = document.getElementById('offline-indicator');
         const offlineRegistroAlert = document.getElementById('offline-registro-alert');
         const offlineListaAlert = document.getElementById('offline-lista-alert');
+        const offlineSanidadAlert = document.getElementById('offline-sanidad-alert');
 
         // Variables globales
-        let animalesData = [];
+        let animalesData = []; // Almacena todos los animales para uso global
+        let reproduccionData = []; // Almacena los registros de reproducción
+        let tratamientosData = []; // Almacena los registros de tratamientos
         let isOnline = navigator.onLine;
-        let pendingWrites = [];
+        let pendingWrites = []; // Operaciones pendientes para cuando se recupere la conexión
 
         // Función para actualizar estado de conexión
         function updateConnectionStatus(connected) {
@@ -1334,23 +1683,32 @@
             
             if (connected) {
                 statusDot.classList.add('connected');
-                statusDot.classList.remove('disconnected');
+                statusDot.classList.remove('disconnected', 'offline');
                 statusText.textContent = 'Conectado';
                 offlineIndicator.style.display = 'none';
+                
+                // Ocultar alertas offline
                 offlineRegistroAlert.style.display = 'none';
                 offlineListaAlert.style.display = 'none';
+                offlineSanidadAlert.style.display = 'none';
+                
+                // Intentar sincronizar operaciones pendientes
                 syncPendingWrites();
             } else {
                 statusDot.classList.add('disconnected');
-                statusDot.classList.remove('connected');
+                statusDot.classList.remove('connected', 'offline');
                 statusText.textContent = 'Sin conexión';
                 offlineIndicator.style.display = 'flex';
                 
+                // Mostrar alertas offline en secciones activas
                 if (document.getElementById('registro').classList.contains('active')) {
                     offlineRegistroAlert.style.display = 'block';
                 }
                 if (document.getElementById('lista').classList.contains('active')) {
                     offlineListaAlert.style.display = 'block';
+                }
+                if (document.getElementById('sanidad').classList.contains('active')) {
+                    offlineSanidadAlert.style.display = 'block';
                 }
                 
                 showNotification('Se perdió la conexión. Trabajando en modo offline', 'offline');
@@ -1366,15 +1724,18 @@
         // FUNCIONALIDAD OFFLINE
         // ======================
         
+        // Guardar datos localmente para acceso offline
         function saveLocalData(key, data) {
             localStorage.setItem(key, JSON.stringify(data));
         }
         
+        // Obtener datos locales
         function getLocalData(key) {
             const data = localStorage.getItem(key);
             return data ? JSON.parse(data) : null;
         }
         
+        // Sincronizar operaciones pendientes
         async function syncPendingWrites() {
             if (pendingWrites.length === 0 || !isOnline) return;
             
@@ -1384,6 +1745,7 @@
             showNotification('Sincronizando datos pendientes...', 'warning');
             
             try {
+                // Procesar cada operación pendiente
                 for (let i = 0; i < pendingWrites.length; i++) {
                     const operation = pendingWrites[i];
                     
@@ -1394,23 +1756,31 @@
                         const serverDoc = await animalRef.get();
                         const serverData = serverDoc.data();
                         
+                        // Comprobar conflictos
                         if (serverDoc.exists && serverData.version && serverData.version > (operation.data.version || 0)) {
+                            // Hay conflicto - mostrar al usuario
                             showConflictResolver(serverData, operation.data);
+                            
+                            // Quitar de pendientes y salir del bucle
                             pendingWrites.splice(i, 1);
                             localStorage.setItem('pendingWrites', JSON.stringify(pendingWrites));
                             return;
                         }
                         
+                        // Sin conflicto - guardar en servidor
                         operation.data.version = serverDoc.exists ? (serverData.version || 0) + 1 : 1;
-                        operation.data.pendingSync = null;
+                        operation.data.pendingSync = null; // Quitar bandera
                         await animalRef.set(operation.data);
                     }
                 }
                 
+                // Limpiar operaciones pendientes después de sincronizar
                 pendingWrites = [];
                 localStorage.removeItem('pendingWrites');
                 
                 showNotification('Datos sincronizados correctamente', 'success');
+                
+                // Actualizar datos locales
                 await loadAllAnimals();
                 renderAnimalList();
                 loadAnimalsForSelects();
@@ -1420,11 +1790,13 @@
             }
         }
         
+        // Guardar operación pendiente para sincronización posterior
         function addPendingWrite(type, data) {
             pendingWrites.push({ type, data });
             localStorage.setItem('pendingWrites', JSON.stringify(pendingWrites));
         }
         
+        // Cargar operaciones pendientes desde localStorage al iniciar
         function loadPendingWrites() {
             const savedWrites = localStorage.getItem('pendingWrites');
             if (savedWrites) {
@@ -1436,6 +1808,7 @@
         // RESOLUCIÓN DE CONFLICTOS
         // ======================
         
+        // Mostrar resolución de conflictos
         function showConflictResolver(serverData, localData) {
             const resolver = document.getElementById('conflictResolver');
             const serverContent = document.getElementById('serverVersionContent');
@@ -1443,12 +1816,15 @@
             const serverTime = document.getElementById('serverTimestamp');
             const localTime = document.getElementById('localTimestamp');
             
+            // Mostrar fechas
             serverTime.textContent = formatTimeDifference(serverData.lastUpdated);
             localTime.textContent = formatTimeDifference(localData.lastUpdated);
             
+            // Generar comparación de campos
             serverContent.innerHTML = generateVersionHTML(serverData, localData);
             localContent.innerHTML = generateVersionHTML(localData, serverData);
             
+            // Configurar botones
             document.getElementById('btnKeepServer').onclick = () => resolveConflict('server', serverData, localData);
             document.getElementById('btnKeepLocal').onclick = () => resolveConflict('local', serverData, localData);
             document.getElementById('btnMerge').onclick = () => resolveConflict('merge', serverData, localData);
@@ -1456,12 +1832,13 @@
             resolver.style.display = 'flex';
         }
         
+        // Formatear diferencia de tiempo
         function formatTimeDifference(timestamp) {
             if (!timestamp) return 'Desconocido';
             
             const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
             const now = new Date();
-            const diff = Math.floor((now - date) / 1000);
+            const diff = Math.floor((now - date) / 1000); // Diferencia en segundos
             
             if (diff < 60) return 'Hace unos segundos';
             if (diff < 3600) return `Hace ${Math.floor(diff/60)} minutos`;
@@ -1469,6 +1846,7 @@
             return `Hace ${Math.floor(diff/86400)} días`;
         }
         
+        // Generar HTML para comparación de versiones
         function generateVersionHTML(data, compareData) {
             let html = '';
             const fields = ['nombre', 'categoria', 'sexo', 'raza', 'peso', 'estado', 'padre', 'madre', 'observaciones'];
@@ -1492,6 +1870,7 @@
             return html;
         }
         
+        // Resolver conflicto
         function resolveConflict(decision, serverData, localData) {
             const resolver = document.getElementById('conflictResolver');
             resolver.style.display = 'none';
@@ -1501,10 +1880,12 @@
             
             switch(decision) {
                 case 'server':
+                    // Descarta los cambios locales y mantiene la versión del servidor
                     showNotification('Se mantuvo la versión del servidor. Tus cambios locales fueron descartados.', 'warning');
                     break;
                     
                 case 'local':
+                    // Sobrescribe el servidor con los cambios locales
                     db.collection('users').doc(user.uid).collection('animales')
                         .doc(localData.id).set(localData)
                         .then(() => {
@@ -1516,6 +1897,7 @@
                     break;
                     
                 case 'merge':
+                    // Combinación inteligente de cambios
                     const mergedData = mergeChanges(serverData, localData);
                     
                     db.collection('users').doc(user.uid).collection('animales')
@@ -1529,35 +1911,44 @@
                     break;
             }
             
+            // Actualizar datos locales
             loadAllAnimals().then(() => {
                 renderAnimalList();
                 loadAnimalsForSelects();
             });
         }
         
+        // Combinar cambios de dos versiones
         function mergeChanges(serverData, localData) {
+            // Estrategia de combinación:
+            // 1. Mantener los campos modificados localmente que no hayan cambiado en el servidor
+            // 2. Para campos modificados en ambos, priorizar los cambios locales
+            // 3. Conservar el último timestamp
+            
             const merged = {...serverData};
             const fields = ['nombre', 'categoria', 'sexo', 'raza', 'peso', 'estado', 'padre', 'madre', 'observaciones'];
             
             fields.forEach(field => {
+                // Si el campo fue modificado localmente
                 if (localData[field] !== serverData[field]) {
                     merged[field] = localData[field];
                 }
             });
             
+            // Actualizar marca de tiempo
             merged.lastUpdated = firebase.firestore.FieldValue.serverTimestamp();
             merged.lastLocalUpdate = new Date().toISOString();
             
+            // Registrar el proceso de combinación
             if (!merged.changeHistory) merged.changeHistory = [];
-            
-            // CORRECCIÓN: Usar fecha ISO en lugar de FieldValue para el array
             merged.changeHistory.push({
                 action: 'merge',
-                timestamp: new Date().toISOString(),
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                 serverVersion: serverData.version || 1,
                 localVersion: localData.version || 1
             });
             
+            // Incrementar versión
             merged.version = Math.max(serverData.version || 1, localData.version || 1) + 1;
             
             return merged;
@@ -1566,6 +1957,7 @@
         // ======================
         // AUTENTICACIÓN
         // ======================
+        // Validación de formulario de login
         document.getElementById('email').addEventListener('input', validateLoginForm);
         document.getElementById('password').addEventListener('input', validateLoginForm);
         
@@ -1576,6 +1968,7 @@
             const passwordError = document.getElementById('password-error');
             let isValid = true;
             
+            // Validar email
             if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
                 emailError.textContent = 'Ingrese un correo válido';
                 emailError.style.display = 'block';
@@ -1584,6 +1977,7 @@
                 emailError.style.display = 'none';
             }
             
+            // Validar contraseña
             if (!password || password.length < 6) {
                 passwordError.textContent = 'La contraseña debe tener al menos 6 caracteres';
                 passwordError.style.display = 'block';
@@ -1595,6 +1989,7 @@
             return isValid;
         }
         
+        // Login
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -1604,14 +1999,18 @@
             const password = document.getElementById('password').value;
             
             try {
+                // Mostrar spinner
                 loginSpinner.style.display = 'inline-block';
                 loginButton.disabled = true;
                 
                 const userCredential = await auth.signInWithEmailAndPassword(email, password);
                 const user = userCredential.user;
                 
+                // Ocultar spinner
                 loginSpinner.style.display = 'none';
                 loginButton.disabled = false;
+                
+                // Actualizar UI
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('main-app').style.display = 'block';
                 userAvatar.src = `https://ui-avatars.com/api/?name=${user.email.charAt(0)}&background=3498db&color=fff`;
@@ -1636,24 +2035,30 @@
             }
         });
         
+        // Logout
         document.getElementById('btnLogout').addEventListener('click', () => {
             auth.signOut();
         });
         
+        // Observador de estado de autenticación
         auth.onAuthStateChanged((user) => {
             if (user) {
+                // Usuario logueado
                 document.getElementById('login-container').style.display = 'none';
                 document.getElementById('main-app').style.display = 'block';
                 document.getElementById('user-avatar').src = `https://ui-avatars.com/api/?name=${user.email.charAt(0)}&background=3498db&color=fff`;
                 
+                // Mostrar opción de admin si es el administrador
                 if (user.uid === ADMIN_UID) {
                     adminMenuItem.style.display = 'block';
                 } else {
                     adminMenuItem.style.display = 'none';
                 }
                 
+                // Inicializar app
                 initApp();
             } else {
+                // No hay usuario logueado
                 document.getElementById('login-container').style.display = 'flex';
                 document.getElementById('main-app').style.display = 'none';
             }
@@ -1662,6 +2067,7 @@
         // ======================
         // FUNCIONALIDAD PRINCIPAL
         // ======================
+        // Mostrar notificación
         function showNotification(message, type) {
             const notification = document.createElement('div');
             notification.className = `notification ${type}`;
@@ -1672,6 +2078,7 @@
             
             document.body.appendChild(notification);
             
+            // Auto eliminar después de 4 segundos
             setTimeout(() => {
                 notification.style.opacity = '0';
                 setTimeout(() => {
@@ -1679,16 +2086,19 @@
                 }, 300);
             }, 4000);
             
+            // Cerrar manualmente
             notification.querySelector('.notification-close').onclick = () => {
                 document.body.removeChild(notification);
             };
         }
         
+        // Función para cargar todos los animales
         async function loadAllAnimals() {
             try {
                 const user = auth.currentUser;
                 if (!user) return [];
                 
+                // Primero intentar cargar desde caché local
                 const localAnimals = getLocalData(`animales_${user.uid}`);
                 if (localAnimals) {
                     animalesData = localAnimals;
@@ -1698,6 +2108,7 @@
                 const snapshot = await db.collection('users').doc(user.uid).collection('animales').get();
                 animalesData = snapshot.docs.map(doc => doc.data());
                 
+                // Guardar en caché local para acceso offline
                 saveLocalData(`animales_${user.uid}`, animalesData);
                 
                 return animalesData;
@@ -1707,9 +2118,11 @@
             }
         }
         
+        // Función para cargar animales en los selectores
         async function loadAnimalsForSelects() {
             await loadAllAnimals();
             
+            // Cargar selector de padre (solo machos adultos)
             const selectPadre = document.getElementById('padre');
             selectPadre.innerHTML = '<option value="">Seleccionar padre</option>';
             animalesData
@@ -1721,6 +2134,7 @@
                     selectPadre.appendChild(option);
                 });
             
+            // Cargar selector de madre (solo hembras adultas)
             const selectMadre = document.getElementById('madre');
             selectMadre.innerHTML = '<option value="">Seleccionar madre</option>';
             animalesData
@@ -1733,24 +2147,24 @@
                 });
         }
 
-        async function loadSanidadAnimals() {
-            const selectAnimal = document.getElementById('animalSanidad');
-            selectAnimal.innerHTML = '<option value="">Seleccione un animal</option>';
+        // Cargar animales para el módulo de sanidad
+        async function loadAnimalsForSanidad() {
+            const select = document.getElementById('animalSanidad');
+            select.innerHTML = '<option value="">Seleccione un animal</option>';
             
             if (animalesData.length === 0) {
                 await loadAllAnimals();
             }
             
-            animalesData
-                .filter(animal => animal.estado === 'Activo')
-                .forEach(animal => {
-                    const option = document.createElement('option');
-                    option.value = animal.id;
-                    option.textContent = `${animal.nombre} (${animal.id})`;
-                    selectAnimal.appendChild(option);
-                });
+            animalesData.forEach(animal => {
+                const option = document.createElement('option');
+                option.value = animal.id;
+                option.textContent = `${animal.nombre} (${animal.id})`;
+                select.appendChild(option);
+            });
         }
         
+        // Función para guardar animal
         async function saveAnimal() {
             const user = auth.currentUser;
             if (!user) {
@@ -1782,6 +2196,7 @@
                 return;
             }
             
+            // Mostrar spinner
             const guardarSpinner = document.getElementById('guardar-spinner');
             const guardarText = document.getElementById('guardar-text');
             guardarSpinner.style.display = 'inline-block';
@@ -1789,28 +2204,35 @@
             
             try {
                 if (isOnline) {
-                    const animalRef = db.collection('users').doc(user.uid).collection('animales').doc(animalId);
+                    // Verificar si ya existe una versión más reciente en el servidor
+                    const animalRef = db.collection('users').doc(user.uid).collection('animales').doc(animalData.id);
                     const serverDoc = await animalRef.get();
                     
+                    let serverVersion = 0;
                     if (serverDoc.exists) {
                         const serverData = serverDoc.data();
                         
+                        // Comprobar si hay conflicto de versiones
                         if (serverData.version && animalData.version && serverData.version > animalData.version) {
+                            // Mostrar resolución de conflictos
                             guardarSpinner.style.display = 'none';
                             guardarText.textContent = 'Guardar Animal';
                             showConflictResolver(serverData, animalData);
                             return;
                         }
+                        
+                        serverVersion = serverData.version || 0;
                     }
                     
-                    animalData.version = serverDoc.exists ? (serverDoc.data().version || 0) + 1 : 1;
+                    // Si no hay conflicto, guardar normalmente
+                    animalData.version = serverVersion + 1;
                     
-                    // CORRECCIÓN: Usar fecha ISO en lugar de FieldValue para el array
+                    // Registrar en historial de cambios
                     if (!animalData.changeHistory) animalData.changeHistory = [];
                     animalData.changeHistory.push({
                         action: document.getElementById('id').value ? 'update' : 'create',
                         user: user.uid,
-                        timestamp: new Date().toISOString(),
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                         fields: Object.keys(animalData)
                     });
                     
@@ -1822,19 +2244,12 @@
                         'success'
                     );
                 } else {
+                    // Modo offline: guardar localmente con bandera de pendiente
                     animalData.pendingSync = true;
-                    animalData.offlineVersion = Date.now();
-                    
-                    // CORRECCIÓN: Para offline también usar fecha ISO
-                    if (!animalData.changeHistory) animalData.changeHistory = [];
-                    animalData.changeHistory.push({
-                        action: document.getElementById('id').value ? 'update' : 'create',
-                        user: user.uid,
-                        timestamp: new Date().toISOString(),
-                        fields: Object.keys(animalData)
-                    });
+                    animalData.offlineVersion = Date.now(); // Identificador único para cambios offline
                 }
                 
+                // Actualizar datos locales
                 const index = animalesData.findIndex(a => a.id === animalData.id);
                 if (index !== -1) {
                     animalesData[index] = animalData;
@@ -1842,19 +2257,23 @@
                     animalesData.push(animalData);
                 }
                 
+                // Guardar en caché local
                 saveLocalData(`animales_${user.uid}`, animalesData);
                 
                 if (!isOnline) {
+                    // Agregar a operaciones pendientes
                     addPendingWrite('saveAnimal', animalData);
                     showNotification('Animal guardado localmente. Se sincronizará cuando recuperes conexión', 'offline');
                 }
                 
+                // Limpiar formulario
                 document.getElementById('formRegistro').reset();
                 document.getElementById('id').value = '';
                 
+                // Actualizar UI
                 renderAnimalList();
                 loadAnimalsForSelects();
-                loadSanidadAnimals();
+                loadAnimalsForSanidad();
                 
             } catch (error) {
                 showNotification('Error guardando animal: ' + error.message, 'error');
@@ -1864,6 +2283,7 @@
             }
         }
         
+        // Renderizar lista de animales
         async function renderAnimalList() {
             const tbody = document.getElementById('tablaAnimales');
             if (!tbody) return;
@@ -1876,6 +2296,7 @@
                     return;
                 }
                 
+                // Construir tabla
                 let html = '';
                 animalesData.forEach(animal => {
                     const edad = calcularEdad(animal.fechaNacimiento);
@@ -1899,6 +2320,7 @@
                 
                 tbody.innerHTML = html;
                 
+                // Añadir eventos
                 document.querySelectorAll('.btn-ver').forEach(btn => {
                     btn.addEventListener('click', () => viewAnimal(btn.dataset.id));
                 });
@@ -1917,6 +2339,7 @@
             }
         }
         
+        // Calcular edad
         function calcularEdad(fechaNacimiento) {
             if (!fechaNacimiento) return "N/A";
             const nacimiento = new Date(fechaNacimiento);
@@ -1929,6 +2352,7 @@
             return edad >= 0 ? edad + " años" : "N/A";
         }
         
+        // Ver animal
         async function viewAnimal(id) {
             try {
                 const animal = animalesData.find(a => a.id === id);
@@ -1963,11 +2387,13 @@
             }
         }
         
+        // Editar animal
         async function editAnimal(id) {
             try {
                 const animal = animalesData.find(a => a.id === id);
                 if (!animal) return;
                 
+                // Rellenar formulario
                 document.getElementById('id').value = animal.id;
                 document.getElementById('arete').value = animal.arete || '';
                 document.getElementById('nombre').value = animal.nombre;
@@ -1978,6 +2404,7 @@
                 document.getElementById('fechaNacimiento').value = animal.fechaNacimiento;
                 document.getElementById('estado').value = animal.estado;
                 
+                // Seleccionar padre y madre
                 const padreSelect = document.getElementById('padre');
                 const madreSelect = document.getElementById('madre');
                 
@@ -2001,6 +2428,7 @@
                 
                 document.getElementById('observaciones').value = animal.observaciones || '';
                 
+                // Mostrar sección de registro
                 showSection('registro');
                 window.scrollTo(0, 0);
                 
@@ -2009,6 +2437,7 @@
             }
         }
         
+        // Eliminar animal
         async function deleteAnimal(id) {
             if (!confirm('¿Eliminar este animal? Esta acción no se puede deshacer.')) return;
             
@@ -2019,22 +2448,713 @@
                 await db.collection('users').doc(user.uid).collection('animales').doc(id).delete();
                 showNotification('Animal eliminado', 'success');
                 
+                // Actualizar datos
                 animalesData = animalesData.filter(animal => animal.id !== id);
                 renderAnimalList();
                 loadAnimalsForSelects();
+                loadAnimalsForSanidad();
             } catch (error) {
                 showNotification('Error eliminando animal: ' + error.message, 'error');
             }
         }
         
         // ======================
+        // MÓDULO DE SANIDAD
+        // ======================
+        async function saveTratamiento() {
+            const user = auth.currentUser;
+            if (!user) {
+                showNotification('Debe iniciar sesión', 'error');
+                return;
+            }
+            
+            const animalId = document.getElementById('animalSanidad').value;
+            const fecha = document.getElementById('fechaSanidad').value;
+            const tipo = document.getElementById('tipoTratamiento').value.trim();
+            const detalles = document.getElementById('detallesSanidad').value.trim();
+            
+            if (!animalId || !fecha || !tipo) {
+                showNotification('Complete los campos obligatorios', 'error');
+                return;
+            }
+            
+            const animal = animalesData.find(a => a.id === animalId);
+            if (!animal) {
+                showNotification('Animal no encontrado', 'error');
+                return;
+            }
+            
+            const tratamientoData = {
+                animalId: animal.id,
+                animalNombre: animal.nombre,
+                fecha: fecha,
+                tipo: tipo,
+                detalles: detalles,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                lastLocalUpdate: new Date().toISOString()
+            };
+            
+            try {
+                if (isOnline) {
+                    await db.collection('users').doc(user.uid).collection('tratamientos').add(tratamientoData);
+                    showNotification('Tratamiento registrado', 'success');
+                } else {
+                    // Modo offline: guardar localmente
+                    tratamientoData.pendingSync = true;
+                    tratamientoData.offlineId = 'tratamiento-' + Date.now();
+                    
+                    // Agregar a datos locales
+                    tratamientosData.push(tratamientoData);
+                    saveLocalData(`tratamientos_${user.uid}`, tratamientosData);
+                    
+                    showNotification('Tratamiento guardado localmente', 'offline');
+                }
+                
+                // Actualizar historial
+                loadTratamientosHistorial();
+                
+                // Limpiar formulario
+                document.getElementById('formSanidad').reset();
+                
+            } catch (error) {
+                showNotification('Error registrando tratamiento: ' + error.message, 'error');
+            }
+        }
+        
+        async function loadTratamientosHistorial() {
+            const cont = document.getElementById('historialSanidad');
+            cont.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Cargando historial...</p>';
+            
+            try {
+                const user = auth.currentUser;
+                if (!user) return;
+                
+                // Cargar desde caché local si estamos offline
+                if (!isOnline) {
+                    const localTratamientos = getLocalData(`tratamientos_${user.uid}`);
+                    if (localTratamientos) {
+                        tratamientosData = localTratamientos;
+                    }
+                } else {
+                    // Cargar desde Firestore
+                    const snapshot = await db.collection('users').doc(user.uid).collection('tratamientos')
+                        .orderBy('createdAt', 'desc')
+                        .get();
+                    
+                    tratamientosData = snapshot.docs.map(doc => {
+                        return {
+                            id: doc.id,
+                            ...doc.data()
+                        };
+                    });
+                    
+                    // Guardar en caché local
+                    saveLocalData(`tratamientos_${user.uid}`, tratamientosData);
+                }
+                
+                if (tratamientosData.length === 0) {
+                    cont.innerHTML = '<p>No hay tratamientos registrados</p>';
+                    return;
+                }
+                
+                let html = '';
+                tratamientosData.forEach(tratamiento => {
+                    const fecha = new Date(tratamiento.createdAt?.seconds * 1000 || tratamiento.createdAt).toLocaleDateString();
+                    html += `
+                        <div class="alerta-card">
+                            <h4>
+                                <span>${tratamiento.animalNombre} - ${tratamiento.tipo}</span>
+                                <span class="fecha">${fecha}</span>
+                            </h4>
+                            <p><strong>Detalles:</strong> ${tratamiento.detalles}</p>
+                        </div>
+                    `;
+                });
+                
+                cont.innerHTML = html;
+                
+            } catch (error) {
+                showNotification('Error cargando tratamientos: ' + error.message, 'error');
+                cont.innerHTML = '<p>Error al cargar tratamientos</p>';
+            }
+        }
+        
+        // ======================
+        // MÓDULO DE REPRODUCCIÓN
+        // ======================
+        // Cargar vacas y toros para reproducción
+        async function loadReproduccionAnimals() {
+            const vacaSelect = document.getElementById('vaca');
+            const toroSelect = document.getElementById('toro');
+            
+            vacaSelect.innerHTML = '<option value="">Seleccione una vaca</option>';
+            toroSelect.innerHTML = '<option value="">Seleccione un toro</option>';
+            
+            if (animalesData.length === 0) {
+                await loadAllAnimals();
+            }
+            
+            // Filtrar vacas (hembras adultas)
+            const vacas = animalesData.filter(a => 
+                a.sexo === 'Hembra' && 
+                (a.categoria === 'Vaca' || a.categoria === 'Novilla') && 
+                a.estado === 'Activo'
+            );
+            
+            // Filtrar toros (machos adultos)
+            const toros = animalesData.filter(a => 
+                a.sexo === 'Macho' && 
+                (a.categoria === 'Toro' || a.categoria === 'Novillo') && 
+                a.estado === 'Activo'
+            );
+            
+            // Llenar selector de vacas
+            vacas.forEach(vaca => {
+                const option = document.createElement('option');
+                option.value = vaca.id;
+                option.textContent = `${vaca.nombre} (${vaca.id})`;
+                vacaSelect.appendChild(option);
+            });
+            
+            // Llenar selector de toros
+            toros.forEach(toro => {
+                const option = document.createElement('option');
+                option.value = toro.id;
+                option.textContent = `${toro.nombre} (${toro.id})`;
+                toroSelect.appendChild(option);
+            });
+        }
+        
+        // Guardar registro de reproducción
+        async function saveReproduccion() {
+            const user = auth.currentUser;
+            if (!user) {
+                showNotification('Debe iniciar sesión', 'error');
+                return;
+            }
+            
+            const vacaId = document.getElementById('vaca').value;
+            const toroId = document.getElementById('toro').value;
+            const fechaMonta = document.getElementById('fechaMonta').value;
+            const metodo = document.getElementById('metodo').value;
+            const observaciones = document.getElementById('observacionesReproduccion').value.trim();
+            
+            if (!vacaId || !toroId || !fechaMonta) {
+                showNotification('Seleccione una vaca, un toro y la fecha de monta', 'error');
+                return;
+            }
+            
+            // Buscar animales
+            const vaca = animalesData.find(a => a.id === vacaId);
+            const toro = animalesData.find(a => a.id === toroId);
+            
+            if (!vaca || !toro) {
+                showNotification('No se encontraron los animales seleccionados', 'error');
+                return;
+            }
+            
+            const reproduccionData = {
+                vaca: {
+                    id: vaca.id,
+                    nombre: vaca.nombre
+                },
+                toro: {
+                    id: toro.id,
+                    nombre: toro.nombre
+                },
+                fechaMonta: fechaMonta,
+                metodo: metodo,
+                observaciones: observaciones,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            try {
+                // Guardar en Firestore
+                await db.collection('users').doc(user.uid).collection('reproduccion').add(reproduccionData);
+                
+                showNotification('Registro de reproducción guardado', 'success');
+                
+                // Limpiar formulario
+                document.getElementById('formReproduccion').reset();
+                
+                // Actualizar historial
+                loadReproduccionHistorial();
+            } catch (error) {
+                showNotification('Error guardando registro: ' + error.message, 'error');
+            }
+        }
+        
+        // Cargar historial de reproducción
+        async function loadReproduccionHistorial() {
+            const cont = document.getElementById('historialReproduccion');
+            cont.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Cargando historial...</p>';
+            
+            try {
+                const user = auth.currentUser;
+                if (!user) return;
+                
+                const snapshot = await db.collection('users').doc(user.uid).collection('reproduccion')
+                    .orderBy('createdAt', 'desc')
+                    .get();
+                    
+                reproduccionData = snapshot.docs.map(doc => {
+                    return {
+                        id: doc.id,
+                        ...doc.data()
+                    };
+                });
+                
+                if (reproduccionData.length === 0) {
+                    cont.innerHTML = '<p>No hay registros de reproducción</p>';
+                    return;
+                }
+                
+                let html = '';
+                reproduccionData.forEach(reg => {
+                    const fecha = new Date(reg.createdAt.seconds * 1000).toLocaleDateString();
+                    html += `
+                        <div class="reproduccion-card">
+                            <h4>
+                                <span>${reg.vaca.nombre} (Vaca)</span>
+                                <span class="fecha">${fecha}</span>
+                            </h4>
+                            <p><strong>Toro:</strong> ${reg.toro.nombre}</p>
+                            <p><strong>Fecha Monta:</strong> ${reg.fechaMonta}</p>
+                            <p><strong>Método:</strong> ${reg.metodo}</p>
+                            ${reg.observaciones ? `<p><strong>Observaciones:</strong> ${reg.observaciones}</p>` : ''}
+                        </div>
+                    `;
+                });
+                
+                cont.innerHTML = html;
+                
+            } catch (error) {
+                showNotification('Error cargando historial: ' + error.message, 'error');
+                cont.innerHTML = '<p>Error al cargar historial</p>';
+            }
+        }
+        
+        // ======================
+        // ÁRBOL GENEALÓGICO
+        // ======================
+        // Función para renderizar el árbol genealógico
+        async function renderArbolGenealogico() {
+            const cont = document.getElementById('arbolContent');
+            cont.innerHTML = '<p>Selecciona un animal para visualizar su árbol genealógico</p>';
+            
+            const animalSelect = document.getElementById('animalRaiz');
+            animalSelect.innerHTML = '<option value="">Seleccione un animal</option>';
+            
+            try {
+                if (animalesData.length === 0) {
+                    await loadAllAnimals();
+                }
+                
+                // Llenar selector de animales
+                animalesData.forEach(animal => {
+                    const option = document.createElement('option');
+                    option.value = animal.id;
+                    option.textContent = `${animal.nombre} (${animal.id})`;
+                    animalSelect.appendChild(option);
+                });
+                
+                // Evento para mostrar árbol
+                animalSelect.addEventListener('change', async () => {
+                    const id = animalSelect.value;
+                    if (!id) return;
+                    
+                    cont.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Generando árbol...</p>';
+                    
+                    const raiz = animalesData.find(a => a.id === id);
+                    if (!raiz) {
+                        cont.innerHTML = '<p>Animal no encontrado</p>';
+                        return;
+                    }
+                    
+                    // Obtener ancestros
+                    const ancestros = {
+                        padre: null,
+                        madre: null
+                    };
+                    
+                    if (raiz.padre) {
+                        ancestros.padre = animalesData.find(a => a.id === raiz.padre);
+                    }
+                    
+                    if (raiz.madre) {
+                        ancestros.madre = animalesData.find(a => a.id === raiz.madre);
+                    }
+                    
+                    // Obtener abuelos
+                    const abuelos = {
+                        abueloPaterno: null,
+                        abuelaPaterna: null,
+                        abueloMaterno: null,
+                        abuelaMaterna: null
+                    };
+                    
+                    if (ancestros.padre) {
+                        if (ancestros.padre.padre) {
+                            abuelos.abueloPaterno = animalesData.find(a => a.id === ancestros.padre.padre);
+                        }
+                        if (ancestros.padre.madre) {
+                            abuelos.abuelaPaterna = animalesData.find(a => a.id === ancestros.padre.madre);
+                        }
+                    }
+                    
+                    if (ancestros.madre) {
+                        if (ancestros.madre.padre) {
+                            abuelos.abueloMaterno = animalesData.find(a => a.id === ancestros.madre.padre);
+                        }
+                        if (ancestros.madre.madre) {
+                            abuelos.abuelaMaterna = animalesData.find(a => a.id === ancestros.madre.madre);
+                        }
+                    }
+                    
+                    // Obtener hijos
+                    const hijos = animalesData.filter(a => a.padre === id || a.madre === id);
+                    
+                    // Construir HTML del árbol
+                    cont.innerHTML = '';
+                    const arbolDiv = document.createElement('div');
+                    arbolDiv.className = 'arbol-genealogico';
+                    
+                    // Nivel de abuelos
+                    const nivelAbuelos = document.createElement('div');
+                    nivelAbuelos.className = 'nivel-arbol nivel-ancestros';
+                    
+                    // Abuelos paternos
+                    const grupoPaterno = document.createElement('div');
+                    grupoPaterno.className = 'grupo-padres';
+                    
+                    grupoPaterno.appendChild(crearNodoArbol(abuelos.abueloPaterno, 'Abuelo'));
+                    grupoPaterno.appendChild(crearNodoArbol(abuelos.abuelaPaterna, 'Abuela'));
+                    
+                    // Abuelos maternos
+                    const grupoMaterno = document.createElement('div');
+                    grupoMaterno.className = 'grupo-padres';
+                    
+                    grupoMaterno.appendChild(crearNodoArbol(abuelos.abueloMaterno, 'Abuelo'));
+                    grupoMaterno.appendChild(crearNodoArbol(abuelos.abuelaMaterna, 'Abuela'));
+                    
+                    nivelAbuelos.appendChild(grupoPaterno);
+                    nivelAbuelos.appendChild(grupoMaterno);
+                    arbolDiv.appendChild(nivelAbuelos);
+                    
+                    // Conexión vertical
+                    const conexionVertical1 = document.createElement('div');
+                    conexionVertical1.className = 'conexion vertical';
+                    conexionVertical1.style.height = '30px';
+                    conexionVertical1.style.bottom = '-30px';
+                    arbolDiv.appendChild(conexionVertical1);
+                    
+                    // Nivel de padres
+                    const nivelPadres = document.createElement('div');
+                    nivelPadres.className = 'nivel-arbol nivel-padres';
+                    
+                    nivelPadres.appendChild(crearNodoArbol(ancestros.padre, 'Padre'));
+                    nivelPadres.appendChild(crearNodoArbol(ancestros.madre, 'Madre'));
+                    
+                    arbolDiv.appendChild(nivelPadres);
+                    
+                    // Conexión vertical
+                    const conexionVertical2 = document.createElement('div');
+                    conexionVertical2.className = 'conexion vertical';
+                    conexionVertical2.style.height = '30px';
+                    conexionVertical2.style.bottom = '-30px';
+                    arbolDiv.appendChild(conexionVertical2);
+                    
+                    // Nivel raíz (animal seleccionado)
+                    const nivelRaiz = document.createElement('div');
+                    nivelRaiz.className = 'nivel-arbol nivel-raiz';
+                    nivelRaiz.appendChild(crearNodoArbol(raiz, 'Animal', true));
+                    arbolDiv.appendChild(nivelRaiz);
+                    
+                    // Conexión vertical
+                    const conexionVertical3 = document.createElement('div');
+                    conexionVertical3.className = 'conexion vertical';
+                    conexionVertical3.style.height = '30px';
+                    conexionVertical3.style.bottom = '-30px';
+                    arbolDiv.appendChild(conexionVertical3);
+                    
+                    // Nivel de hijos
+                    if (hijos.length > 0) {
+                        const nivelHijos = document.createElement('div');
+                        nivelHijos.className = 'nivel-arbol nivel-descendientes';
+                        
+                        const grupoHijos = document.createElement('div');
+                        grupoHijos.className = 'hijos-container';
+                        
+                        hijos.forEach(hijo => {
+                            const hijoDiv = document.createElement('div');
+                            hijoDiv.className = 'nodo-hijo';
+                            hijoDiv.appendChild(crearNodoArbol(hijo, 'Hijo'));
+                            grupoHijos.appendChild(hijoDiv);
+                        });
+                        
+                        nivelHijos.appendChild(grupoHijos);
+                        arbolDiv.appendChild(nivelHijos);
+                    }
+                    
+                    cont.appendChild(arbolDiv);
+                });
+                
+            } catch (error) {
+                showNotification('Error cargando árbol: ' + error.message, 'error');
+            }
+        }
+        
+        // Función auxiliar para crear un nodo del árbol
+        function crearNodoArbol(animal, tipo = '', esRaiz = false) {
+            const nodo = document.createElement('div');
+            
+            if (!animal) {
+                nodo.className = `nodo-arbol`;
+                nodo.innerHTML = `
+                    <div class="nombre">Desconocido</div>
+                    <div class="tipo">${tipo}</div>
+                `;
+                return nodo;
+            }
+            
+            // Asignar clase según el sexo
+            const sexoClase = animal.sexo === 'Macho' ? 'macho' : 'hembra';
+            nodo.className = `nodo-arbol ${sexoClase} ${esRaiz ? 'raiz' : ''}`;
+            
+            nodo.innerHTML = `
+                <div class="nombre">${animal.nombre}</div>
+                <div class="id">${animal.id}</div>
+                <div class="tipo">${tipo} (${animal.categoria})</div>
+            `;
+            return nodo;
+        }
+        
+        // ======================
+        // ESTADÍSTICAS
+        // ======================
+        async function renderEstadisticas() {
+            try {
+                if (animalesData.length === 0) {
+                    await loadAllAnimals();
+                }
+
+                // Actualizar estadísticas
+                document.getElementById('totalAnimales').textContent = animalesData.length;
+
+                const vacas = animalesData.filter(a => a.categoria === 'Vaca');
+                document.getElementById('totalVacas').textContent = vacas.length;
+
+                const toros = animalesData.filter(a => a.categoria === 'Toro');
+                document.getElementById('totalToros').textContent = toros.length;
+
+                // Machos pequeños (terneros, novillos, becerros)
+                const machosPeq = animalesData.filter(a => 
+                    a.sexo === 'Macho' && 
+                    (a.categoria === 'Ternero' || a.categoria === 'Novillo' || a.categoria === 'Becerro')
+                );
+                document.getElementById('totalMachosPeq').textContent = machosPeq.length;
+
+                // Hembras pequeñas (terneras, novillas, becerras)
+                const hembrasPeq = animalesData.filter(a => 
+                    a.sexo === 'Hembra' && 
+                    (a.categoria === 'Ternero' || a.categoria === 'Novillo' || a.categoria === 'Becerro')
+                );
+                document.getElementById('totalHembrasPeq').textContent = hembrasPeq.length;
+
+                // Totales por sexo
+                const totalMachos = animalesData.filter(a => a.sexo === 'Macho').length;
+                const totalHembras = animalesData.filter(a => a.sexo === 'Hembra').length;
+                document.getElementById('totalMachos').textContent = totalMachos;
+                document.getElementById('totalHembras').textContent = totalHembras;
+
+                const pesos = animalesData.map(a => a.peso || 0).filter(p => p > 0);
+                const promedioPeso = pesos.length > 0 ? 
+                    (pesos.reduce((a, b) => a + b, 0) / pesos.length).toFixed(1) : 0;
+                document.getElementById('promedioPeso').textContent = promedioPeso;
+
+                // Actualizar gráfico de distribución
+                const categorias = {};
+                animalesData.forEach(animal => {
+                    categorias[animal.categoria] = (categorias[animal.categoria] || 0) + 1;
+                });
+
+                const grafico = document.getElementById('graficoDistribucion');
+                grafico.innerHTML = '';
+
+                for (const categoria in categorias) {
+                    const porcentaje = Math.round((categorias[categoria] / animalesData.length) * 100);
+                    grafico.innerHTML += `
+                        <div style="margin-bottom: 10px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                                <span>${categoria}</span>
+                                <span>${categorias[categoria]} (${porcentaje}%)</span>
+                            </div>
+                            <div style="height: 20px; background: #e0e0e0; border-radius: 10px; overflow: hidden;">
+                                <div style="height: 100%; width: ${porcentaje}%; background: var(--secondary); border-radius: 10px;"></div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+                showNotification('Error cargando estadísticas: ' + error.message, 'error');
+            }
+        }
+        
+        // ======================
+        // PANEL DE ADMINISTRACIÓN
+        // ======================
+        // Función para crear nuevo usuario (solo admin)
+        async function crearUsuarioAdmin() {
+            const user = auth.currentUser;
+            if (!user || user.uid !== ADMIN_UID) {
+                showNotification('No tienes permisos para esta acción', 'error');
+                return;
+            }
+            
+            const nombre = document.getElementById('admin-nombre').value.trim();
+            const email = document.getElementById('admin-email').value.trim();
+            const password = document.getElementById('admin-password').value;
+            
+            if (!nombre || !email || !password) {
+                showNotification('Todos los campos son obligatorios', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showNotification('La contraseña debe tener al menos 6 caracteres', 'error');
+                return;
+            }
+            
+            try {
+                // Crear usuario en Firebase Authentication
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const nuevoUsuario = userCredential.user;
+                
+                // Guardar información adicional en Firestore
+                await db.collection('users').doc(nuevoUsuario.uid).set({
+                    nombre: nombre,
+                    email: email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    esAdmin: false
+                });
+                
+                showNotification('Usuario creado con éxito', 'success');
+                document.getElementById('admin-register-form').reset();
+                cargarUsuarios();
+                
+            } catch (error) {
+                let errorMessage;
+                switch(error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMessage = 'El correo ya está registrado';
+                        break;
+                    case 'auth/invalid-email':
+                        errorMessage = 'Correo electrónico inválido';
+                        break;
+                    case 'auth/weak-password':
+                        errorMessage = 'La contraseña es demasiado débil';
+                        break;
+                    default:
+                        errorMessage = 'Error al crear usuario: ' + error.message;
+                }
+                showNotification(errorMessage, 'error');
+            }
+        }
+        
+        // Función para cargar lista de usuarios
+        async function cargarUsuarios() {
+            const cont = document.getElementById('usuarios-container');
+            cont.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Cargando usuarios...</p>';
+            
+            try {
+                const snapshot = await db.collection('users').get();
+                const usuarios = snapshot.docs.map(doc => {
+                    return {
+                        id: doc.id,
+                        ...doc.data()
+                    };
+                });
+                
+                if (usuarios.length === 0) {
+                    cont.innerHTML = '<p>No hay usuarios registrados</p>';
+                    return;
+                }
+                
+                let html = `
+                    <table class="permisos-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Fecha Registro</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                usuarios.forEach(usuario => {
+                    const fecha = usuario.createdAt ? 
+                        new Date(usuario.createdAt.seconds * 1000).toLocaleDateString() : 'N/A';
+                    
+                    html += `
+                        <tr>
+                            <td>${usuario.nombre} ${usuario.id === ADMIN_UID ? '<span class="admin-badge">Admin</span>' : ''}</td>
+                            <td>${usuario.email}</td>
+                            <td>${fecha}</td>
+                            <td>
+                                ${usuario.id !== ADMIN_UID ? 
+                                    `<button class="btn btn-danger btn-eliminar-usuario" data-id="${usuario.id}">
+                                        <i class="fas fa-trash"></i> Eliminar
+                                    </button>` : 
+                                    '<span class="btn btn-disabled">Administrador</span>'
+                                }
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                html += `</tbody></table>`;
+                cont.innerHTML = html;
+                
+                // Agregar eventos a botones de eliminar
+                document.querySelectorAll('.btn-eliminar-usuario').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const userId = btn.dataset.id;
+                        if (confirm('¿Eliminar este usuario? Esta acción no se puede deshacer.')) {
+                            try {
+                                // Eliminar de Firestore
+                                await db.collection('users').doc(userId).delete();
+                                
+                                // Eliminar de Authentication
+                                await auth.deleteUser(userId);
+                                
+                                showNotification('Usuario eliminado', 'success');
+                                cargarUsuarios();
+                            } catch (error) {
+                                showNotification('Error eliminando usuario: ' + error.message, 'error');
+                            }
+                        }
+                    });
+                });
+                
+            } catch (error) {
+                showNotification('Error cargando usuarios: ' + error.message, 'error');
+                cont.innerHTML = '<p>Error al cargar usuarios</p>';
+            }
+        }
+        
+        // ======================
         // NAVEGACIÓN Y UI
         // ======================
+        // Alternar menú
         function toggleMenu() {
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('show');
         }
         
+        // Mostrar sección
         function showSection(id) {
             document.querySelectorAll('.seccion').forEach(sec => sec.classList.remove('active'));
             document.querySelectorAll('.sidebar button').forEach(btn => btn.classList.remove('active'));
@@ -2045,17 +3165,29 @@
             const btn = document.querySelector(`.sidebar button[data-seccion="${id}"]`);
             if (btn) btn.classList.add('active');
             
+            // Ocultar ficha individual
             document.getElementById('fichaIndividual').style.display = 'none';
             
+            // Ocultar menú en móviles
             if (window.innerWidth < 768) {
                 document.getElementById('sidebar').classList.remove('show');
             }
             
+            // Cargar datos específicos de la sección
+            if (id === 'admin') cargarUsuarios();
+            if (id === 'arbol') renderArbolGenealogico();
+            if (id === 'estadisticas') renderEstadisticas();
+            if (id === 'reproduccion') {
+                loadReproduccionAnimals();
+                loadReproduccionHistorial();
+            }
             if (id === 'sanidad') {
-                loadSanidadAnimals();
+                loadAnimalsForSanidad();
+                loadTratamientosHistorial();
             }
         }
         
+        // Cerrar ficha
         function closeAnimalCard() {
             document.getElementById('fichaIndividual').style.display = 'none';
         }
@@ -2064,38 +3196,51 @@
         // INICIALIZACIÓN DE LA APP
         // ======================
         function initApp() {
+            // Cargar operaciones pendientes
             loadPendingWrites();
             
+            // Configurar event listeners
             document.getElementById('menuHamburguesa').addEventListener('click', toggleMenu);
             document.querySelector('.cerrarFicha').addEventListener('click', closeAnimalCard);
             document.getElementById('formRegistro').addEventListener('submit', (e) => {
                 e.preventDefault();
                 saveAnimal();
             });
-            
+            document.getElementById('formReproduccion').addEventListener('submit', (e) => {
+                e.preventDefault();
+                saveReproduccion();
+            });
             document.getElementById('formSanidad').addEventListener('submit', (e) => {
                 e.preventDefault();
-                saveTratamientoSanidad();
+                saveTratamiento();
+            });
+            document.getElementById('btnExportar').addEventListener('click', exportToExcel);
+            document.getElementById('admin-register-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                crearUsuarioAdmin();
             });
             
-            document.getElementById('btnExportar').addEventListener('click', exportToExcel);
-            
+            // Delegación de eventos para navegación
             document.querySelectorAll('.sidebar button[data-seccion]').forEach(btn => {
                 btn.addEventListener('click', () => {
                     showSection(btn.dataset.seccion);
                 });
             });
             
+            // Evento de búsqueda
             document.getElementById('busqueda').addEventListener('input', searchAnimals);
             
+            // Cargar datos iniciales
             loadAllAnimals().then(() => {
                 renderAnimalList();
                 loadAnimalsForSelects();
-                loadSanidadAnimals();
+                loadAnimalsForSanidad();
+                renderEstadisticas();
             });
             showSection('registro');
         }
         
+        // Búsqueda de animales
         function searchAnimals() {
             const searchTerm = document.getElementById('busqueda').value.toLowerCase();
             const rows = document.querySelectorAll('#tablaAnimales tr');
@@ -2116,6 +3261,7 @@
             });
         }
         
+        // Exportar a Excel
         async function exportToExcel() {
             try {
                 const user = auth.currentUser;
@@ -2126,6 +3272,7 @@
                     return;
                 }
                 
+                // Preparar datos
                 const data = animalesData.map(animal => ({
                     'ID': animal.id,
                     'Arete': animal.arete || '',
@@ -2141,124 +3288,18 @@
                     'Observaciones': animal.observaciones || ''
                 }));
                 
+                // Crear libro Excel
                 const wb = XLSX.utils.book_new();
                 const ws = XLSX.utils.json_to_sheet(data);
                 XLSX.utils.book_append_sheet(wb, ws, 'Animales');
                 
+                // Descargar archivo
                 XLSX.writeFile(wb, 'ganado.xlsx');
                 showNotification('Datos exportados a Excel', 'success');
                 
             } catch (error) {
                 showNotification('Error exportando datos: ' + error.message, 'error');
             }
-        }
-        
-        // ======================
-        // MÓDULO DE SANIDAD
-        // ======================
-        async function saveTratamientoSanidad() {
-            const user = auth.currentUser;
-            if (!user) {
-                showNotification('Debe iniciar sesión', 'error');
-                return;
-            }
-            
-            const animalId = document.getElementById('animalSanidad').value;
-            const fecha = document.getElementById('fechaSanidad').value;
-            const tipo = document.getElementById('tipoTratamiento').value.trim();
-            const detalles = document.getElementById('detallesSanidad').value.trim();
-            
-            if (!animalId || !fecha || !tipo) {
-                showNotification('Seleccione un animal, fecha y tipo de tratamiento', 'error');
-                return;
-            }
-            
-            const tratamientoData = {
-                animalId: animalId,
-                fecha: fecha,
-                tipo: tipo,
-                detalles: detalles,
-                lastLocalUpdate: new Date().toISOString(),
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            };
-            
-            try {
-                if (isOnline) {
-                    await db.collection('users').doc(user.uid).collection('tratamientos').add(tratamientoData);
-                    showNotification('Tratamiento registrado', 'success');
-                } else {
-                    tratamientoData.pendingSync = true;
-                    tratamientoData.offlineId = 'tratamiento_' + Date.now();
-                    addPendingWrite('saveTratamiento', tratamientoData);
-                    showNotification('Tratamiento guardado localmente. Se sincronizará cuando recuperes conexión', 'offline');
-                }
-                
-                document.getElementById('formSanidad').reset();
-                loadTratamientosHistorial();
-            } catch (error) {
-                showNotification('Error guardando tratamiento: ' + error.message, 'error');
-            }
-        }
-        
-        async function loadTratamientosHistorial() {
-            const cont = document.getElementById('historialSanidad');
-            cont.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Cargando historial...</p>';
-            
-            try {
-                const user = auth.currentUser;
-                if (!user) return;
-                
-                const localTratamientos = getLocalData(`tratamientos_${user.uid}`);
-                if (localTratamientos) {
-                    renderTratamientosHistorial(localTratamientos, cont);
-                    return;
-                }
-                
-                const snapshot = await db.collection('users').doc(user.uid).collection('tratamientos')
-                    .orderBy('createdAt', 'desc')
-                    .get();
-                    
-                const tratamientosData = snapshot.docs.map(doc => {
-                    return {
-                        id: doc.id,
-                        ...doc.data()
-                    };
-                });
-                
-                saveLocalData(`tratamientos_${user.uid}`, tratamientosData);
-                renderTratamientosHistorial(tratamientosData, cont);
-                
-            } catch (error) {
-                showNotification('Error cargando historial: ' + error.message, 'error');
-                cont.innerHTML = '<p>Error al cargar historial</p>';
-            }
-        }
-        
-        function renderTratamientosHistorial(tratamientosData, cont) {
-            if (tratamientosData.length === 0) {
-                cont.innerHTML = '<p>No hay tratamientos registrados</p>';
-                return;
-            }
-            
-            let html = '';
-            tratamientosData.forEach(tratamiento => {
-                const animal = animalesData.find(a => a.id === tratamiento.animalId) || {};
-                const fecha = tratamiento.fecha || (tratamiento.createdAt?.toDate 
-                    ? tratamiento.createdAt.toDate().toLocaleDateString() 
-                    : 'N/A');
-                
-                html += `
-                    <div class="alerta-card">
-                        <h4>
-                            <span>${animal.nombre || 'Animal desconocido'} (${tratamiento.tipo})</span>
-                            <span class="fecha">${fecha}</span>
-                        </h4>
-                        <p><strong>Detalles:</strong> ${tratamiento.detalles}</p>
-                    </div>
-                `;
-            });
-            
-            cont.innerHTML = html;
         }
     </script>
 </body>
