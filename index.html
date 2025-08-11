@@ -15,7 +15,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <style>
-        /* Estilos CSS completos */
+        /* Estilos CSS completos (iguales al original) */
         :root {
             --primary: #2c3e50;
             --secondary: #3498db;
@@ -1650,15 +1650,9 @@
         const db = firebase.firestore();
 
         // Habilitar persistencia de datos para funcionamiento offline
-        db.enablePersistence()
+        db.enablePersistence({ synchronizeTabs: true })
             .catch((err) => {
-                if (err.code === 'failed-precondition') {
-                    console.warn("Persistencia fallida: Múltiples pestañas abiertas");
-                } else if (err.code === 'unimplemented') {
-                    console.warn("Persistencia no soportada en este navegador");
-                } else {
-                    console.error("Error al habilitar persistencia: ", err);
-                }
+                console.error("Error al habilitar persistencia: ", err);
             });
 
         // UID del administrador
@@ -1686,8 +1680,51 @@
         let isOnline = navigator.onLine;
         let pendingWrites = []; // Operaciones pendientes para cuando se recupere la conexión
 
+        // Función para actualizar estado de conexión
+        function updateConnectionStatus(connected) {
+            isOnline = connected;
+            
+            if (connected) {
+                statusDot.classList.add('connected');
+                statusDot.classList.remove('disconnected', 'offline');
+                statusText.textContent = 'Conectado';
+                offlineIndicator.style.display = 'none';
+                
+                // Ocultar alertas offline
+                offlineRegistroAlert.style.display = 'none';
+                offlineListaAlert.style.display = 'none';
+                offlineSanidadAlert.style.display = 'none';
+                
+                // Intentar sincronizar operaciones pendientes
+                syncPendingWrites();
+            } else {
+                statusDot.classList.add('disconnected');
+                statusDot.classList.remove('connected', 'offline');
+                statusText.textContent = 'Sin conexión';
+                offlineIndicator.style.display = 'flex';
+                
+                // Mostrar alertas offline en secciones activas
+                if (document.getElementById('registro').classList.contains('active')) {
+                    offlineRegistroAlert.style.display = 'block';
+                }
+                if (document.getElementById('lista').classList.contains('active')) {
+                    offlineListaAlert.style.display = 'block';
+                }
+                if (document.getElementById('sanidad').classList.contains('active')) {
+                    offlineSanidadAlert.style.display = 'block';
+                }
+                
+                showNotification('Se perdió la conexión. Trabajando en modo offline', 'offline');
+            }
+        }
+
+        // Monitorear estado de conexión
+        window.addEventListener('online', () => updateConnectionStatus(true));
+        window.addEventListener('offline', () => updateConnectionStatus(false));
+        updateConnectionStatus(navigator.onLine);
+
         // ======================
-        // MANEJO OFFLINE
+        // FUNCIONALIDAD OFFLINE MEJORADA
         // ======================
         
         // Guardar datos localmente para acceso offline
@@ -1701,7 +1738,7 @@
             return data ? JSON.parse(data) : null;
         }
         
-        // Sincronizar operaciones pendientes
+        // Sincronizar operaciones pendientes - VERSIÓN MEJORADA
         async function syncPendingWrites() {
             if (pendingWrites.length === 0 || !isOnline) return;
             
@@ -1747,6 +1784,7 @@
                         // Eliminar operación pendiente
                         pendingWrites.splice(i, 1);
                         i--; // Ajustar índice después de eliminar
+                        
                     } else if (operation.type === 'deleteAnimal') {
                         // Eliminar animal del servidor
                         await db.collection('users').doc(user.uid)
@@ -1755,11 +1793,30 @@
                         // Eliminar operación pendiente
                         pendingWrites.splice(i, 1);
                         i--; // Ajustar índice después de eliminar
+                    } else if (operation.type === 'saveTratamiento') {
+                        // Guardar tratamiento en el servidor
+                        await db.collection('users').doc(user.uid)
+                            .collection('tratamientos').add(operation.data);
+                        
+                        // Eliminar operación pendiente
+                        pendingWrites.splice(i, 1);
+                        i--;
                     }
                 }
                 
                 // Guardar operaciones pendientes actualizadas
                 localStorage.setItem('pendingWrites', JSON.stringify(pendingWrites));
+                
+                // Recargar todos los datos después de sincronizar
+                await loadAllAnimals();
+                await loadTratamientosHistorial();
+                await loadReproduccionHistorial();
+                
+                // Actualizar UI
+                renderAnimalList();
+                loadAnimalsForSelects();
+                loadAnimalsForSanidad();
+                renderEstadisticas();
                 
                 if (pendingWrites.length === 0) {
                     showNotification('Datos sincronizados correctamente', 'success');
@@ -1767,20 +1824,19 @@
                     showNotification('Algunos datos pendientes requieren atención', 'warning');
                 }
                 
-                // Actualizar datos locales
-                await loadAllAnimals();
-                renderAnimalList();
-                loadAnimalsForSelects();
-                loadAnimalsForSanidad();
-                
             } catch (error) {
+                console.error("Error sincronizando:", error);
                 showNotification('Error sincronizando datos: ' + error.message, 'error');
             }
         }
         
         // Guardar operación pendiente para sincronización posterior
         function addPendingWrite(type, data) {
-            pendingWrites.push({ type, data });
+            pendingWrites.push({ 
+                type, 
+                data,
+                timestamp: new Date().toISOString()
+            });
             localStorage.setItem('pendingWrites', JSON.stringify(pendingWrites));
         }
         
@@ -1789,11 +1845,22 @@
             const savedWrites = localStorage.getItem('pendingWrites');
             if (savedWrites) {
                 pendingWrites = JSON.parse(savedWrites);
+                
+                // Filtrar operaciones muy antiguas (más de 30 días)
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                
+                pendingWrites = pendingWrites.filter(op => {
+                    const opDate = new Date(op.timestamp);
+                    return opDate > thirtyDaysAgo;
+                });
+                
+                localStorage.setItem('pendingWrites', JSON.stringify(pendingWrites));
             }
         }
 
         // ======================
-        // RESOLUCIÓN DE CONFLICTOS
+        // RESOLUCIÓN DE CONFLICTOS MEJORADA
         // ======================
         
         // Mostrar resolución de conflictos
@@ -2080,49 +2147,6 @@
                 document.body.removeChild(notification);
             };
         }
-        
-        // Función para actualizar estado de conexión
-        function updateConnectionStatus(connected) {
-            isOnline = connected;
-            
-            if (connected) {
-                statusDot.classList.add('connected');
-                statusDot.classList.remove('disconnected', 'offline');
-                statusText.textContent = 'Conectado';
-                offlineIndicator.style.display = 'none';
-                
-                // Ocultar alertas offline
-                offlineRegistroAlert.style.display = 'none';
-                offlineListaAlert.style.display = 'none';
-                offlineSanidadAlert.style.display = 'none';
-                
-                // Intentar sincronizar operaciones pendientes
-                syncPendingWrites();
-            } else {
-                statusDot.classList.add('disconnected');
-                statusDot.classList.remove('connected', 'offline');
-                statusText.textContent = 'Sin conexión';
-                offlineIndicator.style.display = 'flex';
-                
-                // Mostrar alertas offline en secciones activas
-                if (document.getElementById('registro').classList.contains('active')) {
-                    offlineRegistroAlert.style.display = 'block';
-                }
-                if (document.getElementById('lista').classList.contains('active')) {
-                    offlineListaAlert.style.display = 'block';
-                }
-                if (document.getElementById('sanidad').classList.contains('active')) {
-                    offlineSanidadAlert.style.display = 'block';
-                }
-                
-                showNotification('Se perdió la conexión. Trabajando en modo offline', 'offline');
-            }
-        }
-
-        // Monitorear estado de conexión
-        window.addEventListener('online', () => updateConnectionStatus(true));
-        window.addEventListener('offline', () => updateConnectionStatus(false));
-        updateConnectionStatus(navigator.onLine);
         
         // Función para cargar todos los animales
         async function loadAllAnimals() {
@@ -2552,7 +2576,7 @@
         }
         
         // ======================
-        // MÓDULO DE SANIDAD
+        // MÓDULO DE SANIDAD MEJORADO
         // ======================
         async function saveTratamiento() {
             const user = auth.currentUser;
@@ -2583,22 +2607,29 @@
                 fecha: fecha,
                 tipo: tipo,
                 detalles: detalles,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 lastLocalUpdate: new Date().toISOString()
             };
             
             try {
                 if (isOnline) {
-                    await db.collection('users').doc(user.uid).collection('tratamientos').add(tratamientoData);
+                    // Guardar directamente en Firestore
+                    await db.collection('users').doc(user.uid).collection('tratamientos').add({
+                        ...tratamientoData,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
                     showNotification('Tratamiento registrado', 'success');
                 } else {
-                    // Modo offline: guardar localmente
+                    // Modo offline: guardar localmente y agregar a pendientes
                     tratamientoData.pendingSync = true;
                     tratamientoData.offlineId = 'tratamiento-' + Date.now();
                     
                     // Agregar a datos locales
+                    if (!tratamientosData) tratamientosData = [];
                     tratamientosData.push(tratamientoData);
                     saveLocalData(`tratamientos_${user.uid}`, tratamientosData);
+                    
+                    // Agregar operación pendiente
+                    addPendingWrite('saveTratamiento', tratamientoData);
                     
                     showNotification('Tratamiento guardado localmente', 'offline');
                 }
@@ -2627,6 +2658,8 @@
                     const localTratamientos = getLocalData(`tratamientos_${user.uid}`);
                     if (localTratamientos) {
                         tratamientosData = localTratamientos;
+                    } else {
+                        tratamientosData = [];
                     }
                 } else {
                     // Cargar desde Firestore
@@ -2635,9 +2668,12 @@
                         .get();
                     
                     tratamientosData = snapshot.docs.map(doc => {
+                        const data = doc.data();
                         return {
                             id: doc.id,
-                            ...doc.data()
+                            ...data,
+                            // Para compatibilidad con datos offline
+                            createdAt: data.createdAt ? data.createdAt.toDate() : new Date()
                         };
                     });
                     
@@ -2652,11 +2688,16 @@
                 
                 let html = '';
                 tratamientosData.forEach(tratamiento => {
-                    const fecha = new Date(tratamiento.createdAt?.seconds * 1000 || tratamiento.createdAt).toLocaleDateString();
+                    const fecha = tratamiento.createdAt?.toLocaleDateString?.() || 
+                                 new Date(tratamiento.createdAt?.seconds * 1000 || tratamiento.createdAt).toLocaleDateString();
+                    
+                    const offlineBadge = tratamiento.pendingSync ? 
+                        '<span class="offline-badge">(offline)</span>' : '';
+                    
                     html += `
                         <div class="alerta-card">
                             <h4>
-                                <span>${tratamiento.animalNombre} - ${tratamiento.tipo}</span>
+                                <span>${tratamiento.animalNombre} - ${tratamiento.tipo} ${offlineBadge}</span>
                                 <span class="fecha">${fecha}</span>
                             </h4>
                             <p><strong>Detalles:</strong> ${tratamiento.detalles}</p>
@@ -2667,11 +2708,12 @@
                 cont.innerHTML = html;
                 
             } catch (error) {
+                console.error("Error cargando tratamientos:", error);
                 showNotification('Error cargando tratamientos: ' + error.message, 'error');
                 cont.innerHTML = '<p>Error al cargar tratamientos</p>';
             }
         }
-        
+
         // ======================
         // MÓDULO DE REPRODUCCIÓN
         // ======================
@@ -2791,9 +2833,11 @@
                     .get();
                     
                 reproduccionData = snapshot.docs.map(doc => {
+                    const data = doc.data();
                     return {
                         id: doc.id,
-                        ...doc.data()
+                        ...data,
+                        createdAt: data.createdAt.toDate()
                     };
                 });
                 
@@ -2804,7 +2848,7 @@
                 
                 let html = '';
                 reproduccionData.forEach(reg => {
-                    const fecha = new Date(reg.createdAt.seconds * 1000).toLocaleDateString();
+                    const fecha = reg.createdAt.toLocaleDateString();
                     html += `
                         <div class="reproduccion-card">
                             <h4>
@@ -3286,7 +3330,7 @@
         }
         
         // ======================
-        // INICIALIZACIÓN DE LA APP
+        // INICIALIZACIÓN MEJORADA
         // ======================
         function initApp() {
             // Cargar operaciones pendientes
@@ -3329,7 +3373,21 @@
                 loadAnimalsForSelects();
                 loadAnimalsForSanidad();
                 renderEstadisticas();
+                renderArbolGenealogico();
             });
+            
+            // Cargar tratamientos
+            loadTratamientosHistorial();
+            
+            // Cargar reproducción
+            loadReproduccionAnimals();
+            loadReproduccionHistorial();
+            
+            // Si hay conexión, sincronizar operaciones pendientes
+            if (isOnline) {
+                setTimeout(syncPendingWrites, 3000); // Dar tiempo a que cargue la UI
+            }
+            
             showSection('registro');
         }
         
