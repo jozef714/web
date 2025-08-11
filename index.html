@@ -15,7 +15,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
     <style>
-        /* Estilos CSS completos (iguales al original) */
+        /* Estilos CSS completos */
         :root {
             --primary: #2c3e50;
             --secondary: #3498db;
@@ -1686,51 +1686,8 @@
         let isOnline = navigator.onLine;
         let pendingWrites = []; // Operaciones pendientes para cuando se recupere la conexión
 
-        // Función para actualizar estado de conexión
-        function updateConnectionStatus(connected) {
-            isOnline = connected;
-            
-            if (connected) {
-                statusDot.classList.add('connected');
-                statusDot.classList.remove('disconnected', 'offline');
-                statusText.textContent = 'Conectado';
-                offlineIndicator.style.display = 'none';
-                
-                // Ocultar alertas offline
-                offlineRegistroAlert.style.display = 'none';
-                offlineListaAlert.style.display = 'none';
-                offlineSanidadAlert.style.display = 'none';
-                
-                // Intentar sincronizar operaciones pendientes
-                syncPendingWrites();
-            } else {
-                statusDot.classList.add('disconnected');
-                statusDot.classList.remove('connected', 'offline');
-                statusText.textContent = 'Sin conexión';
-                offlineIndicator.style.display = 'flex';
-                
-                // Mostrar alertas offline en secciones activas
-                if (document.getElementById('registro').classList.contains('active')) {
-                    offlineRegistroAlert.style.display = 'block';
-                }
-                if (document.getElementById('lista').classList.contains('active')) {
-                    offlineListaAlert.style.display = 'block';
-                }
-                if (document.getElementById('sanidad').classList.contains('active')) {
-                    offlineSanidadAlert.style.display = 'block';
-                }
-                
-                showNotification('Se perdió la conexión. Trabajando en modo offline', 'offline');
-            }
-        }
-
-        // Monitorear estado de conexión
-        window.addEventListener('online', () => updateConnectionStatus(true));
-        window.addEventListener('offline', () => updateConnectionStatus(false));
-        updateConnectionStatus(navigator.onLine);
-
         // ======================
-        // FUNCIONALIDAD OFFLINE MEJORADA
+        // MANEJO OFFLINE
         // ======================
         
         // Guardar datos localmente para acceso offline
@@ -2123,6 +2080,49 @@
                 document.body.removeChild(notification);
             };
         }
+        
+        // Función para actualizar estado de conexión
+        function updateConnectionStatus(connected) {
+            isOnline = connected;
+            
+            if (connected) {
+                statusDot.classList.add('connected');
+                statusDot.classList.remove('disconnected', 'offline');
+                statusText.textContent = 'Conectado';
+                offlineIndicator.style.display = 'none';
+                
+                // Ocultar alertas offline
+                offlineRegistroAlert.style.display = 'none';
+                offlineListaAlert.style.display = 'none';
+                offlineSanidadAlert.style.display = 'none';
+                
+                // Intentar sincronizar operaciones pendientes
+                syncPendingWrites();
+            } else {
+                statusDot.classList.add('disconnected');
+                statusDot.classList.remove('connected', 'offline');
+                statusText.textContent = 'Sin conexión';
+                offlineIndicator.style.display = 'flex';
+                
+                // Mostrar alertas offline en secciones activas
+                if (document.getElementById('registro').classList.contains('active')) {
+                    offlineRegistroAlert.style.display = 'block';
+                }
+                if (document.getElementById('lista').classList.contains('active')) {
+                    offlineListaAlert.style.display = 'block';
+                }
+                if (document.getElementById('sanidad').classList.contains('active')) {
+                    offlineSanidadAlert.style.display = 'block';
+                }
+                
+                showNotification('Se perdió la conexión. Trabajando en modo offline', 'offline');
+            }
+        }
+
+        // Monitorear estado de conexión
+        window.addEventListener('online', () => updateConnectionStatus(true));
+        window.addEventListener('offline', () => updateConnectionStatus(false));
+        updateConnectionStatus(navigator.onLine);
         
         // Función para cargar todos los animales
         async function loadAllAnimals() {
