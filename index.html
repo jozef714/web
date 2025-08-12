@@ -1686,6 +1686,7 @@
         let isOnline = navigator.onLine;
         let pendingWrites = []; 
         let syncInterval = null;
+        let unsubscribeAnimales = null; // Para desuscribir el listener
 
         // ======================
         // FUNCIONALIDAD OFFLINE MEJORADA
@@ -1705,7 +1706,8 @@
                 offlineListaAlert.style.display = 'none';
                 offlineSanidadAlert.style.display = 'none';
                 
-                // Iniciar sincronización
+                // Iniciar sincronización inmediata al recuperar conexión
+                syncPendingWrites();
                 startSyncInterval();
             } else {
                 statusDot.classList.add('disconnected');
@@ -2125,6 +2127,12 @@
                 document.getElementById('login-container').style.display = 'flex';
                 document.getElementById('main-app').style.display = 'none';
                 
+                // Desuscribir listener de animales
+                if (unsubscribeAnimales) {
+                    unsubscribeAnimales();
+                    unsubscribeAnimales = null;
+                }
+                
                 // Detener sincronización
                 if (syncInterval) {
                     clearInterval(syncInterval);
@@ -2161,36 +2169,84 @@
             };
         }
         
-        // Función para cargar todos los animales
-        async function loadAllAnimals() {
-            try {
-                const user = auth.currentUser;
-                if (!user) return [];
-                
-                // Primero intentar cargar desde caché local
+        // Función para configurar la escucha en tiempo real de animales
+        function setupAnimalesRealtime() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            // Primero cargar desde localStorage para mostrar datos rápidamente
+            const localAnimals = getLocalData(`animales_${user.uid}`);
+            if (localAnimals) {
+                animalesData = localAnimals;
+                renderAnimalList();
+                loadAnimalsForSelects();
+                loadAnimalsForSanidad();
+                renderEstadisticas();
+            }
+
+            const animalesRef = db.collection('users').doc(user.uid).collection('animales');
+
+            // Desuscribir cualquier listener anterior
+            if (unsubscribeAnimales) {
+                unsubscribeAnimales();
+            }
+
+            unsubscribeAnimales = animalesRef.onSnapshot(snapshot => {
+                let hasChanges = false;
+                snapshot.docChanges().forEach(change => {
+                    const animalData = change.doc.data();
+                    const animalId = change.doc.id;
+
+                    if (change.type === 'added' || change.type === 'modified') {
+                        // Asegurarse de que el animal tenga un id
+                        animalData.id = animalId;
+                        
+                        // Buscar si ya existe en animalesData
+                        const index = animalesData.findIndex(a => a.id === animalId);
+                        if (index !== -1) {
+                            // Actualizar
+                            animalesData[index] = animalData;
+                        } else {
+                            // Agregar
+                            animalesData.push(animalData);
+                        }
+                        hasChanges = true;
+                    } else if (change.type === 'removed') {
+                        // Eliminar
+                        const index = animalesData.findIndex(a => a.id === animalId);
+                        if (index !== -1) {
+                            animalesData.splice(index, 1);
+                            hasChanges = true;
+                        }
+                    }
+                });
+
+                if (hasChanges) {
+                    // Guardar en localStorage para offline
+                    saveLocalData(`animales_${user.uid}`, animalesData);
+
+                    // Actualizar la UI
+                    renderAnimalList();
+                    loadAnimalsForSelects();
+                    loadAnimalsForSanidad();
+                    renderEstadisticas();
+                }
+            }, error => {
+                console.error("Error en snapshot animales: ", error);
+                // En caso de error, intentar cargar desde localStorage
                 const localAnimals = getLocalData(`animales_${user.uid}`);
                 if (localAnimals) {
                     animalesData = localAnimals;
-                    return animalesData;
+                    renderAnimalList();
+                    loadAnimalsForSelects();
+                    loadAnimalsForSanidad();
+                    renderEstadisticas();
                 }
-                
-                const snapshot = await db.collection('users').doc(user.uid).collection('animales').get();
-                animalesData = snapshot.docs.map(doc => doc.data());
-                
-                // Guardar en caché local para acceso offline
-                saveLocalData(`animales_${user.uid}`, animalesData);
-                
-                return animalesData;
-            } catch (error) {
-                showNotification('Error cargando animales: ' + error.message, 'error');
-                return [];
-            }
+            });
         }
-        
+
         // Función para cargar animales en los selectores
         async function loadAnimalsForSelects() {
-            await loadAllAnimals();
-            
             // Cargar selector de padre (solo machos adultos)
             const selectPadre = document.getElementById('padre');
             selectPadre.innerHTML = '<option value="">Seleccionar padre</option>';
@@ -2220,10 +2276,6 @@
         async function loadAnimalsForSanidad() {
             const select = document.getElementById('animalSanidad');
             select.innerHTML = '<option value="">Seleccione un animal</option>';
-            
-            if (animalesData.length === 0) {
-                await loadAllAnimals();
-            }
             
             animalesData.forEach(animal => {
                 const option = document.createElement('option');
@@ -2335,25 +2387,27 @@
                     // Agregar a operaciones pendientes
                     addPendingWrite('saveAnimal', animalData);
                     showNotification('Animal guardado localmente. Se sincronizará cuando recuperes conexión', 'offline');
+                    
+                    // Actualizar datos locales
+                    const index = animalesData.findIndex(a => a.id === animalData.id);
+                    if (index !== -1) {
+                        animalesData[index] = animalData;
+                    } else {
+                        animalesData.push(animalData);
+                    }
+                    
+                    // Guardar en caché local
+                    saveLocalData(`animales_${user.uid}`, animalesData);
+                    
+                    // Actualizar UI
+                    renderAnimalList();
                 }
-                
-                // Actualizar datos locales
-                const index = animalesData.findIndex(a => a.id === animalData.id);
-                if (index !== -1) {
-                    animalesData[index] = animalData;
-                } else {
-                    animalesData.push(animalData);
-                }
-                
-                // Guardar en caché local
-                saveLocalData(`animales_${user.uid}`, animalesData);
                 
                 // Limpiar formulario
                 document.getElementById('formRegistro').reset();
                 document.getElementById('id').value = '';
                 
                 // Actualizar UI
-                renderAnimalList();
                 loadAnimalsForSelects();
                 loadAnimalsForSanidad();
                 
@@ -2719,6 +2773,9 @@
             // Cargar operaciones pendientes
             loadPendingWrites();
             
+            // Configurar escucha en tiempo real de animales
+            setupAnimalesRealtime();
+            
             // Configurar event listeners
             document.getElementById('menuHamburguesa').addEventListener('click', toggleMenu);
             document.querySelector('.cerrarFicha').addEventListener('click', closeAnimalCard);
@@ -2750,13 +2807,6 @@
             // Evento de búsqueda
             document.getElementById('busqueda').addEventListener('input', searchAnimals);
             
-            // Cargar datos iniciales
-            loadAllAnimals().then(() => {
-                renderAnimalList();
-                loadAnimalsForSelects();
-                loadAnimalsForSanidad();
-                renderEstadisticas();
-            });
             showSection('registro');
             
             // Iniciar sincronización
