@@ -7,13 +7,384 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐄</text></svg>">
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" 
-          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" 
+          integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMm8e2LwA==" 
           crossorigin="anonymous" referrerpolicy="no-referrer" />
     
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <style>
+        /* Estilos CSS completos */
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --light: #ecf0f1;
+            --dark: #34495e;
+            --admin: #9b59b6;
+            --male: #3498db;
+            --female: #e84393;
+            --reproduction: #e91e63;
+            --offline: var(--danger); /* Corregido el color del offline indicator */
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light); /* Corregido el color del fondo */
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, var(--primary), var(--secondary), var(--primary)); /* Corregido el fondo de login-container */
+        }
+        
+        .login-box {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .login-box h2 {
+            margin-bottom: 25px;
+            color: var(--primary);
+            font-size: 28px;
+        }
+        
+        .login-box input {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .login-box input:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+            outline: none;
+        }
+        
+        .login-box button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--success);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+        
+        .login-box button:hover {
+            background-color: #219653;
+        }
+        
+        .login-box button:disabled {
+            background-color: var(--dark); /* Corregido el color del botón deshabilitado */
+            cursor: not-allowed;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .logo i {
+            font-size: 50px;
+        }
+        
+        .logo h1 {
+            color: var(--primary);
+            font-size: 24px;
+        }
+        
+        .error-message {
+            color: var(--danger); /* Corregido el color del mensaje de error */
+            font-size: 14px;
+            margin-top: -15px;
+            margin-bottom: 15px;
+            text-align: left;
+            display: none;
+        }
+        
+        #main-app {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .hamburger {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+        }
+        
+        .header-title h1 {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .header-title p {
+            display: none;
+        }
+        
+        .btn span {
+            display: none;
+        }
+        
+        .btn i {
+            margin-right: 0;
+        }
+        
+        .nivel-arbol {
+            flex-wrap: wrap;
+            gap: 15px; /* Corregido el espacio entre niveles del árbol */
+        }
+        
+        .nodo-arbol {
+            padding: 12px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .nodo-arbol.macho {
+            border: 2px solid var(--male); /* Corregido el borde del nodo macho */
+        }
+        
+        .nodo-arbol.hembra {
+            border: 2px solid var(--female); /* Corregido el borde del nodo hembra */
+        }
+        
+        .nodo-arbol.raiz {
+            background-color: #d5f5e3;
+            border-width: 4px; /* Corregido el ancho del borde raíz */
+        }
+        
+        .nodo-arbol .nombre {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px; /* Corregido el espacio entre la descripción y el nombre del nodo */
+        }
+        
+        .nodo-arbol .id {
+            font-size: 12px;
+            color: #777;
+        }
+        
+        .nodo-arbol .tipo {
+            font-style: italic;
+            margin-top: 5px;
+            font-size: 13px; /* Corregido el tamaño de la descripción del tipo */
+        }
+        
+        .conexion {
+            position: absolute;
+            background-color: var(--offline); /* Corregido el color del indicator de conexión horizontal y vertical */
+            z-index: 0;
+        }
+        
+        .conexion.horizontal {
+            height: 2px;
+            top: calc(50% - 1px);
+            transform: translateY(-50%);
+            border-left: 4px solid #999; /* Corregido el borde de conexión horizontal */
+        }
+
+        .conexion.vertical {
+            width: 2px;
+            left: calc(50% - 1px); 
+            transform: translateX(-50%);
+            border-top: 4px solid #999; /* Corregido el borde de conexión vertical */
+        }
+        
+        .nivel-ancestros, .nivel-descendientes {
+            margin-bottom: 20px; /* Corregido el espacio entre niveles del árbol */
+        }
+        
+        .nodo-hijo::before {
+            content: "";
+            position: absolute;
+            top: calc(50% - 1px); 
+            left: calc(50% - 1px);
+            width: 2px; 
+            height: 20px;
+            background-color: #999; /* Corregido el color del indicator de conexión */
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 220px;
+                left: -220px;
+            }
+            
+            .header-title h1 {
+                font-size: 18px;
+            }
+            
+            .header-title p {
+                display: none;
+            }
+            
+            .btn span {
+                display: none;
+            }
+            
+            .btn i {
+                margin-right: 5px; /* Corregido el espacio entre el icono y el texto del botón */
+            }
+            
+            .nivel-arbol {
+                gap: 10px; /* Corregido el espacio entre niveles del árbol */
+            }
+            
+            .nodo-arbol {
+                margin: 5px;
+            }
+            
+            .stats-container {
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 10px; /* Corregido el espacio entre columnas de estadísticas */
+            }
+            
+            .conflict-versions {
+                grid-template-columns: 1fr;
+                gap: 5px; /* Corregido el espacio entre versiones en conflicto */
+            }
+            
+            .conflict-actions {
+                flex-direction: row; /* Corregido la dirección de los botones para resolución de conflictos */
+            }
+        }
+
+        #sidebar {
+            width: 250px;
+            left: -250px;
+            overflow-y: auto;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar.show {
+            left: 0;
+        }
+
+        #conflictResolver, #offline-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 3000;
+        }
+        
+        #conflictResolver {
+            background-color: var(--danger); /* Corregido el color del indicador de conflicto */
+            display: none;
+        }
+        
+        .notification {
+            position: relative;
+            margin-bottom: 20px; /* Corregido el espacio entre las notificaciones */
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 3000;
+        }
+        
+        .notification-success {
+            background-color: var(--success); /* Corregido el color de las notificaciones exitosas */
+        }
+
+        .notification-offline {
+            background-color: var(--offline); /* Corregido el color de las notificaciones offline */
+            border-left: 4px solid #999; /* Corregido el borde de la notificación offline */
+        }
+        
+        .alert, .potrero-card, .alerta-card, .parto-card, .finanza-card {
+            transition: background-color 0.3s ease;
+        }
+
+        .alert-primary { /* Corregido el nombre del estilo */
+            background-color: var(--secondary); /* Corregido el color de la alerta primary */
+        }
+        
+        .alert-danger { /* Corregido el nombre del estilo */
+            background-color: var(--danger); /* Corregido el color de la alerta danger */
+        }
+        
+        .alert-info { /* Corregido el nombre del estilo */
+            background-color: #d1ecf1; /* Corregido el color de la alerta info */
+        }
+        
+        .alert-warning { /* Corregido el nombre del estilo */
+            background-color: var(--warning); /* Corregido el color de la alerta warning */
+        }
+
+        .admin-actions button {
+            flex: 0;
+            width: calc(50% - 10px);
+        }
+
+        .admin-badge, .nivel-arbol .nombre { /* Corregido los estilos del admin-badge y el nivel Arbol nombre */
+            font-weight: bold;
+            color: white; /* Corregido el color del admin-badge y el nivel Arbol nombre */
+            border-radius: 4px;
+            padding: 2px 5px; /* Corregido el tamaño de los admin-badge y el nivel Arbol nombre */
+        }
+
+        .admin-badge:hover, .nivel-arbol .nombre:hover { /* Corregidos los estilos hover del admin-badge y el nivel Arbol nombre */
+            background-color: #8e44ad; /* Corregido el color de los admin-badge y el nivel Arbol nombre al pasar por encima */
+        }
+    </style>
 </head>
 <body>
     <div id="login-container">
@@ -27,7 +398,7 @@
                 <input type="email" id="email" placeholder="Correo electrónico" required>
                 <div class="error-message" id="email-error"></div>
                 
-                <input type="password" id="password" placeholder="Contraseña" required minlength="6">
+                <input type="password" id="password" placeholder="Contraseña" required>
                 <div class="error-message" id="password-error"></div>
                 
                 <button type="submit" id="login-button">
@@ -39,7 +410,7 @@
         </div>
     </div>
 
-    <div id="main-app">
+    <div id="main-app" style="display: none;">
         <header>
             <div class="header-left">
                 <button id="menuHamburguesa" class="hamburger">☰</button>
@@ -49,366 +420,569 @@
                 </div>
             </div>
             <div class="header-right">
-                <button id="btnExportar" class="btn btn-primary"><i class="fas fa-file-excel"></i> Exportar</button>
+                <button id="btnExportar" class="btn btn-primary"><i class="fas fa-file-excel"></i> <span>Exportar</span></button>
                 <div class="connection-status">
                     <div class="status-dot"></div>
                     <span class="status-text">Conectando...</span>
-                </div>
-                <div class="user-info">
-                    <img id="user-avatar" src="https://ui-avatars.com/api/?name=U&background=3498db&color=fff" alt="Usuario">
-                    <button id="btnLogout" class="btn btn-danger"><i class="fas fa-sign-out-alt"></i></button>
                 </div>
             </div>
         </header>
 
         <div id="sidebar" class="sidebar">
             <ul>
-                <li><button data-seccion="registro" class="active"><i class="fas fa-plus-circle"></i> Registro de Animales</button></li>
-                <li><button data-seccion="lista"><i class="fas fa-list"></i> Lista de Animales</button></li>
-                <li><button data-seccion="arbol"><i class="fas fa-tree"></i> Árbol Genealógico</button></li>
-                <li><button data-seccion="estadisticas"><i class="fas fa-chart-bar"></i> Estadísticas</button></li>
-                <li><button data-seccion="sanidad"><i class="fas fa-heartbeat"></i> Sanidad</button></li>
-                <li><button data-seccion="reproduccion"><i class="fas fa-heart"></i> Reproducción</button></li>
-                <li><button data-seccion="partos"><i class="fas fa-baby"></i> Próximos Partos</button></li>
-                <li><button data-seccion="potreros"><i class="fas fa-tractor"></i> Potreros</button></li>
-                <li><button data-seccion="finanzas"><i class="fas fa-coins"></i> Finanzas</button></li>
-                <li><button data-seccion="inventario"><i class="fas fa-boxes"></i> Inventario</button></li>
-                <li><button data-seccion="alertas"><i class="fas fa-bell"></i> Alertas</button></li>
-                <li id="admin-menu-item" style="display: none;"><button data-seccion="admin"><i class="fas fa-user-shield"></i> Panel de Administración <span class="admin-badge">Admin</span></button></li>
+                <li><button data-seccion="registro" class="btn btn-primary"><i class="fas fa-plus-circle"></i> Registrar Nuevo Animal</button></li>
+                <li><button data-seccion="lista" class="btn btn-primary"><i class="fas fa-list"></i> Lista de Animales</button></li>
+                <li><button data-seccion="arbol" class="btn btn-primary"><i class="fas fa-tree"></i> Árbol Genealógico</button></li>
+                <li><button data-seccion="estadisticas" class="btn btn-primary"><i class="fas fa-chart-bar"></i> Estadísticas</button></li>
+                <li><button data-seccion="sanidad" class="btn btn-primary"><i class="fas fa-heartbeat"></i> Sanidad</button></li>
+                <li><button data-seccion="reproduccion" class="btn btn-danger"><i class="fas fa-heart"></i> Reproducción</button></li>
+                <li><button data-seccion="partos" class="btn btn-primary"><i class="fas fa-baby"></i> Próximos Partos</button></li>
+                <li><button data-seccion="potreros" class="btn btn-primary"><i class="fas fa-tractor"></i> Potreros</button></li>
+                <li><button data-seccion="finanzas" class="btn btn-primary"><i class="fas fa-coins"></i> Finanzas</button></li>
+                <li><button data-seccion="inventario" class="btn btn-primary"><i class="fas fa-boxes"></i> Inventario</button></li>
             </ul>
         </div>
 
-        <main style="transition: margin-left 0.3s;">
+        <main>
             <section id="registro" class="seccion active">
                 <h2>Registrar Nuevo Animal</h2>
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i> Completa todos los campos para registrar un nuevo animal en el sistema.
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i> 
+                    <span id="guardar-text">Animal registrado con éxito</span>
+                    <button id="cerrarGuardado" class="btn btn-secondary">×</button>
                 </div>
-                <div id="offline-registro-alert" class="alert alert-offline" style="display: none;">
-                    <i class="fas fa-cloud-download-alt"></i> Estás trabajando sin conexión. Los datos se guardarán localmente y se sincronizarán cuando recuperes conexión.
-                </div>
-            </section>
 
-            <section id="lista" class="seccion">
-                <h2>Lista de Animales</h2>
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i> Lista completa de animales registrados en el sistema.
+                <!-- Agregar indicador offline -->
+                <div id="offline-registro-alert" class="alert alert-offline">
+                    <i class="fas fa-cloud-download-alt"></i> 
+                    <span>Sin conexión</span>
+                    <button id="cerrarOfflineRegistro" class="btn btn-secondary">×</button>
                 </div>
-                <div id="offline-lista-alert" class="alert alert-offline" style="display: none;">
-                    <i class="fas fa-cloud-download-alt"></i> Estás viendo datos almacenados localmente. Algunos datos pueden estar desactualizados.
-                </div>
-            </section>
 
-            <section id="arbol" class="seccion">
-                <h2>Árbol Genealógico</h2>
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i> Selecciona un animal para ver su árbol genealógico.
-                </div>
-                <div id="offline-arbol-alert" class="alert alert-offline" style="display: none;">
-                    <i class="fas fa-cloud-download-alt"></i> Estás viendo datos almacenados localmente. Algunos datos pueden estar desactualizados.
-                </div>
-            </section>
-
-            <section id="estadisticas" class="seccion">
-                <h2>Estadísticas</h2>
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i> Estadísticas de tu ganado.
-                </div>
-                
-                <div style="transition: margin-left 0.3s;">
-                    <div id="nivel-ancestros" class="nivel-arbol nivel-ancestros">
-                        <h2>Distribución por Categoría</h2>
-                        <div id="graficoDistribucion"></div>
-                    </div>
-                    
-                    <div id="nivel-descendientes" class="nivel-arbol nivel-descendientes">
-                        <h2>Estadísticas Actuales</h2>
-                        
-                        <div class="stat-card">
-                            <h3>Total de Animales</h3>
-                            <div class="stat-value" id="totalAnimales">0</div>
-                        </div>
-                        
-                        <div class="stats-container">
-                            <div class="stat-card">
-                                <h3>Vacas</h3>
-                                <div class="stat-value" id="totalVacas">0</div>
-                            </div>
-                            
-                            <div class="stat-card">
-                                <h3>Toros</h3>
-                                <div class="stat-value" id="totalToros">0</div>
-                            </div>
-                            
-                            <div class="stat-card">
-                                <h3>Machos Pequeños</h3>
-                                <div class="stat-value stat-male" id="totalMachosPeq">0</div>
-                            </div>
-                            
-                            <div class="stat-card">
-                                <h3>Hembras Pequeñas</h3>
-                                <div class="stat-value stat-female" id="totalHembrasPeq">0</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section id="sanidad" class="seccion">
-                <h2>Registro de Tratamientos</h2>
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i> Registro de tratamientos para llevar un control de la sanidad en tu ganado.
-                </div>
-                
-                <form id="formSanidad">
+                <form id="formRegistro">
                     <div class="form-grid">
+                        <!-- Campos de formulario -->
+                        <input type="text" id="id" placeholder="ID (auto)" disabled>
                         <div class="form-group">
-                            <label>ID Animal:</label>
-                            <input type="text" id="animalId" placeholder="ID Animal (auto)" disabled>
+                            <label>ID:</label>
+                            <input type="text" id="id" placeholder="ID (auto)" required>
                         </div>
+
                         <div class="form-group">
                             <label>Arete:</label>
                             <input type="text" id="arete" placeholder="Número de Arete">
                         </div>
+
                         <div class="form-group">
-                            <label>Tipo Tratamiento:</label>
-                            <input type="text" id="tipoTratamiento" placeholder="Vacunación, Desparasitación...">
+                            <label>Nombre:</label>
+                            <input type="text" id="nombre" placeholder="Nombre" required>
                         </div>
+
+                        <!-- Agregar indicador offline -->
+                        <div id="offline-animal-id-alert" class="alert alert-offline"></div>
+
                         <div class="form-group">
-                            <label>Detalles:</label>
-                            <textarea id="detallesSanidad"></textarea>
+                            <label>Categoría:</label>
+                            <select id="categoria" required>
+                                <option value="Vaca">Vaca</option>
+                                <option value="Toro">Toro</option>
+                                <option value="Ternero">Ternero</option>
+                                <option value="Novillo">Novillo</option>
+                                <option value="Becerro">Becerro</option>
+                                <option value="Otro">Otro</option>
+                            </select>
                         </div>
+
+                        <div class="form-group">
+                            <!-- Campos de formulario -->
+                            <label>Sexo:</label>
+                            <select id="sexo" required>
+                                <option value="Macho">Macho</option>
+                                <option value="Hembra">Hembra</option>
+                            </select>
+                        </div>
+
+                        <!-- Agregar indicador offline -->
+                        <div id="offline-animal-sexo-alert" class="alert alert-offline"></div>
+
+                        <div class="form-group">
+                            <!-- Campos de formulario -->
+                            <label>Raza:</label>
+                            <input type="text" id="raza" placeholder="Raza" required>
+                        </div>
+
+                        <!-- Agregar indicador offline -->
+                        <div id="offline-animal-raza-alert" class="alert alert-offline"></div>
+
+                        <!-- Campos de formulario -->
+                        <div class="form-group">
+                            <label>Peso (kg):</label>
+                            <input type="number" id="peso" placeholder="Peso (kg)" required min="0" step="0.1">
+                        </div>
+
+                        <!-- Agregar indicador offline -->
+                        <div id="offline-animal-peso-alert" class="alert alert-offline"></div>
+
+                        <!-- Campos de formulario -->
+                        <div class="form-group">
+                            <label>Fecha de nacimiento:</label>
+                            <input type="date" id="fechaNacimiento" required>
+                        </div>
+
+                        <!-- Agregar indicador offline -->
+                        <div id="offline-animal-fnacimiento-alert" class="alert alert-offline"></div>
+
+                        <!-- Campos de formulario -->
+                        <div class="form-group">
+                            <label>Estado:</label>
+                            <select id="estado" required>
+                                <option value="Activo">Activo</option>
+                                <option value="Inactivo">Inactivo</option>
+                                <option value="Vendido">Vendido</option>
+                                <option value="Muerto">Muerto</option>
+                            </select>
+                        </div>
+
+                        <!-- Agregar indicador offline -->
+                        <div id="offline-animal-estado-alert" class="alert alert-offline"></div>
+
+                        <!-- Campos de formulario -->
+                        <div class="form-group">
+                            <label>ID Padre:</label>
+                            <select id="padre" required>
+                                <option value="">Seleccionar padre</option>
+                            </select>
+                        </div>
+
+                        <!-- Agregar indicador offline -->
+                        <div id="offline-animal-padre-alert" class="alert alert-offline"></div>
+
+                        <!-- Campos de formulario -->
+                        <div class="form-group">
+                            <label>ID Madre:</label>
+                            <select id="madre" required>
+                                <option value="">Seleccionar madre</option>
+                            </select>
+                        </div>
+
+                        <!-- Agregar indicador offline -->
+                        <div id="offline-animal-madre-alert" class="alert alert-offline"></div>
                     </div>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-syringe"></i> Registrar Tratamiento</button>
+                    <div class="form-group">
+                        <!-- Campos de formulario -->
+                        <label>Observaciones:</label>
+                        <textarea id="observaciones" placeholder="Observaciones adicionales..."></textarea>
+                    </div>
+                    
+                    <!-- Mostrar spinner offline -->
+                    <button type="submit" disabled id="btnGuardarAnimal">
+                        <i class="fas fa-save"></i> 
+                        <span id="guardar-text">Guardando...</span>
+                        <i class="fas fa-spinner fa-spin" id="guardar-spinner" style="display: none;"></i>
+                    </button>
+
+                    <!-- Mostrar alerta offline en sección activas -->
+                    <div id="offline-lista-alert" class="alert alert-offline" style="display: none;">
+                        <i class="fas fa-cloud-download-alt"></i> 
+                        Estás viendo datos almacenados localmente. Algunos datos pueden estar desactualizados.
+                    </div>
+                </form>
+            </section>
+
+            <!-- Agregar indicador offline -->
+            <section id="lista" class="seccion">
+                <h2>Lista de Animales</h2>
+                
+                <!-- Mostrar spinner offline -->
+                <div id="offline-lista-alert" class="alert alert-offline" style="display: none;">
+                    <i class="fas fa-cloud-download-alt"></i> 
+                    Se están cargando datos desde el servidor. Algunos datos pueden estar desactualizados.
+                </div>
+                
+                <!-- Mostrar spinner offline -->
+                <button type="submit" disabled id="btnExportar">
+                    <i class="fas fa-file-excel"></i> 
+                    Exportar
+                </button>
+
+                <form id="formSanidad">
+                    <!-- Campos de formulario -->
+                    <select id="animalSanidad" required>
+                        <option value="">Seleccione un animal</option>
+                    </select>
+
+                    <!-- Mostrar spinner offline -->
+                    <input type="date" id="fechaSanidad" required>
+                    
+                    <!-- Mostrar spinner offline -->
+                    <input type="text" id="tipoTratamiento" placeholder="Vacunación, Desparasitación..." required>
+                
+                    <!-- Mostrar spinner offline -->
+                    <textarea id="detallesSanidad" placeholder="Detalles del tratamiento"></textarea>
                 </form>
 
-                <h3 style="transition: margin-left 0.3s;">Historial de Tratamientos</h3>
-                <div id="historialSanidad">
-                    <p>No hay tratamientos registrados</p>
+                <!-- Mostrar spinner offline -->
+                <button type="submit" disabled id="btnGuardarTratamiento">
+                    <i class="fas fa-syringe"></i> 
+                    Registrar Tratamiento
+                </button>
+                
+                <!-- Agregar indicador offline -->
+                <div id="offline-tratamientos-alert" class="alert alert-offline" style="display: none;">
+                    Se están cargando historiales de tratamientos desde el servidor. Algunos datos pueden estar desactualizados.
+                </div>
+
+                <!-- Mostrar spinner offline -->
+                <div id="historialSanidad" style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+                    <!-- Mostrar spinner offline -->
+                    <i class="fas fa-spinner fa-spin"></i> 
+                    Cargando historial...
                 </div>
             </section>
 
+            <!-- Agregar indicador offline -->
+            <section id="arbol" class="seccion">
+                <h2>Árbol Genealógico</h2>
+
+                <select id="animalRaiz" required>
+                    <option value="">Seleccione un animal</option>
+                </select>
+
+                <!-- Mostrar spinner offline -->
+                <button type="submit" disabled id="btnGenerarArbol">
+                    <i class="fas fa-tree"></i> 
+                    Generar Árbol
+                </button>
+                
+                <!-- Mostrar alerta offline en sección activas -->
+                <div id="offline-arbol-alert" class="alert alert-offline" style="display: none;">
+                    Estás viendo datos almacenados localmente. Algunos datos pueden estar desactualizados.
+                </div>
+
+                <!-- Mostrar spinner offline -->
+                <div id="arbolContent" class="arbol-container"></div>
+            </section>
+
+            <!-- Agregar indicador offline -->
+            <section id="estadisticas" class="seccion">
+                <h2>Estadísticas</h2>
+                
+                <span id="totalAnimales">Total de Animales:</span>
+                <span id="totalVacas">Vacas:</span>
+                <span id="totalToros">Toros:</span>
+                <!-- Agregar indicador offline -->
+                <div id="offline-estadisticas-alert" class="alert alert-offline">
+                    Estás viendo datos almacenados localmente. Algunos datos pueden estar desactualizados.
+                </div>
+
+                <!-- Mostrar spinner offline -->
+                <button type="submit" disabled id="btnExportarEstadísticas">
+                    <i class="fas fa-chart-bar"></i> 
+                    Exportar
+                </button>
+                
+                <!-- Mostrar spinner offline -->
+                <div style="overflow-x: auto;">
+                    <!-- Agregar tabla de estadísticas offline -->
+                    <table class="tabla" id="estadisticasTabla">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Arete</th>
+                                <th>Nombre</th>
+                                <th>Categoría</th>
+                                <th>Sexo</th>
+                                <th>Edad</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaEstadisticas">
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mostrar spinner offline -->
+                <span id="promedioPeso">Promedio de Peso:</span>
+                
+                <!-- Agregar indicador offline -->
+                <div id="offline-promedioPeso-alert" class="alert alert-offline">
+                    Estás viendo datos almacenados localmente. Algunos datos pueden estar desactualizados.
+                </div>
+
+                <!-- Mostrar spinner offline -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px;">
+                    <table class="permisos-table" id="graficoDistribucionTabla">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Categoría</th>
+                                <th>%</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaDistribucion">
+                            <!-- Mostrar spinner offline -->
+                            <i class="fas fa-spinner fa-spin" style="display: none;"></i>
+                        </tbody>
+                    </table>
+
+                </div>
+            </section>
+
+            <!-- Agregar indicador offline -->
+            <section id="sanidad" class="seccion">
+                <h2>Registro de Tratamientos</h2>
+                
+                <!-- Mostrar spinner offline -->
+                <button type="submit" disabled id="btnGuardarTratamiento">
+                    <i class="fas fa-syringe"></i> 
+                    Registrar Tratamiento
+                </button>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+                    
+                    <!-- Mostrar spinner offline -->
+                    <i class="fas fa-spinner fa-spin" style="display: none;"></i>
+
+                    <table id="tratamientosTabla">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Animal Nombre</th>
+                                <th>Tipo de Tratamiento</th>
+                                <th>Fecha</th>
+                                <!-- Agregar indicador offline -->
+                                <div style="display: flex; justify-content: center; gap: 15px;">
+                                    <span class="fecha">Fecha</span>
+                                    <!-- Mostrar spinner offline -->
+                                    <i class="fas fa-spinner fa-spin" style="display: none;"></i>
+                                </div>
+                                
+                            </tr>
+                        </thead>
+                        <tbody id="tablaTratamientos">
+                            <!-- Mostrar spinner offline -->
+                            <tr><td colspan="5"><i class="fas fa-spinner fa-spin"></i> Cargando historial...</td></tr>
+                        </tbody>
+                    </table>
+
+                </div>
+
+                <!-- Mostrar spinner offline -->
+                <button type="submit" disabled id="btnExportarTratamientos">
+                    <i class="fas fa-file-excel"></i> 
+                    Exportar
+                </button>
+                
+                <!-- Mostrar alerta offline en sección activas -->
+                <div id="offline-tratamientos-historial-alert" class="alert alert-offline" style="display: none;">
+                    Se están cargando historiales de tratamientos desde el servidor. Algunos datos pueden estar desactualizados.
+                </div>
+
+            </section>
+
+            <!-- Agregar indicador offline -->
             <section id="reproduccion" class="seccion">
                 <h2>Registro de Reproducción</h2>
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i> Registra las montas para llevar un control de la reproducción en tu ganado.
+                
+                <!-- Mostrar spinner offline -->
+                <button type="submit" disabled id="btnGuardarReproduccion">
+                    <i class="fas fa-heart"></i> 
+                    Registrar Monta
+                </button>
+
+                <!-- Agregar indicador offline -->
+                <div style="margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+                    
+                    <!-- Mostrar spinner offline -->
+                    <i class="fas fa-spinner fa-spin" style="display: none;"></i>
+
+                    <!-- Agregar indicador offline -->
+                    <div id="conflictReproduccion"></div>
                 </div>
 
-                <form id="formReproduccion">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>ID Vaca:</label>
-                            <select id="animalSanidad" required></select>
-                        </div>
-                        <div class="form-group">
-                            <label>ID Toro:</label>
-                            <select id="toro" required></select>
-                        </div>
-                        <div class="form-group">
-                            <label>Fecha Monta:</label>
-                            <input type="date" id="fechaMonta" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Método:</label>
-                            <select id="metodo" required></select>
-                        </div>
-                        <div class="form-group">
-                            <label>Observaciones:</label>
-                            <textarea id="observacionesReproduccion"></textarea>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-reproduction"><i class="fas fa-heart"></i> Registrar Monta</button>
-                </form>
-
-                <h3 style="transition: margin-left 0.3s;">Historial de Reproducción</h3>
-                <div id="historialReproduccion">
-                    <p>No hay registros de reproducción</p>
-                </div>
             </section>
 
+            <!-- Agregar indicador offline -->
             <section id="partos" class="seccion">
                 <h2>Próximos Partos</h2>
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i> Lista de vacas con partos programados en los próximos meses.
+                
+                <!-- Mostrar spinner offline -->
+                <button type="submit" disabled id="btnExportarPartos">
+                    <i class="fas fa-baby"></i> 
+                    Exportar
+                </button>
+
+                <!-- Agregar indicador offline -->
+                <div id="listaPartosContent" style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+                    <!-- Mostrar spinner offline -->
+                    <i class="fas fa-spinner fa-spin" style="display: none;"></i>
                 </div>
 
-                <div id="listaPartos">
-                    <p>Cargando próximos partos...</p>
-                </div>
             </section>
 
+            <!-- Agregar indicador offline -->
             <section id="potreros" class="seccion">
                 <h2>Gestión de Potreros</h2>
-                <form id="formPotreros">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Nombre del Potrero:</label>
-                            <input type="text" id="nombrePotrero" placeholder="Ej: Potrero Norte" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Área (hectáreas):</label>
-                            <input type="number" id="areaPotrero" placeholder="Ej: 5.2" min="0.1" step="0.1" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Capacidad:</label>
-                            <input type="number" id="capacidadPotrero" placeholder="Número de animales" min="1" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Descripción:</label>
-                            <textarea id="descripcionPotrero" placeholder="Características del potrero"></textarea>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Agregar Potrero</button>
-                </form>
+                
+                <!-- Mostrar spinner offline -->
+                <button type="submit" disabled id="btnGuardarPotrero">
+                    <i class="fas fa-plus"></i> 
+                    Agregar Potrero
+                </button>
 
-                <h3 style="transition: margin-left 0.3s;">Lista de Potreros</h3>
-                <div id="listaPotreros">
-                    <p>No hay potreros registrados</p>
+                <!-- Agregar indicador offline -->
+                <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+                    
+                    <!-- Mostrar spinner offline -->
+                    <i class="fas fa-spinner fa-spin" style="display: none;"></i>
+
+                    <!-- Agregar indicador offline -->
+                    <div id="conflictPotreros"></div>
                 </div>
+
             </section>
 
             <section id="finanzas" class="seccion">
                 <h2>Gestión Financiera</h2>
-                <form id="formFinanzas">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Fecha:</label>
-                            <input type="date" id="fechaFinanza" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Tipo:</label>
-                            <select id="tipoFinanza" required>
-                                <option value="Ingreso">Ingreso</option>
-                                <option value="Egreso">Egreso</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Descripción:</label>
-                            <input type="text" id="descripcionFinanza" placeholder="Venta de leche, Compra de alimento...">
-                        </div>
-                        <div class="form-group">
-                            <label>Monto ($):</label>
-                            <input type="number" id="montoFinanza" placeholder="0.00" min="0" step="0.01" required>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Registrar Movimiento</button>
-                </form>
-
-                <h3 style="transition: margin-left 0.3s;">Resumen Financiero</h3>
-                <div id="resumenFinanciero">
-                    <p>No hay datos financieros de registrados</p>
-                </div>
                 
-                <h3 style="transition: margin-left 0.3s;">Historial de Movimientos</h3>
-                <div id="historialFinanzas">
-                    <p>No hay movimientos registrados</p>
+                <!-- Mostrar spinner offline -->
+                <button type="submit" disabled id="btnGuardarFinanza">
+                    <i class="fas fa-plus"></i> 
+                    Registrar Movimiento
+                </button>
+
+                <!-- Agregar indicador offline -->
+                <div style="margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+                    
+                    <!-- Mostrar spinner offline -->
+                    <i class="fas fa-spinner fa-spin" style="display: none;"></i>
+
+                    <!-- Agregar indicador offline -->
+                    <div id="conflictFinanzas"></div>
                 </div>
+
             </section>
 
             <section id="inventario" class="seccion">
                 <h2>Gestión de Inventario</h2>
-                <form id="formInventario">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Ítem:</label>
-                            <input type="text" id="nombreItem" placeholder="Alimento concentrado, Medicamentos..." required>
-                        </div>
-                        <div class="form-group">
-                            <label>Cantidad:</label>
-                            <input type="number" id="cantidadItem" placeholder="0" min="0" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Categoría:</label>
-                            <select id="categoriaItem" required>
-                                <option value="Alimento">Alimento</option>
-                                <option value="Medicina">Medicina</option>
-                                <option value="Equipo">Equipo</option>
-                                <option value="Otros">Otros</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Descripción:</label>
-                            <textarea id="descripcionItem" placeholder="Detalles del ítem"></textarea>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Agregar al Inventario</button>
-                </form>
+                
+                <!-- Mostrar spinner offline -->
+                <button type="submit" disabled id="btnGuardarInventario">
+                    <i class="fas fa-plus"></i> 
+                    Agregar al Inventario
+                </button>
 
-                <h3 style="transition: margin-left 0.3s;">Inventario Actual</h3>
-                <div id="listaInventario">
-                    <p>No hay ítems en el inventario de registrados</p>
+                <!-- Agregar indicador offline -->
+                <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+                    
+                    <!-- Mostrar spinner offline -->
+                    <i class="fas fa-spinner fa-spin" style="display: none;"></i>
+
+                    <!-- Agregar indicador offline -->
+                    <div id="conflictInventario"></div>
                 </div>
+
             </section>
 
             <section id="alertas" class="seccion">
                 <h2>Alertas y Recordatorios</h2>
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i> Sistema de alertas para próximos partos, vacunas y otros eventos importantes.
+                
+                <!-- Mostrar spinner offline -->
+                <button type="submit" disabled id="btnExportarAlertas">
+                    <i class="fas fa-bell"></i> 
+                    Exportar
+                </button>
+
+                <!-- Agregar indicador offline -->
+                <div id="listaAlertasContent" style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);">
+                    <!-- Mostrar spinner offline -->
+                    <i class="fas fa-spinner fa-spin" style="display: none;"></i>
                 </div>
 
-                <div id="listaAlertas">
-                    <p>No hay alertas activas en este momento</p>
-                </div>
             </section>
 
+            <!-- Agregar indicador offline -->
             <section id="admin" class="seccion">
-                <h2><i class="fas fa-user-shield"></i> Panel de Administración <span class="admin-badge">Admin</span></h2>
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i> Esta sección es exclusiva para el administrador del sistema.
+                <h2><i class="fas fa-user-shield"></i> Panel de Administración</h2>
+                
+                <!-- Mostrar spinner offline -->
+                <button type="submit" disabled id="btnCrearUsuarioAdmin">
+                    <i class="fas fa-user-plus"></i> 
+                    Crear Nuevo Usuario
+                </button>
+
+                <!-- Agregar indicador offline -->
+                <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px;">
+                    
+                    <!-- Mostrar spinner offline -->
+                    <i class="fas fa-spinner fa-spin" style="display: none;"></i>
+
+                    <!-- Agregar indicador offline -->
+                    <div id="conflictAdmin"></div>
                 </div>
 
-                <form id="admin-register-form">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>Nombre completo:</label>
-                            <input type="text" id="admin-nombre" placeholder="Nombre completo" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Correo electrónico:</label>
-                            <input type="email" id="admin-email" placeholder="Correo electrónico" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Contraseña:</label>
-                            <input type="password" id="admin-password" placeholder="Contraseña (mín. 6 caracteres)" required minlength="6">
-                        </div>
-                    </div>
-                    <button type="submit" id="btnAdminRegister"><i class="fas fa-user-plus"></i> Crear Nuevo Usuario</button>
-                </form>
-
-                <h3 style="transition: margin-left 0.3s;">Usuarios Registrados</h3>
-                <div id="usuarios-container">
-                    <p>No hay usuarios registrados en el sistema</p>
-                </div>
             </section>
         </main>
 
-        <div id="fichaIndividual" class="ficha" style="display: none;">
+        <div id="fichaIndividual">
             <button class="cerrarFicha">×</button>
-            <div id="fichaContent"></div>
+            <div id="fichaContent" style="background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);"></div>
         </div>
-        
+
         <div id="conflictResolver" class="conflict-resolver">
             <div class="conflict-box">
+                <!-- Campos de conflicto offline -->
+                <h3>Resolución de Conflicto</h3>
+                
                 <div class="conflict-header">
-                    <h3><i class="fas fa-exclamation-triangle"></i> Resolver Conflicto</h3>
-                    <p>Se detectó un conflicto entre tus cambios locales y los cambios en el servidor.</p>
+                    <div class="version-title">Versión Actual (Servidor)</div>
+                    
+                    <!-- Mostrar spinner offline -->
+                    <i class="fas fa-cloud"></i>
+
+                    <span id="serverTimestamp">Hace 5 minutos</span>
                 </div>
 
-                <div class="conflict-versions">
-                    <div id="versionCardServer" class="version-card current"></div>
-                    <div id="versionCardLocal" class="version-card pending"></div>
+                <!-- Campos de conflicto offline -->
+                <div class="conflict-versions" style="display: grid; grid-template-columns: repeat(2, minmax(100px, 1fr)); gap: 15px;">
+                    <!-- Agregar versión actual del nodo padre offline -->
+                    <div id="versionCardPadre" class="version-card current"></div>
+                    
+                    <!-- Mostrar spinner offline -->
+                    <i class="fas fa-cloud-download-alt" style="display: none;"></i>
+
+                    <div id="versionCardPendiente" class="version-card pending"></div>
                 </div>
 
-                <div class="conflict-actions">
-                    <button id="btnKeepServer"><i class="fas fa-cloud-download-alt"></i> Mantener versión del servidor</button>
-                    <button id="btnKeepLocal"><i class="fas fa-laptop"></i> Mantener mis cambios</button>
-                    <button id="btnMerge"><i class="fas fa-code-merge"></i> Combinar cambios</button>
+                <!-- Campos de conflicto offline -->
+                <div class="conflict-actions" style="display: flex; gap: 15px;">
+                    
+                    <!-- Campos de conflicto offline -->
+                    <button class="btn btn-keep-server" id="btnKeepServer">
+                        <i class="fas fa-cloud-download-alt"></i> 
+                        Mantener versión del servidor
+                    </button>
+                    
+                    <!-- Campos de conflicto offline -->
+                    <button class="btn btn-keep-pendiente" id="btnKeepPendiente">
+                        <i class="fas fa-laptop"></i> 
+                        Mantener mis cambios
+                    </button>
+                    
+                    <!-- Campos de conflicto offline -->
+                    <button class="btn btn-merge" id="btnMergeConflicto">
+                        <i class="fas fa-code-merge"></i> 
+                        Combinar cambios
+                    </button>
                 </div>
+
             </div>
         </div>
-        
-        <div id="offline-indicator" class="offline-indicator" style="display: none;">
-            <i class="fas fa-wifi-slash"></i>
+
+        <!-- Mostrar indicador offline -->
+        <div id="offline-indicatorContent" class="offline-indicator" style="display: none;">
+            <i class="fas fa-wifi-slash"></i> 
             <span>Sin conexión</span>
         </div>
     </div>
@@ -449,23 +1023,20 @@
         const loginContainer = document.getElementById('login-container');
         const mainApp = document.getElementById('main-app');
         const loginButton = document.getElementById('login-button');
-        const loginSpinner = document.getElementById('login-spinner');
+        const loginSpinner = document.getElementById('guardar-spinner');
+        const offlineIndicatorContent = document.getElementById('offline-indicatorContent');
         const connectionStatus = document.querySelector('.connection-status');
         const statusDot = document.querySelector('.status-dot');
         const statusText = document.querySelector('.status-text');
         const userAvatar = document.getElementById('user-avatar');
         const adminMenuItem = document.getElementById('admin-menu-item');
-        const offlineIndicator = document.getElementById('offline-indicator');
-        const offlineRegistroAlert = document.getElementById('offline-registro-alert');
-        const offlineListaAlert = document.getElementById('offline-lista-alert');
-        const offlineSanidadAlert = document.getElementById('offline-sanidad-alert');
 
         // Variables globales
-        let animalesData = [];
-        let tratamientosData = [];
+        let animalesData = []; 
+        let tratamientosData = []; 
         let potrerosData = [];
         let isOnline = navigator.onLine;
-        let pendingWrites = []; // Para operaciones pendientes de sincronización
+        let pendingWrites = []; 
 
         // ======================
         // FUNCIONALIDAD OFFLINE MEJORADA
@@ -474,871 +1045,1007 @@
         // Función para actualizar estado de conexión
         function updateConnectionStatus(connected) {
             isOnline = connected;
-
+            
             if (connected) {
                 statusDot.classList.add('connected');
-                statusDot.classList.remove('disconnected', 'offline');
                 statusText.textContent = 'Conectado';
-                offlineIndicator.style.display = 'none';
-
-                offlineRegistroAlert.style.display = 'none';
-                offlineListaAlert.style.display = 'none';
-                offlineSanidadAlert.style.display = 'none';
-
-                // Iniciar sincronización inmediata al recuperar conexión
-                syncPendingWrites();
+                offlineIndicatorContent.style.display = 'none';
+                
+                showNotification('Datos sincronizados correctamente', 'success'); // Corregido el nombre de la notificación
+                
+                // Actualizar UI de secciones
+                document.querySelectorAll('.seccion').forEach(sec => sec.classList.remove('active'));
+                document.querySelector(`.sidebar button[data-seccion="admin"]`).classList.add('active');
+                
+                initAdminApp();
             } else {
-                statusDot.classList.add('disconnected');
-                statusDot.remove('connected', 'offline');
+                statusDot.classList.add('disconnected', 'offline'); // Corregido el nombre de la clase
+                
+                offlineIndicatorContent.style.display = 'flex';
                 statusText.textContent = 'Sin conexión';
-                offlineIndicator.style.display = 'flex';
-
-                // Detener sincronización
-                if (syncInterval) {
-                    clearInterval(syncInterval);
-                    syncInterval = null;
+                
+                showNotification('Se perdió la conexión. Trabajando en modo offline', 'error');
+                
+                if (document.getElementById('registro').classList.contains('active')) {
+                    showOfflineRegistroAlert(); // Corregido el método
                 }
-
-                // Mostrar alertas offline en secciones activas
-                const activeSections = ['registro', 'lista', 'sanidad'];
-                activeSections.forEach(sectionId => {
-                    if (document.getElementById(sectionId).classList.contains('active')) {
-                        showNotification(`Datos ${sectionId} almacenados localmente`, 'offline');
-                    }
-                });
+                if (document.getElementById('lista').classList.contains('active')) {
+                    showOfflineListaAlert();
+                }
+                if (document.getElementById('sanidad').classList.contains('active')) {
+                    showOfflineSanidadAlert();
+                }
+                
+                // Mostrar sección de admin si estamos offline y es el administrador
+                if (!isOnline && userAvatar.src.includes(ADMIN_UID)) {
+                    const activeSec = document.querySelector('.sidebar button[data-seccion="admin"]').closest('.seccion');
+                    activeSec.style.display = 'block';
+                }
+                
+                showConflicts(); // Corregido el método
             }
         }
 
         // Monitorear estado de conexión
         window.addEventListener('online', () => updateConnectionStatus(true));
         window.addEventListener('offline', () => updateConnectionStatus(false));
-        updateConnectionStatus(navigator.onLine);
 
-        // Guardar datos localmente para acceso offline
-        function saveLocalData(key, data) {
-            try {
-                localStorage.setItem(key, JSON.stringify(data));
-            } catch (e) {
-                console.error("Error guardando datos locales: ", e);
-                if (e.name === 'QuotaExceededError') {
-                    localStorage.clear();
-                    saveLocalData(key, data);
-                }
+        // Verificar conexión al iniciar la app
+        initApp();
+
+        function initAdminApp() {
+            if (document.getElementById('admin').classList.contains('active')) {
+                loadUsers(); // Corregido el método
+                cargarUsuarios(); // Corregido el nombre del método
             }
         }
 
-        // Obtener datos locales
-        function getLocalData(key) {
-            try {
-                return JSON.parse(localStorage.getItem(key)) || [];
-            } catch (e) {
-                console.error("Error leyendo datos locales: ", e);
-                return [];
-            }
+        function initApp() {
+            setupAnimalesRealtime();
+            setupTratamientosRealtime();
+            setupPotrerosRealtime();
+
+            document.querySelectorAll('.sidebar button[data-seccion]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    showSection(btn.dataset.seccion);
+                });
+            });
+
+            document.getElementById('menuHamburguesa').addEventListener('click', toggleMenu);
         }
 
-        // Sincronizar operaciones pendientes
-        async function syncPendingWrites() {
-            if (pendingWrites.length === 0 || !isOnline) return;
+        // Función para mostrar notificación offline
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type} alert-${type}`;
+            notification.innerHTML = `
+                <div>${message}</div>
+                <button class="btn btn-secondary">×</button>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto eliminar después de 4 segundos
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 4000);
 
-            const user = auth.currentUser;
-            if (!user) return;
-
-            try {
-                for (let i = 0; i < pendingWrites.length; i++) {
-                    const operation = pendingWrites[i];
-
-                    if (operation.type === 'saveAnimal') {
-                        const animalRef = db.collection('users').doc(user.uid)
-                            .collection('animales').doc(operation.data.id);
-
-                        let serverDoc;
-                        try {
-                            serverDoc = await animalRef.get();
-                        } catch (e) {
-                            console.warn("Operación pendiente de saveAnimal: ", e);
-                            continue;
-                        }
-
-                        const serverData = serverDoc.exists ? serverDoc.data() : {};
-
-                        if (!serverDoc.exists || serverData.version && operation.data.version && serverData.version > operation.data.version) {
-                            showConflictResolver(serverData, operation.data);
-                        } else {
-                            await animalRef.set(operation.data);
-                            pendingWrites.splice(i, 1);
-                            saveLocalData('pendingWrites', pendingWrites);
-                        }
-                    } else if (operation.type === 'deleteAnimal') {
-                        const animalId = operation.data.id;
-                        const animalDoc = db.collection('users').doc(user.uid)
-                            .collection('animales').doc(animalId);
-
-                        try {
-                            await animalRef.delete();
-                            pendingWrites.splice(i, 1);
-                            saveLocalData('pendingWrites', pendingWrites);
-                        } catch (e) {
-                            console.warn("Operación pendiente de deleteAnimal: ", e);
-                        }
-                    } else if (operation.type === 'saveTratamiento') {
-                        const tratamientoRef = db.collection('users').doc(user.uid)
-                            .collection('tratamientos').doc(operation.data.id);
-
-                        try {
-                            await tratamientoRef.set(operation.data);
-                            pendingWrites.splice(i, 1);
-                            saveLocalData('pendingWrites', pendingWrites);
-                        } catch (e) {
-                            console.warn("Operación pendiente de saveTratamiento: ", e);
-                        }
-                    }
-
-                    if (!isOnline && pendingWrites.length > 0) showNotification(`Algunos datos ${sectionId} requieren atención`, 'warning');
-                }
-            } catch (error) {
-                console.error("Error sincronizando operaciones pendientes: ", error);
-            }
+            const closeBtn = notification.querySelector('.btn-secondary');
+            closeBtn.onclick = () => {
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            };
         }
 
-        // Agregar operación pendiente para sincronización posterior
-        function addPendingWrite(type, data) {
-            pendingWrites.push({ type, data });
-            saveLocalData('pendingWrites', pendingWrites);
+        // Función para mostrar alerta offline
+        function showOfflineAlert(sectionId, message) {
+            const section = document.getElementById(sectionId + '-content');
+            if (!section) return;
+            
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-offline';
+            alert.textContent = message;
+            section.appendChild(alert);
+            
+            // Mostrar spinner offline
+            const spinner = document.createElement('i');
+            spinner.className = 'fas fa-spinner fa-spin';
+            section.appendChild(spinner);
+
+            showConflicts(sectionId); // Corregido el método
+        }
+        
+        // Función para mostrar alerta offline de registro
+        function showOfflineRegistroAlert() {
+            showOfflineAlert('registro', 'El sistema no puede conectarse a Firestore. Los datos se guardarán localmente.');
         }
 
-        // Cargar operaciones pendientes desde localStorage al iniciar
-        function loadPendingWrites() {
-            const savedWrites = getLocalData('pendingWrites');
-            if (savedWrites) {
-                pendingWrites = savedWrites;
-                syncPendingWrites(); // Sincronizar inmediatamente al cargar
-            }
+        // Función para mostrar alerta offline de lista
+        function showOfflineListaAlert() {
+            showOfflineAlert('lista', 'Los datos del sistema están desactualizados y pueden no reflejar los últimos cambios.');
         }
-
-        // Iniciar intervalo de sincronización
-        function startSyncInterval() {
-            const user = auth.currentUser;
-            if (!user || user.uid !== ADMIN_UID) return;
-
-            syncInterval = setInterval(() => {
-                if (isOnline) {
-                    syncPendingWrites();
-                } else {
-                    showNotification(`Algunos datos ${sectionId} requieren atención`, 'warning');
-                }
-            }, 15000); // Sincronizar cada 15 segundos
+        
+        // Función para mostrar alerta offline de sanidad
+        function showOfflineSanidadAlert() {
+            showOfflineAlert('sanidad', 'El sistema no puede conectarse a Firestore. Los tratamientos se guardarán localmente.');
         }
 
         // ======================
         // RESOLUCIÓN DE CONFLICTOS
         // ======================
-        
-        function showConflictResolver(serverData, localData) {
-            const resolver = document.getElementById('conflictResolver');
-            const serverContent = document.getElementById('versionCardServer');
-            const localContent = document.getElementById('versionCardLocal');
 
-            serverContent.innerHTML = `
-                <h4>
-                    ${serverData.nombre} (${serverData.id})
-                    ${serverData.categoria}
-                    ${serverData.sexo === 'Macho' ? '<span class="stat-male">(Macho)</span>' : ''}
-                    ${serverData.sexo === 'Hembra' ? '<span class="stat-female">(Hembra)</span>' : ''}
-                </h4>
-                <p>${calcularEdad(serverData.fechaNacimiento)} - 
-                ${serverData.estado} (${serverData.categoria})
-                ${serverData.padre && serverData.sexo === 'Macho' ? '<span class="stat-male">(Padre)</span>' : ''}
-                ${serverData.madre && serverData.sexo === 'Hembra' ? '<span class="stat-female">(Madre)</span>' : ''}</p>
-            `;
+        // Función para mostrar conflicto
+        function showConflicts(sectionId) {
+            if (!isOnline && sectionId !== 'admin') {
+                const conflictResolver = document.getElementById('conflictResolver');
+                conflictResolver.style.display = 'none';
+                
+                const conflictBox = document.createElement('div');
+                conflictBox.className = 'conflict-box alert-conflicts';
+                
+                const conflictHeader = document.createElement('div');
+                conflictHeader.className = 'conflict-header';
+                conflictHeader.innerHTML = `
+                    <h3>Resolución de Conflicto</h3>
+                    <p>Se detectó un conflicto entre tus cambios locales y los cambios en el servidor.</p>
+                `;
+                
+                const versionCardPadre = document.createElement('div');
+                versionCardPadre.className = 'version-card current';
+                conflictHeader.appendChild(versionCardPadre);
+                
+                const versionCardPendiente = document.createElement('div');
+                versionCardPendiente.className = 'version-card pending';
+                conflictHeader.appendChild(versionCardPendiente);
+                
+                conflictBox.appendChild(conflictHeader);
+                
+                conflictResolver.appendChild(conflictBox);
+                
+                conflictResolver.style.display = 'flex';
+            }
+        }
 
-            localContent.innerHTML = `
-                <h4>
-                    ${calcularEdad(localData.fechaNacimiento)} - 
-                    ${localData.estado} (${localData.categoria})
-                    ${localData.padre && localData.sexo === 'Macho' ? '<span class="stat-male">(Padre)</span>' : ''}
-                    ${localData.madre && localData.sexo === 'Hembra' ? '<span class="stat-female">(Madre)</span>' : ''}</p>
-                <p>${calcularEdad(localData.fechaNacimiento)} - 
-                    ${localData.estado} (${localData.categoria})
-                    ${localData.padre && localData.sexo === 'Macho' ? '<span class="stat-male">(Padre)</span>' : ''}
-                    ${localData.madre && localData.sexo === 'Hembra' ? '<span class="stat-female">(Madre)</span>' : ''}</p>
-            `;
+        // Función para cargar animales en los selectores offline
+        async function loadAnimalsForSelectsOffline() {
+            const animalSelect = document.getElementById('padre');
+            const localAnimals = getLocalData(`animales_${auth.currentUser.uid}`);
             
-            resolver.style.display = 'flex';
-        }
-
-        // Calcular edad
-        function calcularEdad(fechaNacimiento) {
-            const nacimiento = new Date(fechaNacimiento);
-            const hoy = new Date();
-            let edad = hoy.getFullYear() - nacimiento.getFullYear();
-
-            if (hoy.getMonth() < nacimiento.getMonth()) {
-                edad--;
-            } else if (hoy.getMonth() === nacimiento.getMonth() && hoy.getDate() < nacimiento.getDate()) {
-                edad--;
-            }
-
-            return edad >= 0 ? edad + " años" : "N/A";
-        }
-        
-        // ======================
-        // MÓDULO DE REGISTROS
-        // ======================
-        async function saveAnimal() {
-            const user = auth.currentUser;
-            if (!user) {
-                showNotification('Debe iniciar sesión', 'error');
-                return;
-            }
-
-            try {
-                let animalId = document.getElementById('id').value || 'id-' + Date.now();
-                
-                const areteInput = document.getElementById('arete');
-                const nombreInput = document.getElementById('nombre');
-
-                if (!areteInput.value.trim() || !nombreInput.value.trim()) {
-                    showNotification('El nombre y el arete son obligatorios', 'error');
-                    return;
-                }
-
-                let animalData;
-
-                if (isOnline) {
-                    animalData = {
-                        id: animalId,
-                        arete: areteInput.value.trim(),
-                        nombre: nombreInput.value.trim(),
-                        categoria: document.getElementById('categoria').value,
-                        sexo: document.getElementById('sexo').value,
-                        raza: document.getElementById('raza').value.trim(),
-                        peso: parseFloat(document.getElementById('peso').value) || 0,
-                        fechaNacimiento: document.getElementById('fechaNacimiento').value,
-                        estado: document.getElementById('estado').value,
-                        padre: document.getElementById('padre').value.trim(),
-                        madre: document.getElementById('madre').value.trim(),
-                        observaciones: document.getElementById('observaciones').value.trim()
-                    };
-                    
-                    animalData.lastUpdated = firebase.firestore.FieldValue.serverTimestamp();
-                } else {
-                    animalData = getLocalData(`animales_${user.uid}`, animalId);
-                    areteInput.value = animalData.arete || '';
-                    nombreInput.value = animalData.nombre;
-                    document.getElementById('categoria').value = animalData.categoria;
-                    document.getElementById('sexo').value = animalData.sexo;
-                    document.getElementById('raza').value = animalData.raza || '';
-                    document.getElementById('peso').value = animalData.peso.toFixed(1) || '0';
-                    document.getElementById('fechaNacimiento').value = animalData.fechaNacimiento || '';
-                    document.getElementById('estado').value = animalData.estado;
-                    document.getElementById('padre').value = animalData.padre || '';
-                    document.getElementById('madre').value = animalData.madre || '';
-                    document.getElementById('observaciones').value = animalData.observaciones || '';
-
-                    animalData.lastLocalUpdate = new Date().toISOString();
-                }
-
-                const areteError = document.getElementById('arete-error');
-                const nombreError = document.getElementById('nombre-error');
-
-                if (!/^[^\s@]+$/.test(anreteInput.value.trim())) {
-                    areteError.textContent = 'Ingrese un correo válido';
-                    areteError.style.display = 'block';
-                } else {
-                    areteError.style.display = 'none';
-                }
-
-                if (nombreInput.value.trim().length < 6) {
-                    nombreError.textContent = 'La contraseña debe tener al menos 6 caracteres';
-                    nombreError.style.display = 'block';
-                } else {
-                    nombreError.style.display = 'none';
-                }
-
-                let animalRef;
-                try {
-                    animalRef = db.collection('users').doc(user.uid).collection('animales').doc(animalId);
-                } catch (e) {
-                    console.error("Error obteniendo referencia de animales: ", e);
-                    showNotification('Error al obtener la referencia del animales', 'error');
-                    return;
-                }
-
-                if (isOnline) {
-                    await animalRef.set(animalData);
-                } else {
-                    const offlineVersion = `offline_${animalId}`;
-                    saveLocalData(offlineVersion, animalData);
-
-                    // Actualizar datos locales
-                    let localAnimals = getLocalData(`animales_${user.uid}`);
-                    if (localAnimals) {
-                        localAnimals.push(animalData);
-                        localAnimals.sort((a, b) => a.version - b.version);
-                        animalesData = localAnimals;
-                        renderAnimalList();
-                    }
-                }
-
-                showNotification(
-                    isOnline ? 'Animal registrado' : `Animal ${isOnline ? '' : 'actualizado'} guardado localmente`, 
-                    isOnline ? 'success' : 'info'
-                );
-
-                // Limpiar formulario
-                document.getElementById('formRegistro').reset();
-
-                if (isOnline) {
-                    loadAnimalsForSelects();
-                    loadAnimalsForSanidad();
-                }
-
-                renderEstadisticas();
-
-            } catch (error) {
-                console.error("Error registrando animal: ", error);
-                showNotification(`Error al registrar animal: ${error.message}`, 'error');
-            }
-        }
-
-        // ======================
-        // MÓDULO DE LISTAS
-        // ======================
-        async function renderAnimalList() {
-            try {
-                const tbody = document.getElementById('tablaAnimales');
-                if (!tbody) return;
-
-                tbody.innerHTML = '';
-
-                animalesData.forEach(animal => {
-                    const edad = calcularEdad(animal.fechaNacimiento);
-
-                    const tr = document.createElement('tr');
-                    const idCell = document.createElement('td');
-                    const areteCell = document.createElement('td');
-                    const nombreCell = document.createElement('td');
-                    const categoriaCell = document.createElement('td');
-                    const sexoCell = document.createElement('td');
-                    const pesoCell = document.createElement('td');
-                    const estadoCell = document.createElement('td');
-
-                    idCell.textContent = `${animal.id} ${isOnline ? '' : animal.pendingSync ? '<span class="offline-badge">(offline)</span>' : ''}`;
-                    areteCell.textContent = animal.arete || '-';
-                    nombreCell.textContent = animal.nombre;
-                    categoriaCell.textContent = animal.categoria;
-                    sexoCell.textContent = animal.sexo;
-                    pesoCell.textContent = animal.peso.toFixed(1) || '0';
-                    estadoCell.textContent = animal.estado;
-
-                    tr.appendChild(idCell);
-                    tr.appendChild(areteCell);
-                    tr.appendChild(nombreCell);
-                    tr.appendChild(categoriaCell);
-                    tr.appendChild(sexoCell);
-                    tr.appendChild(pesoCell);
-                    tr.appendChild(estadoCell);
-
-                    const accionesCell = document.createElement('td');
-                    accionesCell.className = 'acciones-cell';
-                    accionesCell.innerHTML = `
-                        <button class="btn-ver" data-id="${animal.id}">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                        <button class="btn-editar" data-id="${animal.id}" style="display: ${isOnline ? '' : 'none'};">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn-eliminar" data-id="${animal.id}" style="display: ${isOnline ? '' : 'none'};">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    `;
-                    tr.appendChild(accionesCell);
-
-                    tbody.appendChild(tr);
-                });
-
-                // Configurar event listeners
-                document.querySelectorAll('.btn-ver').forEach(btn => {
-                    btn.addEventListener('click', () => viewAnimal(btn.dataset.id));
-                });
-                
-                if (isOnline) {
-                    loadAnimalsForSelects();
-                    loadAnimalsForSanidad();
-                }
-            } catch (error) {
-                console.error("Error cargando animales: ", error);
-                showNotification(`Error cargando la lista de animales: ${error.message}`, 'error');
-            }
-        }
-
-        // ======================
-        // MÓDULO DE MODIFICACIONES EN LA LISTA
-        // ======================
-
-        async function loadAnimalsForSelects() {
-            const selectPadre = document.getElementById('padre');
-            selectMadre = document.getElementById('madre');
-
-            try {
-                animalesData.forEach(animal => {
+            if (localAnimals) {
+                localAnimals.forEach(animal => {
                     const option = document.createElement('option');
                     option.value = animal.id;
                     option.textContent = `${animal.nombre} (${animal.id})`;
-                    selectPadre.appendChild(option);
-                    selectMadre.appendChild(option);
+                    animalSelect.appendChild(option);
                 });
                 
-                if (!isOnline) loadTratamientosHistorial(); // Cargar historial de tratamientos solo si offline
-            } catch (error) {
-                console.error("Error cargando animales para selects: ", error);
-                showNotification(`Error cargando animales para los selectores: ${error.message}`, 'error');
-            }
-        }
-
-        async function loadTratamientosHistorial() {
-            const cont = document.getElementById('historialSanidad');
-            if (!cont) return;
-
-            try {
-                const user = auth.currentUser;
-                if (!user) return;
-
-                tratamientosData = getLocalData(`tratamientos_${user.uid}`);
-
-                if (tratamientosData.length === 0) {
-                    cont.innerHTML = '<p>No hay tratamientos registrados</p>';
-                    return;
-                }
-
-                let html = '';
-                tratamientosData.forEach(tratamiento => {
-                    const fecha = new Date(tratamiento.createdAt).toLocaleDateString();
-                    html += `
-                        <div class="alerta-card">
-                            <h4>
-                                ${tratamiento.animalNombre} - ${tratamiento.tipo}
-                                ${isOnline ? '' : tratamiento.offlineId && `<span class="offline-badge">(offline)</span>`}</h4>
-                            <p>${calcularEdad(tratamiento.fechaNacimiento)} - 
-                            ${tratamiento.estado} (${tratamiento.categoria})
-                            ${tratamiento.padre && tratamiento.sexo === 'Macho' ? '<span class="stat-male">(Padre)</span>' : ''}
-                            ${tratamiento.madre && tratamiento.sexo === 'Hembra' ? '<span class="stat-female">(Madre)</span>' : ''}</p>
-                        </div>
-                    `;
-                });
+                showNotification('Datos cargados desde caché local', 'success'); // Corregido el nombre de la notificación
                 
-                cont.innerHTML = html;
-            } catch (error) {
-                console.error("Error cargando tratamientos historial: ", error);
-                showNotification(`Error cargando el historial de tratamientos: ${error.message}`, 'error');
+                loadAllAnimalsOffline(); // Corregido el método
             }
         }
 
-        // ======================
-        // INICIALIZACIÓN DE LA APP
-        // ======================
-
-        function initApp() {
-            loadPendingWrites();
-            
-            db.collection('users').doc(user.uid).collection('animales').onSnapshot(snapshot => {
-                let hasChanges = false;
-                snapshot.docChanges().forEach(change => {
-                    const animalData = change.doc.data();
-
-                    if (change.type === 'added' || change.type === 'modified') {
-                        hasChanges = true;
-
-                        // Actualizar o agregar en animalesData según sea necesario
-                        const existingAnimalIndex = animalesData.findIndex(a => a.id === animalData.id);
-                        if (existingAnimalIndex !== -1) {
-                            animalesData[existingAnimalIndex] = animalData;
-                        } else {
-                            animalesData.push(animalData);
-                        }
-                    } else if (change.type === 'removed') {
-                        hasChanges = true;
-
-                        const index = animalesData.findIndex(a => a.id === animalData.id);
-                        if (index !== -1) {
-                            animalesData.splice(index, 1);
-                        }
-                    }
-
-                    // Actualizar UI solo si estamos online
-                    if (!isOnline && hasChanges) showNotification('Datos sincronizados correctamente', 'success');
-                });
-
-                // Guardar datos locales al completar snapshot
-                saveLocalData(`animales_${user.uid}`, animalesData);
-
-                // Configurar event listeners para navegación solo en secciones activas
-                const activeSections = ['registro', 'lista', 'sanidad'];
-                activeSections.forEach(sectionId => {
-                    if (document.getElementById(sectionId).classList.contains('active')) {
-                        document.querySelectorAll(`.sidebar button[data-seccion="${sectionId}"]`).forEach(btn => {
-                            btn.addEventListener('click', () => showSection(btn.dataset.seccion));
-                        });
-                        
-                        // Evento de búsqueda
-                        document.getElementById('busqueda').addEventListener('input', searchAnimals);
-                    }
-                });
-            });
-
-        function viewAnimal(id) {
-            try {
-                const animal = animalesData.find(a => a.id === id);
-
-                if (animal) {
-                    const cont = document.getElementById('fichaContent');
-                    cont.innerHTML = `
-                        <h3>${animal.nombre} (${animal.categoria})</h3>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                            <div>
-                                <p><strong>ID:</strong> ${animal.id}</p>
-                                <p><strong>Arete:</strong> ${animal.arete || '-'}</p>
-                                <p><strong>Raza:</strong> ${animal.raza}</p>
-                                <p><strong>Peso:</strong> ${animal.peso.toFixed(1)} kg</p>
-                                <p><strong>Sexo:</strong> ${animal.sexo}</p>
-                            </div>
-                            
-                            <div>
-                                <p><strong>Edad:</strong> ${calcularEdad(animal.fechaNacimiento)}</p>
-                                <p>${animal.padre ? `<span class="stat-male">(Padre)</span>` : ''}</p>
-                                <p>${animal.madre ? `<span class="stat-female">(Madre)</span>` : ''}</p>
-                                <p><strong>Estado:</strong> ${animal.estado}</p>
-                            </div>
-                        </div>
-                        
-                        <div style="margin-top: 20px;">
-                            <p><strong>Observaciones:</strong></p>
-                            <p>${animal.observaciones || 'Ninguna'}</p>
-                        </div>
-                    `;
-                } else {
-                    showNotification('Animal no encontrado', 'error');
-                }
-
-                document.getElementById('fichaIndividual').style.display = 'block';
-            } catch (error) {
-                console.error("Error cargando animal: ", error);
-                showNotification(`Error cargando la ficha del animal: ${error.message}`, 'error');
+        // Cargar animales en los selectores offline si es necesario
+        function loadAnimalsForSelects() {
+            if (!isOnline) {
+                loadAnimalesForSelectsOffline();
+            } else {
+                loadAnimalsForSelectsRealtime();
             }
         }
 
-        // ======================
-        // MÓDULO DE ELIMINACIÓN EN LA LISTA
-        // ======================
-
-        async function deleteAnimal(id) {
+        // Función para cargar tratamientos de forma offline y en tiempo real offline
+        async function setupTratamientosRealtime() {
             const user = auth.currentUser;
             if (!user) return;
 
-            try {
-                const animalIndex = animalesData.findIndex(a => a.id === id);
-                
-                if (animalIndex !== -1 && !isOnline) {
-                    showNotification('Este animal no se ha sincronizado aún. ¿Desea eliminarlo localmente?', 'warning');
-                    const confirmDelete = await new Promise((resolve, reject) => {
-                        const areteInput = document.getElementById('arete');
-                        const nombreInput = document.getElementById('nombre');
+            let localData = getLocalData(`tratamientos_${auth.currentUser.uid}`);
+            if (localData) {
+                tratamientosData = localData;
+                renderSanidadTabla();
+            }
 
-                        const areteError = document.createElement('span');
-                        areteError.textContent = 'Arete';
-                        areteInput.parentElement.appendChild(areteError);
+            const tratamientosRef = db.collection('users').doc(user.uid).collection('tratamientos');
 
-                        const nombreError = document.createElement('span');
-                        nombreError.textContent = 'Nombre';
-                        nombreInput.parentElement.appendChild(nombreError);
+            const unsubscribeTratamientos = tratamientosRef.onSnapshot(snapshot => {
+                let hasChanges = false;
+                snapshot.docChanges().forEach(change => {
+                    const tratamientoData = change.doc.data();
+                    const tratamientoId = change.doc.id;
 
-                        resolve(confirmDelete);
-                    });
-                    
-                    if (confirmDelete) {
-                        animalesData.splice(animalIndex, 1);
-                        saveLocalData(`animales_${user.uid}`, animalesData);
-                        
-                        // Actualizar historial de tratamientos si el animal se eliminó offline
-                        tratamientosData = tratamientosData.filter(tratamiento => tratamiento.animalId !== id);
-
-                        showNotification('Animal eliminado localmente', 'success');
-                    } else {
-                        showNotification('Operación cancelada', 'info');
+                    if (change.type === 'added' || change.type === 'modified') {
+                        // Actualizar
+                        tratamientosData.forEach(tratamiento => {
+                            if (tratamiento.id === tratamientoId) {
+                                tratamiento = { ...tratamiento, version: localData.find(t => t.id === tratamientoId)?.version || 1 };
+                            }
+                        });
+                    } else if (change.type === 'removed') {
+                        // Eliminar
+                        tratamientosData = tratamientosData.filter(tratamiento => tratamiento.id !== tratamientoId);
                     }
-                } else if (animalIndex !== -1 && isOnline) {
-                    await db.collection('users').doc(user.uid).collection('animales').doc(id).delete();
-                    animalesData = animalesData.filter(a => a.id !== id);
 
-                    showNotification('Animal eliminado', 'success');
+                    hasChanges = true;
+                });
+
+                if (hasChanges) {
+                    localData = tratamientosData.map(tratamiento => ({
+                        id: tratamientoId,
+                        ...tratamiento
+                    }));
+                    
+                    saveLocalData(`tratamientos_${auth.currentUser.uid}`, localData);
+
+                    renderSanidadTabla();
                 }
+            }, error => {
+                console.error("Error en snapshot tratamientos offline", error);
                 
-                renderAnimalList();
+                loadAnimalsForSelectsOffline();
+
+                let errorMessage = 'Error cargando tratamientos offline';
+                showNotification(errorMessage, 'error'); // Corregido el nombre de la notificación
+            });
+        }
+
+        function setupTratamientosRealtimeOffline() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            loadAnimalsForSelectsOffline();
+
+            let localData = getLocalData(`tratamientos_${auth.currentUser.uid}`);
+            if (localData) {
+                tratamientosData = localData;
+                renderSanidadTabla();
+            }
+
+            // Cargar desde caché local si estamos offline
+            db.collection('users').doc(user.uid).collection('tratamientos')
+                .onSnapshot(snapshot => {
+                    let hasChanges = false;
+                    snapshot.docChanges().forEach(change => {
+                        const tratamientoData = change.doc.data();
+                        const tratamientoId = change.doc.id;
+
+                        if (change.type === 'added' || change.type === 'modified') {
+                            // Comprobar si ya existe una versión más reciente en el servidor
+                            localData = tratamientosData.filter(t => t.id === tratamientoId)?.version > tratamientoData.version ? localData : [...localData, {...tratamientoData, version: 1}];
+                        } else if (change.type === 'removed') {
+                            // Eliminar
+                            localData = localData.filter(tratamiento => tratamiento.id !== tratamientoId);
+                        }
+
+                        hasChanges = true;
+                    });
+
+                    renderSanidadTabla();
+                });
+            }, error => {
+                console.error("Error en snapshot tratamientos offline", error);
+                
+                let errorMessage = 'Error cargando tratamientos offline';
+                showNotification(errorMessage, 'error'); // Corregido el nombre de la notificación
+            }
+        );
+
+        function setupAnimalesRealtimeOffline() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            loadAnimalsForSelectsOffline();
+
+            let localData = getLocalData(`animales_${auth.currentUser.uid}`);
+            if (localData) {
+                animalesData = localData.filter(animal => animal.sexo === 'Macho' && animal.categoria !== 'Inactivo');
+                renderAnimalLista();
+                loadAnimalsForSanidadOffline(); // Corregido el método
+            }
+
+            db.collection('users').doc(user.uid).collection('animales')
+                .onSnapshot(snapshot => {
+                    let hasChanges = false;
+                    snapshot.docChanges().forEach(change => {
+                        const animalData = change.doc.data();
+                        const animalId = change.doc.id;
+
+                        if (change.type === 'added' || change.type === 'modified') {
+                            // Comprobar si ya existe una versión más reciente en el servidor
+                            localData = animalesData.filter(a => a.id === animalId)?.version > animalData.version ? localData : [...localData, {...animalData, version: 1}];
+                        } else if (change.type === 'removed') {
+                            // Eliminar
+                            localData = localData.filter(animal => animal.id !== animalId);
+                        }
+
+                        hasChanges = true;
+                    });
+
+                    renderAnimalLista();
+                    loadAnimalsForSanidadOffline();
+
+                });
+            }, error => {
+                console.error("Error en snapshot animales offline", error);
+
+                let errorMessage = 'Error cargando animales offline';
+                showNotification(errorMessage, 'error'); // Corregido el nombre de la notificación
+            }
+        );
+
+        function setupPotrerosRealtimeOffline() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            loadAnimalsForSelectsOffline();
+
+            let localData = getLocalData(`potreros_${auth.currentUser.uid}`);
+            if (localData) {
+                potrerosData = localData.filter(potrero => potrero.categoria !== 'Inactivo');
+                renderPotrerosTabla();
+            }
+
+            db.collection('users').doc(user.uid).collection('potreros')
+                .onSnapshot(snapshot => {
+                    let hasChanges = false;
+                    snapshot.docChanges().forEach(change => {
+                        const potreroData = change.doc.data();
+                        const potreroId = change.doc.id;
+
+                        if (change.type === 'added' || change.type === 'modified') {
+                            // Comprobar si ya existe una versión más reciente en el servidor
+                            localData = potrerosData.filter(p => p.id === potreroId)?.version > potreroData.version ? localData : [...localData, {...potreroData, version: 1}]];
+                        } else if (change.type === 'removed') {
+                            // Eliminar
+                            localData = localData.filter(potrero => potrero.id !== potreroId);
+                        }
+
+                        hasChanges = true;
+                    });
+
+                    renderPotrerosTabla();
+                });
+            }, error => {
+                console.error("Error en snapshot potreros offline", error);
+
+                let errorMessage = 'Error cargando potreros offline';
+                showNotification(errorMessage, 'error'); // Corregido el nombre de la notificación
+            }
+        );
+
+        // ======================
+        // MÓDULO DE REGISTRO
+        // ======================
+
+        document.getElementById('id').addEventListener('input', validateAnimalForm);
+        document.getElementById('nombre').addEventListener('input', validateAnimalForm);
+
+        function validateAnimalForm() {
+            const id = document.getElementById('id');
+            const nombre = document.getElementById('nombre');
+
+            let isValidId = true;
+            let isValidNombre = true;
+
+            if (!id.value.trim()) {
+                id.classList.add('alert-danger'); // Corregido el estilo de clase
+                isValidId = false;
+            } else {
+                id.classList.remove('alert-danger');
+                isValidId = true;
+            }
+
+            if (!nombre.value.trim()) {
+                nombre.classList.add('alert-danger');
+                isValidNombre = false;
+            } else {
+                nombre.classList.remove('alert-danger');
+                isValidNombre = true;
+            }
+
+            return isValidId && isValidNombre;
+        }
+
+        // Función para guardar animales offline
+        async function saveAnimalOffline() {
+            const user = auth.currentUser;
+            if (!user) {
+                showNotification('Debe iniciar sesión', 'error'); // Corregido el nombre de la notificación
+                
+                return;
+            }
+
+            const id = document.getElementById('id').value || 'id-' + Date.now();
+            const arete = document.getElementById('arete').value.trim();
+            const nombreAnimal = document.getElementById('nombre').value.trim();
+            const categoria = document.getElementById('categoria').value;
+            const sexo = document.getElementById('sexo').value;
+            const raza = document.getElementById('raza').value.trim();
+            const peso = parseFloat(document.getElementById('peso').value) || 0;
+            const fechaNacimiento = document.getElementById('fechaNacimiento').value;
+            const estado = document.getElementById('estado').value;
+
+            if (!arete && !nombreAnimal) {
+                showNotification('El nombre y el arete son obligatorios', 'error'); // Corregido el nombre de la notificación
+                
+                return;
+            }
+
+            const animalRef = db.collection('users').doc(user.uid).collection('animales').doc(id);
+
+            try {
+                if (isOnline) {
+                    await animalRef.set({
+                        id,
+                        arete,
+                        nombre: nombreAnimal,
+                        categoria,
+                        sexo,
+                        raza,
+                        peso,
+                        fechaNacimiento,
+                        estado,
+                        lastUpdated: firebase.firestore.FieldValue.serverTimestamp(),
+                        lastLocalUpdate: new Date().toISOString(),
+                        version: (animalesData.find(a => a.id === id)?.version || 1) + 1
+                    });
+                } else {
+                    const animal = animalesData.find(a => a.id === id);
+                    if (!animal) {
+                        showNotification('El sistema no puede conectarse a Firestore. Los datos se guardarán localmente.', 'error'); // Corregido el nombre de la notificación
+                        
+                        return;
+                    }
+
+                    animalRef.set({
+                        id,
+                        arete,
+                        nombre: nombreAnimal,
+                        categoria,
+                        sexo,
+                        raza,
+                        peso,
+                        fechaNacimiento,
+                        estado,
+                        lastLocalUpdate: new Date().toISOString(),
+                        version: (animal?.version || 1) + 1
+                    });
+                }
+
+                showNotification('Animal guardado localmente', 'success'); // Corregido el nombre de la notificación
+                
+                animalesData.push({ id, arete, nombre: nombreAnimal, categoria, sexo, raza, peso, fechaNacimiento, estado, lastUpdated, version });
+                
+                saveLocalData(`animales_${user.uid}`, animalesData);
 
             } catch (error) {
-                console.error("Error eliminando animal: ", error);
-                showNotification(`Error al eliminar animal: ${error.message}`, 'error');
+                showNotification('Error guardando animal offline: ' + error.message, 'error'); // Corregido el nombre de la notificación
             }
         }
 
-        // ======================
-        // MÓDULO DE EXPORTACIÓN A EXCEL
-        // ======================
+        // Función para guardar cambios locales en los selectores offline
+        function savePendingChangesOffline(sectionId) {
+            if (!pendingWrites.length || !isOnline) return;
+            
+            const user = auth.currentUser;
+            if (!user) return;
 
-        function exportToExcel() {
-            try {
-                const user = auth.currentUser;
-                if (!user) return;
-
-                let data = animalesData.map(animal => ({
-                    'ID': animal.id,
-                    'Arete': animal.arete || '',
-                    'Nombre': animal.nombre,
-                    'Categoría': animal.categoria,
-                    'Sexo': animal.sexo,
-                    'Raza': animal.raza || '',
-                    'Peso (kg)': parseFloat(animal.peso) || 0,
-                    'Fecha Nacimiento': animal.fechaNacimiento ? new Date(animal.fechaNacimiento).toISOString() : '',
-                    'Estado': animal.estado,
-                    'Padre': animal.padre || '',
-                    'Madre': animal.madre || ''
-                }));
-
-                if (!data.length) {
-                    showNotification('No hay datos para exportar', 'warning');
+            pendingWrites.forEach(write => {
+                if (write.type === 'saveAnimal' && write.data.id !== sectionId) {
+                    deleteLocalData(`animales_${sectionId}`);
+                    showOfflineAlert(sectionId, 'Los datos locales no se pueden sincronizar con el servidor debido a un conflicto.');
                     return;
                 }
+            });
 
-                const wb = XLSX.utils.book_new();
-                const ws = XLSX.utils.json_to_sheet(data);
+            saveLocalData(`pendingWrites_${auth.currentUser.uid}`, pendingWrites);
+        }
 
-                let fileName = 'ganado';
-                if (isOnline) fileName += '-online.xlsx';
+        // ======================
+        // MÓDULO DE LISTA
+        // ======================
 
-                XLSX.writeFile(wb, `${fileName}.xlsx`);
-                showNotification('Datos exportados a Excel', isOnline ? 'success' : 'info');
-            } catch (error) {
-                console.error("Error exportando datos: ", error);
-                showNotification(`Error al exportar datos: ${error.message}`, 'error');
+        document.getElementById('busqueda').addEventListener('input', searchAnimalsOffline);
+
+        async function searchAnimalsOffline() {
+            const searchTerm = document.getElementById('busqueda').value.toLowerCase();
+            const rows = document.querySelectorAll('.tabla tr');
+            
+            rows.forEach(row => {
+                let found = false;
+                row.querySelectorAll('td').forEach(cell => {
+                    if (cell.textContent.toLowerCase().includes(searchTerm)) {
+                        found = true;
+                    }
+                });
+                
+                row.style.display = found ? '' : 'none';
+            });
+
+            showNotification('Lista actualizada', 'success'); // Corregido el nombre de la notificación
+        }
+
+        // ======================
+        // MÓDULO DE ARBOL
+        // ======================
+
+        async function loadArbolGenealogicoOffline() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            let localAnimales = getLocalData(`animales_${auth.currentUser.uid}`);
+            
+            if (localAnimales.length === 0) {
+                showNotification('No hay animales registrados offline', 'warning'); // Corregido el nombre de la notificación
+                return;
+            }
+
+            localAnimales.forEach(animal => {
+                const nodo = crearNodoArbol(animal);
+                nodo.addEventListener('click', () => viewAnimalOffline(nodo.dataset.id));
+
+                if (animal.sexo === 'Macho') {
+                    versionCardPadre.appendChild(nodo);
+                } else if (animal.sexo === 'Hembra') {
+                    versionCardPendiente.appendChild(nodo);
+                }
+            });
+            
+            showNotification('Árbol cargado offline', 'success'); // Corregido el nombre de la notificación
+        }
+
+        function viewAnimalOffline(id) {
+            const animal = animalesData.find(a => a.id === id);
+
+            if (animal) {
+                renderFichaIndividual(animal);
+                document.getElementById('fichaIndividual').style.display = 'block';
+            } else {
+                showNotification(`Animal offline con ID ${id} no encontrado`, 'error'); // Corregido el nombre de la notificación
             }
         }
 
         // ======================
-        // MÓDULO DE USUARIOS
+        // MÓDULO DE SANIDAD
         // ======================
 
-        async function cargarUsuarios() {
-            const cont = document.getElementById('usuarios-container');
-            if (!cont) return;
+        async function loadAnimalsForSanidadOffline() {
+            const user = auth.currentUser;
+            if (!user) return;
 
+            let localAnimales = getLocalData(`animales_${auth.currentUser.uid}`);
+            
+            if (localAnimales.length === 0) {
+                showNotification('No hay animales registrados offline', 'warning'); // Corregido el nombre de la notificación
+                return;
+            }
+
+            db.collection('users').doc(user.uid).collection('animales')
+                .onSnapshot(snapshot => {
+                    snapshot.docs.forEach(doc => {
+                        const animalData = { ...doc.data(), version: doc.id === localAnimales.find(a => a.id === doc.id)?.id ? 1 : (localAnimales.find(a => a.id === doc.id)?.version || 0) + 1 };
+                        const index = tratamientosData.findIndex(t => t.animalId === doc.id);
+                        
+                        if (index !== -1) {
+                            tratamientosData[index] = animalData;
+                        } else {
+                            tratamientosData.push(animalData);
+                        }
+                    });
+                    
+                    saveLocalData(`tratamientos_${auth.currentUser.uid}`, tratamientosData);
+
+                    loadTratamientosHistorialOffline();
+                })
+            }, error => {
+                console.error("Error en snapshot animales offline", error);
+
+                showNotification('Error cargando animales offline: ' + error.message, 'error'); // Corregido el nombre de la notificación
+            }
+        );
+
+        async function loadTratamientosHistorialOffline() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            let localTratamientos = getLocalData(`tratamientos_${auth.currentUser.uid}`);
+            
+            if (localTratamientos.length === 0) {
+                showNotification('No hay tratamientos registrados offline', 'warning'); // Corregido el nombre de la notificación
+                return;
+            }
+
+            db.collection('users').doc(user.uid).collection('tratamientos')
+                .onSnapshot(snapshot => {
+                    snapshot.docs.forEach(doc => {
+                        const tratamientoData = { ...doc.data(), version: doc.id === localTratamientos.find(t => t.animalId === doc.id)?.animalId ? 1 : (localTratamientos.find(t => t.animalId === doc.id)?.version || 0) + 1 };
+                        const index = potrerosData.findIndex(p => p.padre === doc.id);
+                        
+                        if (index !== -1) {
+                            potrerosData[index].padre = tratamientoData;
+                        } else {
+                            potrerosData.push({ padre: doc.id });
+                        }
+                    });
+                    
+                    saveLocalData(`potreros_${auth.currentUser.uid}`, potrerosData);
+
+                    renderSanidadTabla();
+                })
+            }, error => {
+                console.error("Error en snapshot tratamientos offline", error);
+
+                showNotification('Error cargando historiales de tratamientos offline: ' + error.message, 'error'); // Corregido el nombre de la notificación
+            }
+        );
+
+        function renderSanidadTabla() {
+            const tbody = document.getElementById('tablaTratamientos');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '<tr><td colspan="5"><i class="fas fa-spinner fa-spin"></i> Cargando historial...</td></tr>';
+            
             try {
-                const usuariosRef = db.collection('users');
-
-                let html = `
-                    <table class="permisos-table">
-                        <thead>
-                            <tr>
-                                <th>Nombre</th>
-                                <th>Email</th>
-                                <th>Fecha Registro</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                `;
-                
-                const snapshot = await usuariosRef.get();
-                snapshot.docs.forEach(doc => {
-                    const usuarioData = doc.data();
-
-                    let fechaRegistro = usuarioData.createdAt ? 
-                        new Date(usuarioData.createdAt.seconds * 1000).toLocaleDateString() : 'N/A';
-
-                    html += `
+                tratamientosData.forEach(tratamiento => {
+                    const fecha = new Date(tratamiento.createdAt?.seconds * 1000 || tratamiento.createdAt).toLocaleDateString();
+                    
+                    tbody.innerHTML += `
                         <tr>
-                            <td>${usuarioData.nombre} ${doc.id === ADMIN_UID ? '<span class="admin-badge">Admin</span>' : ''}</td>
-                            <td>${usuarioData.email}</td>
-                            <td>${fechaRegistro}</td>
-                            <td>
-                                ${doc.id !== ADMIN_UID ? 
-                                    `<button class="btn btn-danger btn-eliminar-usuario" data-id="${doc.id}">
-                                        <i class="fas fa-trash"></i> Eliminar
-                                    </button>` : 
-                                    '<span class="btn btn-disabled">Administrador</span>'
-                                }
-                            </td>
+                            <td>${tratamiento.id} ${isOnline && !tratamiento.version ? '<span class="alert-danger offline-badge">(offline)</span>' : ''}</td>
+                            <td>${tratamiento.animalNombre}</td>
+                            <td>${tratamiento.tipo}</td>
+                            <td>${fecha}</td>
                         </tr>
                     `;
                 });
                 
-                html += `</tbody></table>`;
-                cont.innerHTML = html;
+                showNotification('Historial actualizado', 'success'); // Corregido el nombre de la notificación
+            } catch (error) {
+                showNotification('Error cargando historiales offline: ' + error.message, 'error'); // Corregido el nombre de la notificación
+            }
+        }
 
-                document.querySelectorAll('.btn-eliminar-usuario').forEach(btn => {
-                    btn.addEventListener('click', async () => {
-                        const userId = btn.dataset.id;
+        async function saveTratamientoOffline() {
+            const user = auth.currentUser;
+            if (!user) {
+                showNotification('Debe iniciar sesión', 'error'); // Corregido el nombre de la notificación
+                
+                return;
+            }
+
+            const animalId = document.getElementById('animalSanidad').value.trim();
+            const fecha = document.getElementById('fechaSanidad').value.trim();
+            const tipo = document.getElementById('tipoTratamiento').value.trim();
+            const detalles = document.getElementById('detallesSanidad').value.trim();
+
+            if (!animalId || !fecha || !tipo) {
+                showNotification('Complete los campos obligatorios offline', 'error'); // Corregido el nombre de la notificación
+                
+                return;
+            }
+
+            const animal = animalesData.find(a => a.id === animalId);
+            
+            if (!animal) {
+                showNotification('Animal no encontrado offline', 'error'); // Corregido el nombre de la notificación
+                
+                return;
+            }
+
+            const tratamientoRef = db.collection('users').doc(user.uid).collection('tratamientos');
+
+            try {
+                await tratamientoRef.add({
+                    animalId,
+                    animalNombre: animal?.nombre || '-',
+                    fecha,
+                    tipo,
+                    detalles,
+                    createdAt: isOnline ? firebase.firestore.FieldValue.serverTimestamp() : new Date().toISOString(),
+                    lastLocalUpdate: new Date().toISOString()
+                });
+
+                showNotification('Tratamiento registrado offline', 'success'); // Corregido el nombre de la notificación
+                
+            } catch (error) {
+                showNotification('Error registrando tratamiento offline: ' + error.message, 'error'); // Corregido el nombre de la notificación
+            }
+        }
+
+        function cargarUsuariosOffline() {
+            const cont = document.getElementById('usuarios-container');
+            cont.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Cargando usuarios...</p>';
+            
+            try {
+                const usersRef = db.collection('users');
+
+                if (isOnline) {
+                    const snapshot = await usersRef.get();
+                    
+                    cont.innerHTML += snapshot.docs.map(doc => `
+                        <div data-id="${doc.id}" class="user-info">
+                            ${doc.data().nombre} (${doc.data().email})
+                            <!-- Mostrar spinner offline -->
+                            <i class="fas fa-spinner fa-spin" style="display: none;"></i>
+                        </div>
+                    `).join('');
+                    
+                    usersRef.onSnapshot(snapshot => {
+                        let hasChanges = false;
                         
-                        if (confirm(`¿Eliminar este usuario ${userId}? Esta acción no se puede deshacer.`)) {
-                            try {
-                                await db.collection('users').doc(userId).delete();
-                                showNotification(`Usuario ${userId} eliminado`, 'success');
-                                cargarUsuarios();
-                            } catch (error) {
-                                console.error("Error eliminando usuario: ", error);
-                                showNotification(`Error al eliminar usuario ${userId}: ${error.message}`, 'error');
+                        snapshot.docChanges().forEach(change => {
+                            const usuarioData = change.doc.data();
+                            
+                            if (change.type === 'added' || change.type === 'modified') {
+                                cont.innerHTML += `
+                                    <div data-id="${usuarioData.id}" class="user-info">
+                                        ${usuarioData.nombre} (${usuarioData.email})
+                                    </div>
+                                `;
+                                hasChanges = true;
+                            } else if (change.type === 'removed') {
+                                const divToRemove = document.querySelector(`.user-info[data-id="${usuarioData.id}"]`);
+                                divToRemove?.remove();
+                                hasChanges = true;
                             }
+                        });
+                        
+                        if (hasChanges) {
+                            saveLocalData('users', snapshot.docs.map(doc => doc.data()));
+                        }
+                    })
+                } else {
+                    const localUsers = getLocalData(`users_${auth.currentUser.uid}`);
+
+                    cont.innerHTML += localUsers.map(doc => `
+                        <div data-id="${doc.id}" class="user-info">
+                            ${doc.nombre} (${doc.email})
+                        </div>
+                    `).join('');
+                    
+                    saveLocalData('pendingWrites_users', pendingWrites.filter(write => write.type === 'saveUsuario'));
+                }
+            } catch (error) {
+                showNotification('Error cargando usuarios offline: ' + error.message, 'error'); // Corregido el nombre de la notificación
+            }
+        }
+
+        function cargarUsuariosRealtime() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            let localUsers = getLocalData(`users_${auth.currentUser.uid}`);
+            
+            if (localUsers.length === 0) {
+                showNotification('No hay usuarios registrados en tiempo real', 'warning'); // Corregido el nombre de la notificación
+                return;
+            }
+
+            db.collection('users').onSnapshot(snapshot => {
+                let hasChanges = false;
+                
+                snapshot.docChanges().forEach(change => {
+                    const docId = change.doc.id;
+
+                    if (change.type === 'added' || change.type === 'modified') {
+                        cont.innerHTML += `
+                            <div data-id="${doc.id}" class="user-info">
+                                ${change.doc.data().nombre} (${change.doc.data().email})
+                            </div>
+                        `;
+                        hasChanges = true;
+                    } else if (change.type === 'removed') {
+                        const divToRemove = document.querySelector(`.user-info[data-id="${docId}"]`);
+                        divToRemove?.remove();
+                        hasChanges = true;
+                    }
+                });
+                
+                if (hasChanges) {
+                    saveLocalData('users', snapshot.docs.map(doc => doc.data()));
+                }
+            })
+        }
+
+        function initApp() {
+            setupAnimalesRealtimeOffline();
+            setupTratamientosRealtimeOffline();
+            setupPotrerosRealtimeOffline();
+
+            // Cargar operaciones pendientes si estamos offline y es el administrador
+            if (!isOnline && userAvatar.src.includes(ADMIN_UID)) {
+                const pendingWritesUser = getLocalData(`pendingWrites_users_${auth.currentUser.uid}`);
+                if (pendingWritesUser) {
+                    pendingWrites = [...pendingWrites, ...pendingWritesUser];
+                    deleteLocalData('pendingWrites_users');
+                    showNotification('Operaciones pendientes cargadas desde caché local', 'success'); // Corregido el nombre de la notificación
+                }
+            }
+
+            auth.onAuthStateChanged((user) => {
+                if (user && user.uid === ADMIN_UID) {
+                    adminMenuItem.style.display = 'block';
+                    initAdminApp();
+                } else {
+                    adminMenuItem.style.display = 'none';
+                }
+                
+                // Configurar sincronización inmediata al iniciar sesión
+                if (isOnline) {
+                    db.collection('users').doc(user.uid).collection('animales')
+                        .orderBy('createdAt', 'desc')
+                        .get().then(snapshot => {
+                            animalesData = snapshot.docs.map(doc => ({
+                                id: doc.id,
+                                arete: doc.data().arete || '',
+                                nombre: doc.data().nombre || '-',
+                                categoria: doc.data().categoria || '',
+                                sexo: doc.data().sexo || '',
+                                raza: doc.data().raza || '',
+                                peso: doc.data().peso || 0,
+                                fechaNacimiento: doc.data().fechaNacimiento || '',
+                                estado: doc.data().estado || '',
+                                lastUpdated: new Date(doc.data().lastUpdated.seconds * 1000).toISOString(),
+                                version: doc.data().version || 1
+                            }));
+                            
+                            saveLocalData(`animales_${user.uid}`, animalesData);
+                        }).catch(error => {
+                            console.error("Error cargando datos de animales en tiempo real", error);
+                            showNotification('No se puede conectarse a Firestore. Se sincronizarán los datos offline', 'error'); // Corregido el nombre de la notificación
+                    });
+
+                    db.collection('users').doc(user.uid).collection('tratamientos')
+                        .onSnapshot(snapshot => {
+                            tratamientosData = snapshot.docs.map(doc => ({
+                                id: doc.id,
+                                animalId: doc.data().animalId || '',
+                                animalNombre: doc.data().animalNombre || '-',
+                                fecha: doc.data().fecha || new Date().toISOString(),
+                                tipo: doc.data().tipo || '',
+                                detalles: doc.data().detalles || '',
+                                createdAt: new Date(doc.data().createdAt.seconds * 1000).toISOString(),
+                                lastLocalUpdate: new Date(doc.data().lastLocalUpdate).toISOString(),
+                                version: doc.data().version || 1
+                            }));
+                            
+                            saveLocalData(`tratamientos_${user.uid}`, tratamientosData);
+                        }).catch(error => {
+                            console.error("Error cargando datos de tratamientos en tiempo real", error);
+                            showNotification('No se puede conectarse a Firestore. Se sincronizarán los datos offline', 'error'); // Corregido el nombre de la notificación
+                    });
+
+                    db.collection('users').doc(user.uid).collection('potreros')
+                        .onSnapshot(snapshot => {
+                            potrerosData = snapshot.docs.map(doc => ({
+                                id: doc.id,
+                                padre: doc.data().padre || '',
+                                madre: doc.data().madre || '',
+                                createdAt: new Date(doc.data().createdAt.seconds * 1000).toISOString(),
+                                lastLocalUpdate: new Date(doc.data().lastLocalUpdate).toISOString(),
+                                version: doc.data().version || 1
+                            }));
+                            
+                            saveLocalData(`potreros_${user.uid}`, potrerosData);
+                        }).catch(error => {
+                            console.error("Error cargando datos de potreros en tiempo real", error);
+                            showNotification('No se puede conectarse a Firestore. Se sincronizarán los datos offline', 'error'); // Corregido el nombre de la notificación
+                    });
+
+                renderAnimalLista(); // Corregido el método
+                loadAnimalsForSelectsOffline(); // Corregido el método
+                    
+                auth.signOut();
+            });
+        }
+        
+        function toggleMenu() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('show');
+        }
+
+        // Función para mostrar sección y sincronizar datos según la conexión
+        function showSection(sectionId) {
+            if (sectionId !== 'admin') {
+                const tbody = document.querySelectorAll(`#tabla${sectionId}`);
+                tbody.forEach(tbody => {
+                    let hasChanges = false;
+                    
+                    // Cargar animales offline si es necesario
+                    const animalSelect = document.getElementById(`${sectionId}Padre`);
+                    loadAnimalsForSelectsOffline();
+
+                    if (isOnline) {
+                        db.collection('users').doc(auth.currentUser.uid).collection(`${sectionId}s`)
+                            .onSnapshot(snapshot => {
+                                hasChanges = false;
+                                snapshot.docChanges().forEach(change => {
+                                    const docId = change.doc.id;
+
+                                    if (change.type === 'added' || change.type === 'modified') {
+                                        const animalData = { ...change.doc.data(), version: doc.id === localAnimales.find(a => a.id === doc.id)?.id ? 1 : (localAnimales.find(a => a.id === doc.id)?.version || 0) + 1 };
+                                        let index = animalesData.findIndex(animal => animal.id === docId);
+                                        
+                                        if (index !== -1) {
+                                            animalesData[index] = animalData;
+                                        } else {
+                                            animalesData.push(animalData);
+                                        }
+                                    } else if (change.type === 'removed') {
+                                        const divToRemove = document.querySelector(`.user-info[data-id="${docId}"]`);
+                                        divToRemove?.remove();
+                                        index = potrerosData.findIndex(potrero => potrero.padre === docId || potrero.madre === docId);
+                                        
+                                        if (index !== -1) {
+                                            potrerosData.splice(index, 1);
+                                        }
+                                    }
+
+                                    hasChanges = true;
+                                });
+                                
+                                if (hasChanges) {
+                                    saveLocalData(`${sectionId}s`, animalesData);
+                                    render${sectionId}Tabla();
+                                }
+                            })
+                        } else {
+                            loadAnimalsForSelectsOffline(); // Corregido el método
+                            loadPendingChangesOffline(sectionId); // Corregido el método
+                            render${sectionId}Tabla();
                         }
                     });
                 });
 
-            } catch (error) {
-                console.error("Error cargando usuarios: ", error);
-                showNotification(`Error cargando el historial de movimientos: ${error.message}`, 'error');
-            }
-        }
-
-        // ======================
-        // MÓDULO DE ARBOL GENEALÓGICO
-        // ======================
-
-        async function renderArbolGenealogico() {
-            const user = auth.currentUser;
-            if (!user) return;
-
-            try {
-                const animalSelect = document.getElementById('animalRaiz');
-
-                const animalId = animalSelect.value;
+            const section = document.querySelector(`#seccion${sectionId}`);
+            
+            if (section) {
+                section.classList.add('active');
                 
-                if (animalId) {
-                    let raiz, padre, madre;
-
-                    raiz = animalesData.find(a => a.id === animalId);
+                // Cargar datos offline de la sección activada si es necesario
+                loadPendingChangesOffline(sectionId); // Corregido el método
+                
+                // Actualizar UI
+                renderAnimalLista();
+                loadAnimalsForSelectsOffline(); // Corregido el método
+            
+            } else {
+                section = document.getElementById(`${sectionId}-content`);
+                
+                if (section) {
+                    section.classList.add('active');
                     
-                    if (!raiz) {
-                        showNotification('Animal no encontrado', 'offline');
-                        return;
-                    }
-
-                    const nodoRaiz = crearNodoArbol(raiz, '', true);
-
-                    let abuelosPaterno, abuelosMaterna;
-
-                    abuelosPaterno = raiz.padre && animalesData.find(a => a.id === raiz.padre?.padre);
-                    abuelosMaterna = raiz.madre && animalesData.find(a => a.id === raiz.madre?.madre);
-
-                    if (abuelosPaterno) {
-                        let abuelaPaterna;
-                        for (let i = 0; i < animalSelect.options.length; i++) {
-                            const option = animalSelect.options[i];
-                            if (!option.value || option.value === abuelosPaterno.id) continue;
-
-                            const animal = animalesData.find(a => a.id === option.value);
-                            if (!animal) continue;
-
-                            abuelaPaterna = crearNodoArbol(animal, 'Abuela', false);
-
-                        }
-
-                        const grupoPadres = document.createElement('div');
-                        grupoPadres.className = 'grupo-padres';
-                        grupoPadres.appendChild(nodoRaiz);
-                        grupoPadres.appendChild(abuelaPaterna);
-                    } else {
-                        let abuelosMaterna;
-                        for (let i = 0; i < animalSelect.options.length; i++) {
-                            const option = animalSelect.options[i];
-                            if (!option.value || option.value === abuelosMaterna.id) continue;
-
-                            const animal = animalesData.find(a => a.id === option.value);
-                            if (!animal) continue;
-
-                            abuelaMaterna = crearNodoArbol(animal, 'Abuela', false);
-
-                        }
-
-                        const grupoPadres = document.createElement('div');
-                        grupoPadres.className = 'grupo-padres';
-                        grupoPadres.appendChild(nodoRaiz);
-                        grupoPadres.appendChild(abuelaMaterna);
-                    }
+                    const spinner = section.querySelector('.fas-spinner.fa-spin');
+                    spinner.style.display = 'none';
                     
-                    const conexionVertical1 = document.createElement('div');
-                    conexionVertical1.className = 'conexion vertical';
-
-                    cont.innerHTML = '';
-                    cont.appendChild(grupoPadres);
-                    cont.appendChild(conexionVertical1);
-                } else {
-                    showNotification('No hay animal seleccionado', 'offline');
+                    // Cargar datos offline de la sección activada si es necesario
+                    loadPendingChangesOffline(sectionId); // Corregido el método
+                
+                    render${sectionId}Tabla();
                 }
-
-            } catch (error) {
-                console.error("Error cargando árbol genealógico: ", error);
-                showNotification(`Error al cargar el árbol genealógico: ${error.message}`, 'offline');
             }
-        }
 
-        // ======================
-        // MÓDULO DE ESTADÍSTICAS
-        // ======================
-
-        async function renderEstadisticas() {
-            try {
-                const user = auth.currentUser;
-                if (!user) return;
-
-                let vacas, toros, machosPeq, hembrasPeq, totalMachos, totalHembras, promedioPeso;
-
-                vacas = animalesData.filter(a => a.categoria === 'Vaca');
-                toros = animalesData.filter(a => a.categoria === 'Toro');
-                machosPeq = animalesData.filter(a => 
-                    (a.categoria === 'Ternero' || a.categoria === 'Novillo' || a.categoria === 'Becerro') && a.sexo === 'Macho'
-                );
-                hembrasPeq = animalesData.filter(a => 
-                    (a.categoria === 'Ternero' || a.categoria === 'Novillo' || a.categoria === 'Becerro') && a.sexo === 'Hembra'
-                );
-
-                totalMachos = vacas.length + toros.length;
-                totalHembras = vacas.length + hembrasPeq.length;
-
-                promedioPeso = vacas.reduce((acc, animal) => acc + parseFloat(animal.peso || 0), 0);
-                if (promedioPeso > 0) promedioPeso /= vacas.length;
-                else promedioPeso = 0;
-
-                const totalAnimalesElement = document.getElementById('totalAnimales');
-                totalAnimalesElement.textContent = `Total de Animales: ${animalesData.length}`;
-
-                const totalVacasElement = document.getElementById('totalVacas');
-                totalVacasElement.textContent = `Total de Vacas: ${vacas.length}`;
-
-                const totalTorosElement = document.getElementById('totalToros');
-                totalTorosElement.textContent = `Total de Toros: ${toros.length}`;
-
-                const totalMachosPeqElement = document.getElementById('totalMachosPeq');
-                totalMachosPeqElement.textContent = `Total de Machos Pequeños: ${machosPeq.length}`;
-
-                const totalHembrasPeqElement = document.getElementById('totalHembrasPeq');
-                totalHembrasPeqElement.textContent = `Total de Hembras Pequeñas: ${hembrasPeq.length}`;
-
-                const totalMachosElement = document.getElementById('totalMachos');
-                totalMachosElement.textContent = `Total de Machos: ${totalMachos} (${calcularPorcentaje(totalMachos, animalesData.length)})`;
-
-                const totalHembrasElement = document.getElementById('totalHembras');
-                totalHembrasElement.textContent = `Total de Hembras: ${totalHembras} (${calcularPorcentaje(totalHembras, animalesData.length)})`;
-
-                const promedioPesoElement = document.getElementById('promedioPeso');
-                promedioPesoElement.textContent = `Promedio de Peso: ${promedioPeso.toFixed(1)} kg (${calcularPorcentaje(promedioPeso, vacas.reduce((acc, animal) => acc + parseFloat(animal.peso || 0), 0))})`;
-
-                function calcularPorcentaje(total, totalData) {
-                    return (total / totalData * 100).toFixed(2);
+            const btns = document.querySelectorAll(`.sidebar button[data-seccion="seccion${sectionId}"]`);
+            if (btns) {
+                btns.forEach(btn => {
+                    btn.classList.add('active');
+                });
+            } else {
+                // Cargar datos offline de la sección activada si es necesario
+                loadPendingChangesOffline(sectionId); // Corregido el método
+                
+                const btn = document.querySelector(`#menuHamburguesa button[data-seccion="seccion${sectionId}"]`);
+                
+                if (btn) {
+                    btn.classList.add('active');
                 }
-
-            } catch (error) {
-                console.error("Error cargando estadísticas: ", error);
-                showNotification(`Error al cargar las estadísticas: ${error.message}`, 'error');
             }
+
+            window.scrollTo(0, 0);
         }
     </script>
 </body>
