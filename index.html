@@ -14,1047 +14,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
     <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
-    <style>
-        :root {
-            --primary: #2c3e50;
-            --secondary: #3498db;
-            --success: #27ae60;
-            --danger: #e74c3c;
-            --warning: #f39c12;
-            --light: #ecf0f1;
-            --dark: #34495e;
-            --admin: #9b59b6;
-            --male: #3498db;
-            --female: #e84393;
-            --reproduction: #e91e63;
-            --offline: #7f8c8d;
-            --card-bg: #ffffff;
-            --sidebar-bg: #2c3e50;
-            --header-bg: #2c3e50;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
-            color: #333;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background-attachment: fixed;
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-        }
-        
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-        
-        #login-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        
-        .login-box {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
-            width: 100%;
-            max-width: 450px;
-            text-align: center;
-            transform: translateY(0);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .login-box:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-        }
-        
-        .login-box h2 {
-            margin-bottom: 25px;
-            color: var(--primary);
-            font-size: 28px;
-            font-weight: 600;
-        }
-        
-        .login-box input {
-            width: 100%;
-            padding: 14px 18px;
-            margin-bottom: 20px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: all 0.3s;
-            background: #f9f9f9;
-        }
-        
-        .login-box input:focus {
-            border-color: var(--secondary);
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-            outline: none;
-            background: #fff;
-        }
-        
-        .login-box button {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(to right, var(--success), #219653);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s;
-            margin-top: 10px;
-            box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3);
-        }
-        
-        .login-box button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(39, 174, 96, 0.4);
-        }
-        
-        .login-box button:disabled {
-            background: #95a5a6;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        .logo {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        
-        .logo i {
-            font-size: 60px;
-            color: var(--success);
-            margin-bottom: 15px;
-            transition: transform 0.5s ease;
-        }
-        
-        .logo:hover i {
-            transform: rotate(360deg);
-        }
-        
-        .logo h1 {
-            color: var(--primary);
-            font-size: 28px;
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
-        
-        .error-message {
-            color: var(--danger);
-            font-size: 14px;
-            margin-top: -15px;
-            margin-bottom: 15px;
-            text-align: left;
-            display: none;
-            font-weight: 500;
-        }
-        
-        #main-app {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 15px;
-            margin: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            overflow: hidden;
-        }
-        
-        header {
-            background: linear-gradient(to right, var(--header-bg), #1c2b3e);
-            color: white;
-            padding: 15px 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .hamburger {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 8px 12px;
-            border-radius: 8px;
-            transition: all 0.3s;
-        }
-        
-        .hamburger:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-        
-        .header-title h1 {
-            font-size: 22px;
-            font-weight: 600;
-        }
-        
-        .header-title p {
-            font-size: 13px;
-            opacity: 0.9;
-            color: #ecf0f1;
-        }
-        
-        .header-right {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .btn {
-            padding: 9px 16px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: 500;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-        }
-        
-        .btn-primary {
-            background: linear-gradient(to right, var(--secondary), #2980b9);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: linear-gradient(to right, #2980b9, #1c5d8a);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.3);
-        }
-        
-        .btn-danger {
-            background: linear-gradient(to right, var(--danger), #c0392b);
-            color: white;
-        }
-        
-        .btn-danger:hover {
-            background: linear-gradient(to right, #c0392b, #9c2c22);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.3);
-        }
-        
-        .btn-admin {
-            background: linear-gradient(to right, var(--admin), #8e44ad);
-            color: white;
-        }
-        
-        .btn-admin:hover {
-            background: linear-gradient(to right, #8e44ad, #6c3483);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(155, 89, 182, 0.3);
-        }
-        
-        .btn-reproduction {
-            background: linear-gradient(to right, var(--reproduction), #c2185b);
-            color: white;
-        }
-        
-        .btn-reproduction:hover {
-            background: linear-gradient(to right, #c2185b, #9e1449);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(233, 30, 99, 0.3);
-        }
-        
-        .btn-offline {
-            background: linear-gradient(to right, var(--offline), #6c7a89);
-            color: white;
-        }
-        
-        .connection-status {
-            display: flex;
-            align-items: center;
-            background: rgba(0, 0, 0, 0.25);
-            color: white;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 13px;
-        }
-        
-        .status-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            margin-right: 8px;
-        }
-        
-        .status-dot.connected {
-            background-color: #2ecc71;
-            box-shadow: 0 0 8px #2ecc71;
-        }
-        
-        .status-dot.disconnected {
-            background-color: #e74c3c;
-            box-shadow: 0 0 8px #e74c3c;
-        }
-        
-        .status-dot.offline {
-            background-color: var(--offline);
-            box-shadow: 0 0 8px var(--offline);
-        }
-        
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .user-info img {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            object-fit: cover;
-            background: #3498db;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-        }
-        
-        .sidebar {
-            background: var(--sidebar-bg);
-            color: white;
-            width: 280px;
-            height: calc(100vh - 70px);
-            position: fixed;
-            top: 70px;
-            left: -280px;
-            transition: left 0.4s ease;
-            overflow-y: auto;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            border-top-right-radius: 15px;
-            border-bottom-right-radius: 15px;
-            box-shadow: 5px 0 15px rgba(0, 0, 0, 0.2);
-        }
-        
-        .sidebar.show {
-            left: 0;
-        }
-        
-        .sidebar ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-            flex: 1;
-        }
-        
-        .sidebar li {
-            padding: 0;
-            transition: background 0.3s;
-        }
-        
-        .sidebar button {
-            width: 100%;
-            padding: 16px 25px;
-            text-align: left;
-            background: none;
-            border: none;
-            color: rgba(255, 255, 255, 0.85);
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            font-size: 16px;
-            font-weight: 500;
-            border-left: 4px solid transparent;
-        }
-        
-        .sidebar button:hover, .sidebar button.active {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-left-color: var(--secondary);
-        }
-        
-        .sidebar button i {
-            width: 24px;
-            text-align: center;
-            font-size: 18px;
-        }
-        
-        main {
-            margin-top: 70px;
-            padding: 25px;
-            flex: 1;
-            transition: margin-left 0.4s;
-        }
-        
-        .seccion {
-            display: none;
-            padding: 25px;
-            background: var(--card-bg);
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-            margin-bottom: 25px;
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .seccion.active {
-            display: block;
-        }
-        
-        .seccion h2 {
-            margin-bottom: 25px;
-            color: var(--primary);
-            padding-bottom: 15px;
-            border-bottom: 2px solid var(--light);
-            font-size: 26px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .tabla {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            margin-top: 20px;
-            font-size: 15px;
-            background: var(--card-bg);
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-        }
-        
-        .tabla th {
-            background: linear-gradient(to right, var(--primary), #34495e);
-            padding: 15px;
-            text-align: left;
-            font-weight: 600;
-            color: white;
-        }
-        
-        .tabla td {
-            padding: 14px 15px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .tabla tr:last-child td {
-            border-bottom: none;
-        }
-        
-        .tabla tr:hover {
-            background-color: #f9f9f9;
-        }
-        
-        .tabla tr:nth-child(even) {
-            background-color: #f5f7fa;
-        }
-        
-        .ficha {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-            z-index: 2000;
-            width: 90%;
-            max-width: 750px;
-            max-height: 85vh;
-            overflow-y: auto;
-            animation: popIn 0.4s ease-out;
-        }
-        
-        @keyframes popIn {
-            0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-        }
-        
-        .cerrarFicha {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: none;
-            border: none;
-            font-size: 28px;
-            cursor: pointer;
-            color: #777;
-            transition: color 0.3s;
-        }
-        
-        .cerrarFicha:hover {
-            color: var(--danger);
-        }
-        
-        .alert {
-            padding: 16px 20px;
-            border-radius: 10px;
-            margin-bottom: 25px;
-            position: relative;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
-        }
-        
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .alert-danger {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
-        .alert-info {
-            background-color: #d1ecf1;
-            color: #0c5460;
-            border: 1px solid #bee5eb;
-        }
-        
-        .alert-warning {
-            background-color: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeeba;
-        }
-        
-        .alert-offline {
-            background-color: #e0e0e0;
-            color: #333;
-            border: 1px solid #bdbdbd;
-        }
-        
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-            gap: 22px;
-            margin-bottom: 25px;
-        }
-        
-        .form-group {
-            margin-bottom: 18px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #555;
-            font-size: 15px;
-        }
-        
-        .form-group input, 
-        .form-group select, 
-        .form-group textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 15px;
-            background: #f9f9f9;
-            transition: all 0.3s;
-        }
-        
-        .form-group input:focus, 
-        .form-group select:focus, 
-        .form-group textarea:focus {
-            border-color: var(--secondary);
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-            outline: none;
-            background: #fff;
-        }
-        
-        .form-group textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-        
-        .stats-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 22px;
-            margin-top: 25px;
-        }
-        
-        .stat-card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            text-align: center;
-            transition: transform 0.3s ease;
-            border-bottom: 4px solid var(--secondary);
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-7px);
-        }
-        
-        .stat-card h3 {
-            font-size: 18px;
-            margin-bottom: 18px;
-            color: var(--primary);
-        }
-        
-        .stat-value {
-            font-size: 42px;
-            font-weight: 700;
-            margin-bottom: 12px;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-        }
-        
-        .stat-male {
-            color: var(--male);
-        }
-        
-        .stat-female {
-            color: var(--female);
-        }
-        
-        .stat-label {
-            color: #777;
-            font-size: 14px;
-        }
-        
-        .notification {
-            position: fixed;
-            top: 25px;
-            right: 25px;
-            padding: 18px 24px;
-            border-radius: 8px;
-            color: white;
-            z-index: 3000;
-            max-width: 380px;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.2);
-            animation: slideIn 0.4s ease-out;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        .notification.success {
-            background: linear-gradient(to right, var(--success), #219653);
-        }
-        
-        .notification.error {
-            background: linear-gradient(to right, var(--danger), #c0392b);
-        }
-        
-        .notification.warning {
-            background: linear-gradient(to right, var(--warning), #e67e22);
-        }
-        
-        .notification.offline {
-            background: linear-gradient(to right, var(--offline), #6c7a89);
-        }
-        
-        .notification-close {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: none;
-            border: none;
-            color: white;
-            cursor: pointer;
-            font-size: 20px;
-        }
-        
-        .admin-card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            margin-bottom: 25px;
-            border-left: 5px solid var(--admin);
-        }
-        
-        .admin-card h3 {
-            color: var(--admin);
-            border-bottom: 1px solid #eee;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-            font-size: 22px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .permisos-table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            margin-top: 20px;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-        }
-        
-        .permisos-table th, .permisos-table td {
-            padding: 15px;
-            text-align: left;
-            border: 1px solid #eee;
-        }
-        
-        .permisos-table th {
-            background: linear-gradient(to right, var(--primary), #34495e);
-            color: white;
-            font-weight: 600;
-        }
-        
-        .permisos-table tr:nth-child(even) {
-            background-color: #f5f7fa;
-        }
-        
-        .admin-form {
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 10px;
-            margin-top: 25px;
-        }
-        
-        .admin-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 25px;
-        }
-        
-        .admin-badge {
-            background: linear-gradient(to right, var(--admin), #8e44ad);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        
-        .offline-indicator {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            background: linear-gradient(to right, var(--offline), #6c7a89);
-            color: white;
-            padding: 12px 20px;
-            border-radius: 30px;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.25);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            z-index: 2000;
-            animation: fadeInUp 0.5s ease-out;
-        }
-        
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .offline-indicator i {
-            font-size: 20px;
-        }
-        
-        .conflict-resolver {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 5000;
-            display: none;
-        }
-        
-        .conflict-box {
-            background: white;
-            width: 90%;
-            max-width: 800px;
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.35);
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        
-        .conflict-header {
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid var(--light);
-        }
-        
-        .conflict-header h3 {
-            color: var(--warning);
-            font-size: 26px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .conflict-versions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            margin-bottom: 25px;
-        }
-        
-        .version-card {
-            background: #f9f9f9;
-            border-radius: 12px;
-            padding: 20px;
-            border: 1px solid #eee;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-        
-        .version-card.current {
-            border-color: var(--success);
-            background: #f0fff4;
-        }
-        
-        .version-card.pending {
-            border-color: var(--warning);
-            background: #fffaf0;
-        }
-        
-        .version-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px dashed #ddd;
-        }
-        
-        .version-title {
-            font-weight: bold;
-            font-size: 18px;
-        }
-        
-        .version-meta {
-            font-size: 13px;
-            color: #777;
-        }
-        
-        .conflict-field {
-            margin-bottom: 18px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-        
-        .field-label {
-            font-weight: 500;
-            color: #555;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .field-value {
-            padding: 12px;
-            background: white;
-            border-radius: 8px;
-            border: 1px solid #eee;
-            font-size: 15px;
-        }
-        
-        .field-diff {
-            color: var(--danger);
-            font-weight: bold;
-        }
-        
-        .conflict-actions {
-            display: flex;
-            gap: 15px;
-            margin-top: 25px;
-        }
-        
-        .conflict-actions button {
-            flex: 1;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s;
-            font-size: 15px;
-        }
-        
-        .btn-keep-current {
-            background: linear-gradient(to right, var(--success), #219653);
-            color: white;
-        }
-        
-        .btn-keep-pending {
-            background: linear-gradient(to right, var(--warning), #e67e22);
-            color: white;
-        }
-        
-        .btn-merge {
-            background: linear-gradient(to right, var(--secondary), #2980b9);
-            color: white;
-        }
-        
-        .conflict-actions button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-        }
-        
-        .history-card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 18px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            border-left: 4px solid #ddd;
-        }
-        
-        .history-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-        
-        .history-user {
-            font-weight: bold;
-            color: var(--dark);
-            font-size: 16px;
-        }
-        
-        .history-time {
-            font-size: 13px;
-            color: #777;
-        }
-        
-        .history-changes {
-            font-size: 15px;
-            color: #555;
-        }
-        
-        .history-change-item {
-            margin-bottom: 8px;
-            display: flex;
-            gap: 8px;
-        }
-        
-        .history-change-field {
-            font-weight: 500;
-        }
-
-        .offline-badge {
-            background: linear-gradient(to right, var(--offline), #6c7a89);
-            color: white;
-            padding: 3px 8px;
-            border-radius: 20px;
-            font-size: 11px;
-            margin-left: 8px;
-        }
-        
-        .card-title {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .card-title h3 {
-            font-size: 20px;
-            color: var(--primary);
-        }
-        
-        .card-title .btn {
-            padding: 8px 15px;
-            font-size: 14px;
-        }
-
-        @media (max-width: 992px) {
-            .conflict-versions {
-                grid-template-columns: 1fr;
-            }
-            
-            .sidebar {
-                width: 260px;
-                left: -260px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .login-box {
-                padding: 25px;
-                max-width: 90%;
-            }
-            
-            .header-title h1 {
-                font-size: 18px;
-            }
-            
-            .header-title p {
-                display: none;
-            }
-            
-            .btn span {
-                display: none;
-            }
-            
-            .btn i {
-                margin-right: 0;
-            }
-            
-            .stats-container {
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            }
-            
-            .conflict-actions {
-                flex-direction: column;
-            }
-            
-            main {
-                padding: 15px;
-            }
-            
-            .seccion {
-                padding: 20px;
-            }
-        }
-    </style>
 </head>
 <body>
     <div id="login-container">
@@ -1068,7 +27,7 @@
                 <input type="email" id="email" placeholder="Correo electrónico" required>
                 <div class="error-message" id="email-error"></div>
                 
-                <input type="password" id="password" placeholder="Contraseña" required>
+                <input type="password" id="password" placeholder="Contraseña" required minlength="6">
                 <div class="error-message" id="password-error"></div>
                 
                 <button type="submit" id="login-button">
@@ -1080,7 +39,7 @@
         </div>
     </div>
 
-    <div id="main-app" style="display: none;">
+    <div id="main-app">
         <header>
             <div class="header-left">
                 <button id="menuHamburguesa" class="hamburger">☰</button>
@@ -1090,7 +49,7 @@
                 </div>
             </div>
             <div class="header-right">
-                <button id="btnExportar" class="btn btn-primary"><i class="fas fa-file-excel"></i> <span>Exportar</span></button>
+                <button id="btnExportar" class="btn btn-primary"><i class="fas fa-file-excel"></i> Exportar</button>
                 <div class="connection-status">
                     <div class="status-dot"></div>
                     <span class="status-text">Conectando...</span>
@@ -1115,185 +74,310 @@
                 <li><button data-seccion="finanzas"><i class="fas fa-coins"></i> Finanzas</button></li>
                 <li><button data-seccion="inventario"><i class="fas fa-boxes"></i> Inventario</button></li>
                 <li><button data-seccion="alertas"><i class="fas fa-bell"></i> Alertas</button></li>
-                <li id="admin-menu-item" style="display: none;"><button data-seccion="admin"><i class="fas fa-user-shield"></i> Administración</button></li>
+                <li id="admin-menu-item" style="display: none;"><button data-seccion="admin"><i class="fas fa-user-shield"></i> Panel de Administración <span class="admin-badge">Admin</span></button></li>
             </ul>
         </div>
 
-        <main>
+        <main style="transition: margin-left 0.3s;">
             <section id="registro" class="seccion active">
-                <h2><i class="fas fa-plus-circle"></i> Registrar Nuevo Animal</h2>
+                <h2>Registrar Nuevo Animal</h2>
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle"></i> Completa todos los campos para registrar un nuevo animal en el sistema.
                 </div>
                 <div id="offline-registro-alert" class="alert alert-offline" style="display: none;">
                     <i class="fas fa-cloud-download-alt"></i> Estás trabajando sin conexión. Los datos se guardarán localmente y se sincronizarán cuando recuperes conexión.
                 </div>
-                <form id="formRegistro">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label>ID:</label>
-                            <input type="text" id="id" placeholder="ID (auto)" disabled>
-                        </div>
-                        <div class="form-group">
-                            <label>Arete:</label>
-                            <input type="text" id="arete" placeholder="Número de Arete">
-                        </div>
-                        <div class="form-group">
-                            <label>Nombre:</label>
-                            <input type="text" id="nombre" placeholder="Nombre" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Categoría:</label>
-                            <select id="categoria" required>
-                                <option value="Vaca">Vaca</option>
-                                <option value="Toro">Toro</option>
-                                <option value="Ternero">Ternero</option>
-                                <option value="Novillo">Novillo</option>
-                                <option value="Becerro">Becerro</option>
-                                <option value="Otro">Otro</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Sexo:</label>
-                            <select id="sexo" required>
-                                <option value="Macho">Macho</option>
-                                <option value="Hembra">Hembra</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Raza:</label>
-                            <input type="text" id="raza" placeholder="Raza" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Peso (kg):</label>
-                            <input type="number" id="peso" placeholder="Peso (kg)" required min="0" step="0.1">
-                        </div>
-                        <div class="form-group">
-                            <label>Fecha de nacimiento:</label>
-                            <input type="date" id="fechaNacimiento" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Estado:</label>
-                            <select id="estado">
-                                <option value="Activo">Activo</option>
-                                <option value="Inactivo">Inactivo</option>
-                                <option value="Vendido">Vendido</option>
-                                <option value="Muerto">Muerto</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>ID Padre:</label>
-                            <select id="padre">
-                                <option value="">Seleccionar padre</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>ID Madre:</label>
-                            <select id="madre">
-                                <option value="">Seleccionar madre</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>Observaciones:</label>
-                        <textarea id="observaciones" placeholder="Observaciones adicionales..."></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary" id="btnGuardarAnimal">
-                        <i class="fas fa-save"></i> 
-                        <span id="guardar-text">Guardar Animal</span>
-                        <i class="fas fa-spinner fa-spin" id="guardar-spinner" style="display: none;"></i>
-                    </button>
-                </form>
             </section>
 
             <section id="lista" class="seccion">
-                <div class="card-title">
-                    <h2><i class="fas fa-list"></i> Lista de Animales</h2>
-                    <div class="form-group" style="width: 300px;">
-                        <input type="text" id="busqueda" placeholder="Buscar por nombre, ID o Arete...">
-                    </div>
-                </div>
+                <h2>Lista de Animales</h2>
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle"></i> Lista completa de animales registrados en el sistema.
                 </div>
                 <div id="offline-lista-alert" class="alert alert-offline" style="display: none;">
                     <i class="fas fa-cloud-download-alt"></i> Estás viendo datos almacenados localmente. Algunos datos pueden estar desactualizados.
                 </div>
-                <div style="overflow-x: auto;">
-                    <table class="tabla">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Arete</th>
-                                <th>Nombre</th>
-                                <th>Categoría</th>
-                                <th>Sexo</th>
-                                <th>Edad</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tablaAnimales">
-                            <tr>
-                                <td colspan="8" style="text-align: center; padding: 30px;">
-                                    <i class="fas fa-spinner fa-spin"></i> Cargando datos...
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+            </section>
+
+            <section id="arbol" class="seccion">
+                <h2>Árbol Genealógico</h2>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Selecciona un animal para ver su árbol genealógico.
+                </div>
+                <div id="offline-arbol-alert" class="alert alert-offline" style="display: none;">
+                    <i class="fas fa-cloud-download-alt"></i> Estás viendo datos almacenados localmente. Algunos datos pueden estar desactualizados.
                 </div>
             </section>
 
             <section id="estadisticas" class="seccion">
-                <h2><i class="fas fa-chart-bar"></i> Estadísticas</h2>
+                <h2>Estadísticas</h2>
                 <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i> Resumen estadístico del ganado registrado en el sistema.
+                    <i class="fas fa-info-circle"></i> Estadísticas de tu ganado.
                 </div>
-                <div class="stats-container">
-                    <div class="stat-card">
-                        <h3>Total de Animales</h3>
-                        <div class="stat-value" id="totalAnimales">0</div>
-                        <div class="stat-label">en el sistema</div>
+                
+                <div style="transition: margin-left 0.3s;">
+                    <div id="nivel-ancestros" class="nivel-arbol nivel-ancestros">
+                        <h2>Distribución por Categoría</h2>
+                        <div id="graficoDistribucion"></div>
                     </div>
-                    <div class="stat-card">
-                        <h3>Vacas</h3>
-                        <div class="stat-value" id="totalVacas">0</div>
-                        <div class="stat-label">hembras adultas</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Toros</h3>
-                        <div class="stat-value" id="totalToros">0</div>
-                        <div class="stat-label">machos adultos</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Machos Pequeños</h3>
-                        <div class="stat-value stat-male" id="totalMachosPeq">0</div>
-                        <div class="stat-label">terneros/novillos</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Hembras Pequeñas</h3>
-                        <div class="stat-value stat-female" id="totalHembrasPeq">0</div>
-                        <div class="stat-label">terneras/novillas</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Total Machos</h3>
-                        <div class="stat-value stat-male" id="totalMachos">0</div>
-                        <div class="stat-label">en la finca</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Total Hembras</h3>
-                        <div class="stat-value stat-female" id="totalHembras">0</div>
-                        <div class="stat-label">en la finca</div>
-                    </div>
-                    <div class="stat-card">
-                        <h3>Promedio de Peso</h3>
-                        <div class="stat-value" id="promedioPeso">0</div>
-                        <div class="stat-label">kilogramos</div>
+                    
+                    <div id="nivel-descendientes" class="nivel-arbol nivel-descendientes">
+                        <h2>Estadísticas Actuales</h2>
+                        
+                        <div class="stat-card">
+                            <h3>Total de Animales</h3>
+                            <div class="stat-value" id="totalAnimales">0</div>
+                        </div>
+                        
+                        <div class="stats-container">
+                            <div class="stat-card">
+                                <h3>Vacas</h3>
+                                <div class="stat-value" id="totalVacas">0</div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <h3>Toros</h3>
+                                <div class="stat-value" id="totalToros">0</div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <h3>Machos Pequeños</h3>
+                                <div class="stat-value stat-male" id="totalMachosPeq">0</div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <h3>Hembras Pequeñas</h3>
+                                <div class="stat-value stat-female" id="totalHembrasPeq">0</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div style="margin-top: 40px; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.08);">
-                    <h3>Distribución por Categoría</h3>
-                    <div id="graficoDistribucion" style="margin-top: 20px;"></div>
+            </section>
+
+            <section id="sanidad" class="seccion">
+                <h2>Registro de Tratamientos</h2>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Registro de tratamientos para llevar un control de la sanidad en tu ganado.
+                </div>
+                
+                <form id="formSanidad">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>ID Animal:</label>
+                            <input type="text" id="animalId" placeholder="ID Animal (auto)" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label>Arete:</label>
+                            <input type="text" id="arete" placeholder="Número de Arete">
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo Tratamiento:</label>
+                            <input type="text" id="tipoTratamiento" placeholder="Vacunación, Desparasitación...">
+                        </div>
+                        <div class="form-group">
+                            <label>Detalles:</label>
+                            <textarea id="detallesSanidad"></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-syringe"></i> Registrar Tratamiento</button>
+                </form>
+
+                <h3 style="transition: margin-left 0.3s;">Historial de Tratamientos</h3>
+                <div id="historialSanidad">
+                    <p>No hay tratamientos registrados</p>
+                </div>
+            </section>
+
+            <section id="reproduccion" class="seccion">
+                <h2>Registro de Reproducción</h2>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Registra las montas para llevar un control de la reproducción en tu ganado.
+                </div>
+
+                <form id="formReproduccion">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>ID Vaca:</label>
+                            <select id="animalSanidad" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>ID Toro:</label>
+                            <select id="toro" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Fecha Monta:</label>
+                            <input type="date" id="fechaMonta" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Método:</label>
+                            <select id="metodo" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label>Observaciones:</label>
+                            <textarea id="observacionesReproduccion"></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-reproduction"><i class="fas fa-heart"></i> Registrar Monta</button>
+                </form>
+
+                <h3 style="transition: margin-left 0.3s;">Historial de Reproducción</h3>
+                <div id="historialReproduccion">
+                    <p>No hay registros de reproducción</p>
+                </div>
+            </section>
+
+            <section id="partos" class="seccion">
+                <h2>Próximos Partos</h2>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Lista de vacas con partos programados en los próximos meses.
+                </div>
+
+                <div id="listaPartos">
+                    <p>Cargando próximos partos...</p>
+                </div>
+            </section>
+
+            <section id="potreros" class="seccion">
+                <h2>Gestión de Potreros</h2>
+                <form id="formPotreros">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nombre del Potrero:</label>
+                            <input type="text" id="nombrePotrero" placeholder="Ej: Potrero Norte" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Área (hectáreas):</label>
+                            <input type="number" id="areaPotrero" placeholder="Ej: 5.2" min="0.1" step="0.1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Capacidad:</label>
+                            <input type="number" id="capacidadPotrero" placeholder="Número de animales" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Descripción:</label>
+                            <textarea id="descripcionPotrero" placeholder="Características del potrero"></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Agregar Potrero</button>
+                </form>
+
+                <h3 style="transition: margin-left 0.3s;">Lista de Potreros</h3>
+                <div id="listaPotreros">
+                    <p>No hay potreros registrados</p>
+                </div>
+            </section>
+
+            <section id="finanzas" class="seccion">
+                <h2>Gestión Financiera</h2>
+                <form id="formFinanzas">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Fecha:</label>
+                            <input type="date" id="fechaFinanza" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Tipo:</label>
+                            <select id="tipoFinanza" required>
+                                <option value="Ingreso">Ingreso</option>
+                                <option value="Egreso">Egreso</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Descripción:</label>
+                            <input type="text" id="descripcionFinanza" placeholder="Venta de leche, Compra de alimento...">
+                        </div>
+                        <div class="form-group">
+                            <label>Monto ($):</label>
+                            <input type="number" id="montoFinanza" placeholder="0.00" min="0" step="0.01" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Registrar Movimiento</button>
+                </form>
+
+                <h3 style="transition: margin-left 0.3s;">Resumen Financiero</h3>
+                <div id="resumenFinanciero">
+                    <p>No hay datos financieros de registrados</p>
+                </div>
+                
+                <h3 style="transition: margin-left 0.3s;">Historial de Movimientos</h3>
+                <div id="historialFinanzas">
+                    <p>No hay movimientos registrados</p>
+                </div>
+            </section>
+
+            <section id="inventario" class="seccion">
+                <h2>Gestión de Inventario</h2>
+                <form id="formInventario">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Ítem:</label>
+                            <input type="text" id="nombreItem" placeholder="Alimento concentrado, Medicamentos..." required>
+                        </div>
+                        <div class="form-group">
+                            <label>Cantidad:</label>
+                            <input type="number" id="cantidadItem" placeholder="0" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Categoría:</label>
+                            <select id="categoriaItem" required>
+                                <option value="Alimento">Alimento</option>
+                                <option value="Medicina">Medicina</option>
+                                <option value="Equipo">Equipo</option>
+                                <option value="Otros">Otros</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Descripción:</label>
+                            <textarea id="descripcionItem" placeholder="Detalles del ítem"></textarea>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Agregar al Inventario</button>
+                </form>
+
+                <h3 style="transition: margin-left 0.3s;">Inventario Actual</h3>
+                <div id="listaInventario">
+                    <p>No hay ítems en el inventario de registrados</p>
+                </div>
+            </section>
+
+            <section id="alertas" class="seccion">
+                <h2>Alertas y Recordatorios</h2>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Sistema de alertas para próximos partos, vacunas y otros eventos importantes.
+                </div>
+
+                <div id="listaAlertas">
+                    <p>No hay alertas activas en este momento</p>
+                </div>
+            </section>
+
+            <section id="admin" class="seccion">
+                <h2><i class="fas fa-user-shield"></i> Panel de Administración <span class="admin-badge">Admin</span></h2>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Esta sección es exclusiva para el administrador del sistema.
+                </div>
+
+                <form id="admin-register-form">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Nombre completo:</label>
+                            <input type="text" id="admin-nombre" placeholder="Nombre completo" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Correo electrónico:</label>
+                            <input type="email" id="admin-email" placeholder="Correo electrónico" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Contraseña:</label>
+                            <input type="password" id="admin-password" placeholder="Contraseña (mín. 6 caracteres)" required minlength="6">
+                        </div>
+                    </div>
+                    <button type="submit" id="btnAdminRegister"><i class="fas fa-user-plus"></i> Crear Nuevo Usuario</button>
+                </form>
+
+                <h3 style="transition: margin-left 0.3s;">Usuarios Registrados</h3>
+                <div id="usuarios-container">
+                    <p>No hay usuarios registrados en el sistema</p>
                 </div>
             </section>
         </main>
@@ -1309,48 +393,23 @@
                     <h3><i class="fas fa-exclamation-triangle"></i> Resolver Conflicto</h3>
                     <p>Se detectó un conflicto entre tus cambios locales y los cambios en el servidor.</p>
                 </div>
-                
+
                 <div class="conflict-versions">
-                    <div class="version-card current">
-                        <div class="version-header">
-                            <div class="version-title">Versión Actual (Servidor)</div>
-                            <div class="version-meta">
-                                <i class="fas fa-cloud"></i>
-                                <span id="serverTimestamp">Hace 5 minutos</span>
-                            </div>
-                        </div>
-                        <div id="serverVersionContent"></div>
-                    </div>
-                    
-                    <div class="version-card pending">
-                        <div class="version-header">
-                            <div class="version-title">Tus Cambios (Locales)</div>
-                            <div class="version-meta">
-                                <i class="fas fa-laptop"></i>
-                                <span id="localTimestamp">Hace 2 minutos</span>
-                            </div>
-                        </div>
-                        <div id="localVersionContent"></div>
-                    </div>
+                    <div id="versionCardServer" class="version-card current"></div>
+                    <div id="versionCardLocal" class="version-card pending"></div>
                 </div>
-                
+
                 <div class="conflict-actions">
-                    <button class="btn-keep-current" id="btnKeepServer">
-                        <i class="fas fa-cloud-download-alt"></i> Mantener versión del servidor
-                    </button>
-                    <button class="btn-keep-pending" id="btnKeepLocal">
-                        <i class="fas fa-laptop"></i> Mantener mis cambios
-                    </button>
-                    <button class="btn-merge" id="btnMerge">
-                        <i class="fas fa-code-merge"></i> Combinar cambios
-                    </button>
+                    <button id="btnKeepServer"><i class="fas fa-cloud-download-alt"></i> Mantener versión del servidor</button>
+                    <button id="btnKeepLocal"><i class="fas fa-laptop"></i> Mantener mis cambios</button>
+                    <button id="btnMerge"><i class="fas fa-code-merge"></i> Combinar cambios</button>
                 </div>
             </div>
         </div>
         
         <div id="offline-indicator" class="offline-indicator" style="display: none;">
             <i class="fas fa-wifi-slash"></i>
-            <span>Sin conexión - Trabajando en modo local</span>
+            <span>Sin conexión</span>
         </div>
     </div>
 
@@ -1371,7 +430,7 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // Habilitar persistencia de datos
+        // Habilitar persistencia de datos para funcionamiento offline
         db.enablePersistence()
             .catch((err) => {
                 if (err.code === 'failed-precondition') {
@@ -1399,58 +458,54 @@
         const offlineIndicator = document.getElementById('offline-indicator');
         const offlineRegistroAlert = document.getElementById('offline-registro-alert');
         const offlineListaAlert = document.getElementById('offline-lista-alert');
+        const offlineSanidadAlert = document.getElementById('offline-sanidad-alert');
 
         // Variables globales
-        let animalesData = []; 
+        let animalesData = [];
+        let tratamientosData = [];
+        let potrerosData = [];
         let isOnline = navigator.onLine;
-        let pendingWrites = []; 
-        let syncInterval = null;
-        let unsubscribeAnimales = null;
+        let pendingWrites = []; // Para operaciones pendientes de sincronización
 
         // ======================
-        // MANEJO DE CONEXIÓN
+        // FUNCIONALIDAD OFFLINE MEJORADA
         // ======================
         
         // Función para actualizar estado de conexión
         function updateConnectionStatus(connected) {
             isOnline = connected;
-            
+
             if (connected) {
                 statusDot.classList.add('connected');
                 statusDot.classList.remove('disconnected', 'offline');
                 statusText.textContent = 'Conectado';
                 offlineIndicator.style.display = 'none';
-                
+
                 offlineRegistroAlert.style.display = 'none';
                 offlineListaAlert.style.display = 'none';
-                
-                // Reconectar listeners
-                setupAnimalesRealtime();
-                
-                // Sincronizar datos pendientes
+                offlineSanidadAlert.style.display = 'none';
+
+                // Iniciar sincronización inmediata al recuperar conexión
                 syncPendingWrites();
-                startSyncInterval();
             } else {
                 statusDot.classList.add('disconnected');
-                statusDot.classList.remove('connected', 'offline');
+                statusDot.remove('connected', 'offline');
                 statusText.textContent = 'Sin conexión';
                 offlineIndicator.style.display = 'flex';
-                
+
                 // Detener sincronización
                 if (syncInterval) {
                     clearInterval(syncInterval);
                     syncInterval = null;
                 }
-                
+
                 // Mostrar alertas offline en secciones activas
-                if (document.getElementById('registro').classList.contains('active')) {
-                    offlineRegistroAlert.style.display = 'block';
-                }
-                if (document.getElementById('lista').classList.contains('active')) {
-                    offlineListaAlert.style.display = 'block';
-                }
-                
-                showNotification('Se perdió la conexión. Trabajando en modo offline', 'offline');
+                const activeSections = ['registro', 'lista', 'sanidad'];
+                activeSections.forEach(sectionId => {
+                    if (document.getElementById(sectionId).classList.contains('active')) {
+                        showNotification(`Datos ${sectionId} almacenados localmente`, 'offline');
+                    }
+                });
             }
         }
 
@@ -1459,7 +514,7 @@
         window.addEventListener('offline', () => updateConnectionStatus(false));
         updateConnectionStatus(navigator.onLine);
 
-        // Guardar datos localmente
+        // Guardar datos localmente para acceso offline
         function saveLocalData(key, data) {
             try {
                 localStorage.setItem(key, JSON.stringify(data));
@@ -1467,829 +522,822 @@
                 console.error("Error guardando datos locales: ", e);
                 if (e.name === 'QuotaExceededError') {
                     localStorage.clear();
-                    localStorage.setItem(key, JSON.stringify(data));
+                    saveLocalData(key, data);
                 }
             }
         }
-        
+
         // Obtener datos locales
         function getLocalData(key) {
             try {
-                const data = localStorage.getItem(key);
-                return data ? JSON.parse(data) : null;
+                return JSON.parse(localStorage.getItem(key)) || [];
             } catch (e) {
                 console.error("Error leyendo datos locales: ", e);
-                return null;
+                return [];
             }
         }
-        
+
         // Sincronizar operaciones pendientes
         async function syncPendingWrites() {
             if (pendingWrites.length === 0 || !isOnline) return;
-            
+
             const user = auth.currentUser;
             if (!user) return;
-            
-            // Procesar cada operación pendiente
-            for (let i = 0; i < pendingWrites.length; i++) {
-                const operation = pendingWrites[i];
-                
-                try {
+
+            try {
+                for (let i = 0; i < pendingWrites.length; i++) {
+                    const operation = pendingWrites[i];
+
                     if (operation.type === 'saveAnimal') {
                         const animalRef = db.collection('users').doc(user.uid)
                             .collection('animales').doc(operation.data.id);
-                            
-                        const serverDoc = await animalRef.get();
-                        const serverData = serverDoc.data();
-                        
-                        // Comprobar conflictos
-                        if (serverDoc.exists && serverData.version && serverData.version > (operation.data.version || 0)) {
-                            // Hay conflicto - mostrar al usuario
+
+                        let serverDoc;
+                        try {
+                            serverDoc = await animalRef.get();
+                        } catch (e) {
+                            console.warn("Operación pendiente de saveAnimal: ", e);
+                            continue;
+                        }
+
+                        const serverData = serverDoc.exists ? serverDoc.data() : {};
+
+                        if (!serverDoc.exists || serverData.version && operation.data.version && serverData.version > operation.data.version) {
                             showConflictResolver(serverData, operation.data);
-                            return;
+                        } else {
+                            await animalRef.set(operation.data);
+                            pendingWrites.splice(i, 1);
+                            saveLocalData('pendingWrites', pendingWrites);
                         }
-                        
-                        // Sin conflicto - guardar en servidor
-                        operation.data.version = serverDoc.exists ? (serverData.version || 0) + 1 : 1;
-                        operation.data.pendingSync = null;
-                        await animalRef.set(operation.data);
-                        
-                        // Actualizar datos locales
-                        const index = animalesData.findIndex(a => a.id === operation.data.id);
-                        if (index !== -1) {
-                            animalesData[index] = operation.data;
-                            saveLocalData(`animales_${user.uid}`, animalesData);
-                        }
-                        
-                        // Eliminar operación pendiente
-                        pendingWrites.splice(i, 1);
-                        i--;
                     } else if (operation.type === 'deleteAnimal') {
-                        await db.collection('users').doc(user.uid)
-                            .collection('animales').doc(operation.data.id).delete();
-                        
-                        pendingWrites.splice(i, 1);
-                        i--;
+                        const animalId = operation.data.id;
+                        const animalDoc = db.collection('users').doc(user.uid)
+                            .collection('animales').doc(animalId);
+
+                        try {
+                            await animalRef.delete();
+                            pendingWrites.splice(i, 1);
+                            saveLocalData('pendingWrites', pendingWrites);
+                        } catch (e) {
+                            console.warn("Operación pendiente de deleteAnimal: ", e);
+                        }
+                    } else if (operation.type === 'saveTratamiento') {
+                        const tratamientoRef = db.collection('users').doc(user.uid)
+                            .collection('tratamientos').doc(operation.data.id);
+
+                        try {
+                            await tratamientoRef.set(operation.data);
+                            pendingWrites.splice(i, 1);
+                            saveLocalData('pendingWrites', pendingWrites);
+                        } catch (e) {
+                            console.warn("Operación pendiente de saveTratamiento: ", e);
+                        }
                     }
-                    
-                    saveLocalData('pendingWrites', pendingWrites);
-                    
-                } catch (error) {
-                    console.error("Error sincronizando operación: ", error);
-                    continue;
+
+                    if (!isOnline && pendingWrites.length > 0) showNotification(`Algunos datos ${sectionId} requieren atención`, 'warning');
                 }
-            }
-            
-            if (pendingWrites.length === 0) {
-                showNotification('Datos sincronizados correctamente', 'success');
-            } else {
-                showNotification('Algunos datos pendientes requieren atención', 'warning');
+            } catch (error) {
+                console.error("Error sincronizando operaciones pendientes: ", error);
             }
         }
-        
-        // Guardar operación pendiente
+
+        // Agregar operación pendiente para sincronización posterior
         function addPendingWrite(type, data) {
             pendingWrites.push({ type, data });
             saveLocalData('pendingWrites', pendingWrites);
         }
-        
-        // Cargar operaciones pendientes
+
+        // Cargar operaciones pendientes desde localStorage al iniciar
         function loadPendingWrites() {
             const savedWrites = getLocalData('pendingWrites');
             if (savedWrites) {
                 pendingWrites = savedWrites;
+                syncPendingWrites(); // Sincronizar inmediatamente al cargar
             }
         }
-        
+
         // Iniciar intervalo de sincronización
         function startSyncInterval() {
-            if (syncInterval || !isOnline) return;
-            
+            const user = auth.currentUser;
+            if (!user || user.uid !== ADMIN_UID) return;
+
             syncInterval = setInterval(() => {
                 if (isOnline) {
                     syncPendingWrites();
+                } else {
+                    showNotification(`Algunos datos ${sectionId} requieren atención`, 'warning');
                 }
-            }, 15000);
+            }, 15000); // Sincronizar cada 15 segundos
         }
 
         // ======================
-        // AUTENTICACIÓN
+        // RESOLUCIÓN DE CONFLICTOS
         // ======================
-        // Validación de formulario de login
-        document.getElementById('email').addEventListener('input', validateLoginForm);
-        document.getElementById('password').addEventListener('input', validateLoginForm);
         
-        function validateLoginForm() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const emailError = document.getElementById('email-error');
-            const passwordError = document.getElementById('password-error');
-            let isValid = true;
-            
-            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-                emailError.textContent = 'Ingrese un correo válido';
-                emailError.style.display = 'block';
-                isValid = false;
-            } else {
-                emailError.style.display = 'none';
-            }
-            
-            if (!password || password.length < 6) {
-                passwordError.textContent = 'La contraseña debe tener al menos 6 caracteres';
-                passwordError.style.display = 'block';
-                isValid = false;
-            } else {
-                passwordError.style.display = 'none';
-            }
-            
-            return isValid;
-        }
-        
-        // Login
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            if (!validateLoginForm()) return;
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            try {
-                loginSpinner.style.display = 'inline-block';
-                loginButton.disabled = true;
-                
-                const userCredential = await auth.signInWithEmailAndPassword(email, password);
-                const user = userCredential.user;
-                
-                loginSpinner.style.display = 'none';
-                loginButton.disabled = false;
-                
-                document.getElementById('login-container').style.display = 'none';
-                document.getElementById('main-app').style.display = 'block';
-                userAvatar.src = `https://ui-avatars.com/api/?name=${user.email.charAt(0)}&background=3498db&color=fff`;
-                
-                startSyncInterval();
-            } catch (error) {
-                loginSpinner.style.display = 'none';
-                loginButton.disabled = false;
-                
-                let errorMessage;
-                switch(error.code) {
-                    case 'auth/user-not-found':
-                        errorMessage = 'Usuario no encontrado';
-                        break;
-                    case 'auth/wrong-password':
-                        errorMessage = 'Contraseña incorrecta';
-                        break;
-                    default:
-                        errorMessage = 'Error al iniciar sesión';
-                }
-                
-                document.getElementById('password-error').textContent = errorMessage;
-                document.getElementById('password-error').style.display = 'block';
-            }
-        });
-        
-        // Logout
-        document.getElementById('btnLogout').addEventListener('click', () => {
-            auth.signOut();
-        });
-        
-        // Observador de estado de autenticación
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                loginContainer.style.display = 'none';
-                mainApp.style.display = 'block';
-                userAvatar.src = `https://ui-avatars.com/api/?name=${user.email.charAt(0)}&background=3498db&color=fff`;
-                
-                if (user.uid === ADMIN_UID) {
-                    adminMenuItem.style.display = 'block';
-                } else {
-                    adminMenuItem.style.display = 'none';
-                }
-                
-                initApp();
-            } else {
-                loginContainer.style.display = 'flex';
-                mainApp.style.display = 'none';
-                
-                if (unsubscribeAnimales) {
-                    unsubscribeAnimales();
-                    unsubscribeAnimales = null;
-                }
-                
-                if (syncInterval) {
-                    clearInterval(syncInterval);
-                    syncInterval = null;
-                }
-            }
-        });
-        
-        // ======================
-        // FUNCIONALIDAD PRINCIPAL
-        // ======================
-        // Mostrar notificación
-        function showNotification(message, type) {
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.innerHTML = `
-                <div>${message}</div>
-                <button class="notification-close">×</button>
+        function showConflictResolver(serverData, localData) {
+            const resolver = document.getElementById('conflictResolver');
+            const serverContent = document.getElementById('versionCardServer');
+            const localContent = document.getElementById('versionCardLocal');
+
+            serverContent.innerHTML = `
+                <h4>
+                    ${serverData.nombre} (${serverData.id})
+                    ${serverData.categoria}
+                    ${serverData.sexo === 'Macho' ? '<span class="stat-male">(Macho)</span>' : ''}
+                    ${serverData.sexo === 'Hembra' ? '<span class="stat-female">(Hembra)</span>' : ''}
+                </h4>
+                <p>${calcularEdad(serverData.fechaNacimiento)} - 
+                ${serverData.estado} (${serverData.categoria})
+                ${serverData.padre && serverData.sexo === 'Macho' ? '<span class="stat-male">(Padre)</span>' : ''}
+                ${serverData.madre && serverData.sexo === 'Hembra' ? '<span class="stat-female">(Madre)</span>' : ''}</p>
+            `;
+
+            localContent.innerHTML = `
+                <h4>
+                    ${calcularEdad(localData.fechaNacimiento)} - 
+                    ${localData.estado} (${localData.categoria})
+                    ${localData.padre && localData.sexo === 'Macho' ? '<span class="stat-male">(Padre)</span>' : ''}
+                    ${localData.madre && localData.sexo === 'Hembra' ? '<span class="stat-female">(Madre)</span>' : ''}</p>
+                <p>${calcularEdad(localData.fechaNacimiento)} - 
+                    ${localData.estado} (${localData.categoria})
+                    ${localData.padre && localData.sexo === 'Macho' ? '<span class="stat-male">(Padre)</span>' : ''}
+                    ${localData.madre && localData.sexo === 'Hembra' ? '<span class="stat-female">(Madre)</span>' : ''}</p>
             `;
             
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                setTimeout(() => {
-                    document.body.removeChild(notification);
-                }, 300);
-            }, 4000);
-            
-            notification.querySelector('.notification-close').onclick = () => {
-                document.body.removeChild(notification);
-            };
+            resolver.style.display = 'flex';
         }
-        
-        // Función para configurar la escucha de animales
-        function setupAnimalesRealtime() {
-            const user = auth.currentUser;
-            if (!user) return;
 
-            // Cargar desde localStorage primero
-            const localAnimals = getLocalData(`animales_${user.uid}`);
-            if (localAnimals) {
-                animalesData = localAnimals;
-                renderAnimalList();
-                loadAnimalsForSelects();
-                renderEstadisticas();
+        // Calcular edad
+        function calcularEdad(fechaNacimiento) {
+            const nacimiento = new Date(fechaNacimiento);
+            const hoy = new Date();
+            let edad = hoy.getFullYear() - nacimiento.getFullYear();
+
+            if (hoy.getMonth() < nacimiento.getMonth()) {
+                edad--;
+            } else if (hoy.getMonth() === nacimiento.getMonth() && hoy.getDate() < nacimiento.getDate()) {
+                edad--;
             }
 
-            const animalesRef = db.collection('users').doc(user.uid).collection('animales');
-
-            // Desuscribir listener anterior
-            if (unsubscribeAnimales) {
-                unsubscribeAnimales();
-            }
-
-            unsubscribeAnimales = animalesRef.onSnapshot(snapshot => {
-                let hasChanges = false;
-                snapshot.docChanges().forEach(change => {
-                    const animalData = change.doc.data();
-                    const animalId = change.doc.id;
-
-                    if (change.type === 'added' || change.type === 'modified') {
-                        animalData.id = animalId;
-                        
-                        const index = animalesData.findIndex(a => a.id === animalId);
-                        if (index !== -1) {
-                            animalesData[index] = animalData;
-                        } else {
-                            animalesData.push(animalData);
-                        }
-                        hasChanges = true;
-                    } else if (change.type === 'removed') {
-                        const index = animalesData.findIndex(a => a.id === animalId);
-                        if (index !== -1) {
-                            animalesData.splice(index, 1);
-                            hasChanges = true;
-                        }
-                    }
-                });
-
-                if (hasChanges) {
-                    saveLocalData(`animales_${user.uid}`, animalesData);
-                    renderAnimalList();
-                    loadAnimalsForSelects();
-                    renderEstadisticas();
-                }
-            }, error => {
-                console.error("Error en snapshot animales: ", error);
-                const localAnimals = getLocalData(`animales_${user.uid}`);
-                if (localAnimals) {
-                    animalesData = localAnimals;
-                    renderAnimalList();
-                    loadAnimalsForSelects();
-                    renderEstadisticas();
-                }
-            });
-        }
-
-        // Cargar animales en selectores
-        function loadAnimalsForSelects() {
-            const selectPadre = document.getElementById('padre');
-            selectPadre.innerHTML = '<option value="">Seleccionar padre</option>';
-            animalesData
-                .filter(animal => animal.sexo === 'Macho' && (animal.categoria === 'Toro' || animal.categoria === 'Novillo'))
-                .forEach(animal => {
-                    const option = document.createElement('option');
-                    option.value = animal.id;
-                    option.textContent = `${animal.nombre} (${animal.id})`;
-                    selectPadre.appendChild(option);
-                });
-            
-            const selectMadre = document.getElementById('madre');
-            selectMadre.innerHTML = '<option value="">Seleccionar madre</option>';
-            animalesData
-                .filter(animal => animal.sexo === 'Hembra' && (animal.categoria === 'Vaca' || animal.categoria === 'Novilla'))
-                .forEach(animal => {
-                    const option = document.createElement('option');
-                    option.value = animal.id;
-                    option.textContent = `${animal.nombre} (${animal.id})`;
-                    selectMadre.appendChild(option);
-                });
+            return edad >= 0 ? edad + " años" : "N/A";
         }
         
-        // Función para guardar animal
+        // ======================
+        // MÓDULO DE REGISTROS
+        // ======================
         async function saveAnimal() {
             const user = auth.currentUser;
             if (!user) {
                 showNotification('Debe iniciar sesión', 'error');
                 return;
             }
-            
-            const animalId = document.getElementById('id').value || 'id-' + Date.now();
-            
-            const animalData = {
-                id: animalId,
-                arete: document.getElementById('arete').value.trim(),
-                nombre: document.getElementById('nombre').value.trim(),
-                categoria: document.getElementById('categoria').value,
-                sexo: document.getElementById('sexo').value,
-                raza: document.getElementById('raza').value.trim(),
-                peso: parseFloat(document.getElementById('peso').value) || 0,
-                fechaNacimiento: document.getElementById('fechaNacimiento').value,
-                estado: document.getElementById('estado').value,
-                padre: document.getElementById('padre').value.trim(),
-                madre: document.getElementById('madre').value.trim(),
-                observaciones: document.getElementById('observaciones').value.trim(),
-                lastLocalUpdate: new Date().toISOString()
-            };
-            
-            if (isOnline) {
-                animalData.lastUpdated = firebase.firestore.FieldValue.serverTimestamp();
-            } else {
-                animalData.lastUpdated = new Date().toISOString();
-            }
-            
-            if (!animalData.nombre) {
-                showNotification('El nombre es obligatorio', 'error');
-                return;
-            }
-            
-            const guardarSpinner = document.getElementById('guardar-spinner');
-            const guardarText = document.getElementById('guardar-text');
-            guardarSpinner.style.display = 'inline-block';
-            guardarText.textContent = isOnline ? 'Guardando...' : 'Guardando localmente...';
-            
+
             try {
-                if (isOnline) {
-                    const animalRef = db.collection('users').doc(user.uid).collection('animales').doc(animalData.id);
-                    const serverDoc = await animalRef.get();
-                    
-                    let serverVersion = 0;
-                    if (serverDoc.exists) {
-                        const serverData = serverDoc.data();
-                        if (serverData.version && animalData.version && serverData.version > animalData.version) {
-                            guardarSpinner.style.display = 'none';
-                            guardarText.textContent = 'Guardar Animal';
-                            showConflictResolver(serverData, animalData);
-                            return;
-                        }
-                        serverVersion = serverData.version || 0;
-                    }
-                    
-                    animalData.version = serverVersion + 1;
-                    
-                    if (!animalData.changeHistory) animalData.changeHistory = [];
-                    animalData.changeHistory.push({
-                        action: document.getElementById('id').value ? 'update' : 'create',
-                        user: user.uid,
-                        timestamp: new Date().toISOString(),
-                        fields: Object.keys(animalData)
-                    });
-                    
-                    await animalRef.set(animalData);
-                    
-                    showNotification(
-                        document.getElementById('id').value ? 
-                        'Animal actualizado' : 'Animal registrado', 
-                        'success'
-                    );
-                } else {
-                    animalData.pendingSync = true;
-                    animalData.offlineVersion = Date.now();
-                    
-                    if (!animalData.changeHistory) animalData.changeHistory = [];
-                    animalData.changeHistory.push({
-                        action: document.getElementById('id').value ? 'update' : 'create',
-                        user: user.uid,
-                        timestamp: new Date().toISOString(),
-                        fields: Object.keys(animalData)
-                    });
-                    
-                    addPendingWrite('saveAnimal', animalData);
-                    showNotification('Animal guardado localmente. Se sincronizará cuando recuperes conexión', 'offline');
-                    
-                    const index = animalesData.findIndex(a => a.id === animalData.id);
-                    if (index !== -1) {
-                        animalesData[index] = animalData;
-                    } else {
-                        animalesData.push(animalData);
-                    }
-                    
-                    saveLocalData(`animales_${user.uid}`, animalesData);
-                }
+                let animalId = document.getElementById('id').value || 'id-' + Date.now();
                 
-                document.getElementById('formRegistro').reset();
-                document.getElementById('id').value = '';
-                loadAnimalsForSelects();
-                
-            } catch (error) {
-                showNotification('Error guardando animal: ' + error.message, 'error');
-            } finally {
-                guardarSpinner.style.display = 'none';
-                guardarText.textContent = 'Guardar Animal';
-            }
-        }
-        
-        // Renderizar lista de animales
-        function renderAnimalList() {
-            const tbody = document.getElementById('tablaAnimales');
-            if (!tbody) return;
-            
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 30px;"><i class="fas fa-spinner fa-spin"></i> Cargando datos...</td></tr>';
-            
-            try {
-                if (animalesData.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 30px;">No hay animales registrados</td></tr>';
+                const areteInput = document.getElementById('arete');
+                const nombreInput = document.getElementById('nombre');
+
+                if (!areteInput.value.trim() || !nombreInput.value.trim()) {
+                    showNotification('El nombre y el arete son obligatorios', 'error');
                     return;
                 }
-                
-                let html = '';
+
+                let animalData;
+
+                if (isOnline) {
+                    animalData = {
+                        id: animalId,
+                        arete: areteInput.value.trim(),
+                        nombre: nombreInput.value.trim(),
+                        categoria: document.getElementById('categoria').value,
+                        sexo: document.getElementById('sexo').value,
+                        raza: document.getElementById('raza').value.trim(),
+                        peso: parseFloat(document.getElementById('peso').value) || 0,
+                        fechaNacimiento: document.getElementById('fechaNacimiento').value,
+                        estado: document.getElementById('estado').value,
+                        padre: document.getElementById('padre').value.trim(),
+                        madre: document.getElementById('madre').value.trim(),
+                        observaciones: document.getElementById('observaciones').value.trim()
+                    };
+                    
+                    animalData.lastUpdated = firebase.firestore.FieldValue.serverTimestamp();
+                } else {
+                    animalData = getLocalData(`animales_${user.uid}`, animalId);
+                    areteInput.value = animalData.arete || '';
+                    nombreInput.value = animalData.nombre;
+                    document.getElementById('categoria').value = animalData.categoria;
+                    document.getElementById('sexo').value = animalData.sexo;
+                    document.getElementById('raza').value = animalData.raza || '';
+                    document.getElementById('peso').value = animalData.peso.toFixed(1) || '0';
+                    document.getElementById('fechaNacimiento').value = animalData.fechaNacimiento || '';
+                    document.getElementById('estado').value = animalData.estado;
+                    document.getElementById('padre').value = animalData.padre || '';
+                    document.getElementById('madre').value = animalData.madre || '';
+                    document.getElementById('observaciones').value = animalData.observaciones || '';
+
+                    animalData.lastLocalUpdate = new Date().toISOString();
+                }
+
+                const areteError = document.getElementById('arete-error');
+                const nombreError = document.getElementById('nombre-error');
+
+                if (!/^[^\s@]+$/.test(anreteInput.value.trim())) {
+                    areteError.textContent = 'Ingrese un correo válido';
+                    areteError.style.display = 'block';
+                } else {
+                    areteError.style.display = 'none';
+                }
+
+                if (nombreInput.value.trim().length < 6) {
+                    nombreError.textContent = 'La contraseña debe tener al menos 6 caracteres';
+                    nombreError.style.display = 'block';
+                } else {
+                    nombreError.style.display = 'none';
+                }
+
+                let animalRef;
+                try {
+                    animalRef = db.collection('users').doc(user.uid).collection('animales').doc(animalId);
+                } catch (e) {
+                    console.error("Error obteniendo referencia de animales: ", e);
+                    showNotification('Error al obtener la referencia del animales', 'error');
+                    return;
+                }
+
+                if (isOnline) {
+                    await animalRef.set(animalData);
+                } else {
+                    const offlineVersion = `offline_${animalId}`;
+                    saveLocalData(offlineVersion, animalData);
+
+                    // Actualizar datos locales
+                    let localAnimals = getLocalData(`animales_${user.uid}`);
+                    if (localAnimals) {
+                        localAnimals.push(animalData);
+                        localAnimals.sort((a, b) => a.version - b.version);
+                        animalesData = localAnimals;
+                        renderAnimalList();
+                    }
+                }
+
+                showNotification(
+                    isOnline ? 'Animal registrado' : `Animal ${isOnline ? '' : 'actualizado'} guardado localmente`, 
+                    isOnline ? 'success' : 'info'
+                );
+
+                // Limpiar formulario
+                document.getElementById('formRegistro').reset();
+
+                if (isOnline) {
+                    loadAnimalsForSelects();
+                    loadAnimalsForSanidad();
+                }
+
+                renderEstadisticas();
+
+            } catch (error) {
+                console.error("Error registrando animal: ", error);
+                showNotification(`Error al registrar animal: ${error.message}`, 'error');
+            }
+        }
+
+        // ======================
+        // MÓDULO DE LISTAS
+        // ======================
+        async function renderAnimalList() {
+            try {
+                const tbody = document.getElementById('tablaAnimales');
+                if (!tbody) return;
+
+                tbody.innerHTML = '';
+
                 animalesData.forEach(animal => {
                     const edad = calcularEdad(animal.fechaNacimiento);
-                    const isPending = animal.pendingSync;
-                    html += `
-                        <tr>
-                            <td>${animal.id} ${isPending ? '<span class="offline-badge">(offline)</span>' : ''}</td>
-                            <td>${animal.arete || '-'}</td>
-                            <td>${animal.nombre}</td>
-                            <td>${animal.categoria}</td>
-                            <td>${animal.sexo}</td>
-                            <td>${edad}</td>
-                            <td>${animal.estado}</td>
-                            <td>
-                                <button class="btn-ver" data-id="${animal.id}"><i class="fas fa-eye"></i></button>
-                                <button class="btn-editar" data-id="${animal.id}"><i class="fas fa-edit"></i></button>
-                                <button class="btn-eliminar" data-id="${animal.id}"><i class="fas fa-trash"></i></button>
-                            </td>
-                        </tr>
+
+                    const tr = document.createElement('tr');
+                    const idCell = document.createElement('td');
+                    const areteCell = document.createElement('td');
+                    const nombreCell = document.createElement('td');
+                    const categoriaCell = document.createElement('td');
+                    const sexoCell = document.createElement('td');
+                    const pesoCell = document.createElement('td');
+                    const estadoCell = document.createElement('td');
+
+                    idCell.textContent = `${animal.id} ${isOnline ? '' : animal.pendingSync ? '<span class="offline-badge">(offline)</span>' : ''}`;
+                    areteCell.textContent = animal.arete || '-';
+                    nombreCell.textContent = animal.nombre;
+                    categoriaCell.textContent = animal.categoria;
+                    sexoCell.textContent = animal.sexo;
+                    pesoCell.textContent = animal.peso.toFixed(1) || '0';
+                    estadoCell.textContent = animal.estado;
+
+                    tr.appendChild(idCell);
+                    tr.appendChild(areteCell);
+                    tr.appendChild(nombreCell);
+                    tr.appendChild(categoriaCell);
+                    tr.appendChild(sexoCell);
+                    tr.appendChild(pesoCell);
+                    tr.appendChild(estadoCell);
+
+                    const accionesCell = document.createElement('td');
+                    accionesCell.className = 'acciones-cell';
+                    accionesCell.innerHTML = `
+                        <button class="btn-ver" data-id="${animal.id}">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button class="btn-editar" data-id="${animal.id}" style="display: ${isOnline ? '' : 'none'};">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn-eliminar" data-id="${animal.id}" style="display: ${isOnline ? '' : 'none'};">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     `;
+                    tr.appendChild(accionesCell);
+
+                    tbody.appendChild(tr);
                 });
-                
-                tbody.innerHTML = html;
-                
+
+                // Configurar event listeners
                 document.querySelectorAll('.btn-ver').forEach(btn => {
                     btn.addEventListener('click', () => viewAnimal(btn.dataset.id));
                 });
                 
-                document.querySelectorAll('.btn-editar').forEach(btn => {
-                    btn.addEventListener('click', () => editAnimal(btn.dataset.id));
-                });
-                
-                document.querySelectorAll('.btn-eliminar').forEach(btn => {
-                    btn.addEventListener('click', () => deleteAnimal(btn.dataset.id));
-                });
-                
-            } catch (error) {
-                showNotification('Error cargando animales: ' + error.message, 'error');
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 30px; color: #e74c3c;">Error cargando datos</td></tr>';
-            }
-        }
-        
-        // Calcular edad
-        function calcularEdad(fechaNacimiento) {
-            if (!fechaNacimiento) return "N/A";
-            const nacimiento = new Date(fechaNacimiento);
-            const hoy = new Date();
-            let edad = hoy.getFullYear() - nacimiento.getFullYear();
-            const m = hoy.getMonth() - nacimiento.getMonth();
-            if (m < 0 || (m === 0 && hoy.getDate() < nacimiento.getDate())) {
-                edad--;
-            }
-            return edad >= 0 ? edad + " años" : "N/A";
-        }
-        
-        // Ver animal
-        function viewAnimal(id) {
-            try {
-                const animal = animalesData.find(a => a.id === id);
-                if (!animal) return;
-                
-                const cont = document.getElementById('fichaContent');
-                cont.innerHTML = `
-                    <h3 style="margin-bottom: 20px; color: var(--primary);">${animal.nombre} (${animal.categoria})</h3>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 20px;">
-                        <div>
-                            <p><strong>ID:</strong> ${animal.id}</p>
-                            <p><strong>Arete:</strong> ${animal.arete || "N/A"}</p>
-                            <p><strong>Raza:</strong> ${animal.raza}</p>
-                            <p><strong>Peso:</strong> ${animal.peso} kg</p>
-                            <p><strong>Sexo:</strong> ${animal.sexo}</p>
-                        </div>
-                        <div>
-                            <p><strong>Edad:</strong> ${calcularEdad(animal.fechaNacimiento)}</p>
-                            <p><strong>Padre:</strong> ${animal.padre || "N/A"}</p>
-                            <p><strong>Madre:</strong> ${animal.madre || "N/A"}</p>
-                            <p><strong>Estado:</strong> ${animal.estado}</p>
-                        </div>
-                    </div>
-                    <div style="margin-top: 25px;">
-                        <p><strong>Observaciones:</strong></p>
-                        <p>${animal.observaciones || "Ninguna"}</p>
-                    </div>
-                `;
-                document.getElementById('fichaIndividual').style.display = 'block';
-            } catch (error) {
-                showNotification('Error cargando animal: ' + error.message, 'error');
-            }
-        }
-        
-        // Editar animal
-        function editAnimal(id) {
-            try {
-                const animal = animalesData.find(a => a.id === id);
-                if (!animal) return;
-                
-                document.getElementById('id').value = animal.id;
-                document.getElementById('arete').value = animal.arete || '';
-                document.getElementById('nombre').value = animal.nombre;
-                document.getElementById('categoria').value = animal.categoria;
-                document.getElementById('sexo').value = animal.sexo;
-                document.getElementById('raza').value = animal.raza;
-                document.getElementById('peso').value = animal.peso;
-                document.getElementById('fechaNacimiento').value = animal.fechaNacimiento;
-                document.getElementById('estado').value = animal.estado;
-                
-                const padreSelect = document.getElementById('padre');
-                const madreSelect = document.getElementById('madre');
-                
-                if (animal.padre) {
-                    for (let i = 0; i < padreSelect.options.length; i++) {
-                        if (padreSelect.options[i].value === animal.padre) {
-                            padreSelect.selectedIndex = i;
-                            break;
-                        }
-                    }
-                }
-                
-                if (animal.madre) {
-                    for (let i = 0; i < madreSelect.options.length; i++) {
-                        if (madreSelect.options[i].value === animal.madre) {
-                            madreSelect.selectedIndex = i;
-                            break;
-                        }
-                    }
-                }
-                
-                document.getElementById('observaciones').value = animal.observaciones || '';
-                
-                showSection('registro');
-                window.scrollTo(0, 0);
-                
-            } catch (error) {
-                showNotification('Error cargando animal: ' + error.message, 'error');
-            }
-        }
-        
-        // Eliminar animal
-        async function deleteAnimal(id) {
-            const user = auth.currentUser;
-            if (!user) return;
-            
-            const animalIndex = animalesData.findIndex(a => a.id === id);
-            if (animalIndex === -1) return;
-            
-            const animal = animalesData[animalIndex];
-            
-            if (animal.pendingSync) {
-                if (confirm('Este animal no se ha sincronizado aún. ¿Desea eliminarlo localmente?')) {
-                    animalesData.splice(animalIndex, 1);
-                    saveLocalData(`animales_${user.uid}`, animalesData);
-                    
-                    const pendingOps = pendingWrites.filter(op => 
-                        op.type === 'saveAnimal' && op.data.id === id
-                    );
-                    
-                    pendingOps.forEach(op => {
-                        const index = pendingWrites.indexOf(op);
-                        if (index !== -1) {
-                            pendingWrites.splice(index, 1);
-                        }
-                    });
-                    
-                    saveLocalData('pendingWrites', pendingWrites);
-                    
-                    showNotification('Animal eliminado localmente', 'success');
-                    renderAnimalList();
-                    loadAnimalsForSelects();
-                }
-                return;
-            }
-            
-            if (!confirm('¿Eliminar este animal? Esta acción no se puede deshacer.')) return;
-            
-            try {
                 if (isOnline) {
-                    await db.collection('users').doc(user.uid)
-                        .collection('animales').doc(id).delete();
-                } else {
-                    addPendingWrite('deleteAnimal', { id });
-                    showNotification('Animal marcado para eliminación. Se eliminará cuando recuperes conexión', 'offline');
+                    loadAnimalsForSelects();
+                    loadAnimalsForSanidad();
                 }
-                
-                animalesData.splice(animalIndex, 1);
-                saveLocalData(`animales_${user.uid}`, animalesData);
-                
-                showNotification('Animal eliminado', 'success');
-                renderAnimalList();
-                loadAnimalsForSelects();
-                
             } catch (error) {
-                showNotification('Error eliminando animal: ' + error.message, 'error');
+                console.error("Error cargando animales: ", error);
+                showNotification(`Error cargando la lista de animales: ${error.message}`, 'error');
             }
         }
-        
+
         // ======================
-        // INICIALIZACIÓN DE LA APP
+        // MÓDULO DE MODIFICACIONES EN LA LISTA
         // ======================
-        function initApp() {
-            loadPendingWrites();
-            setupAnimalesRealtime();
-            
-            document.getElementById('menuHamburguesa').addEventListener('click', toggleMenu);
-            document.querySelector('.cerrarFicha').addEventListener('click', closeAnimalCard);
-            document.getElementById('formRegistro').addEventListener('submit', (e) => {
-                e.preventDefault();
-                saveAnimal();
-            });
-            document.getElementById('btnExportar').addEventListener('click', exportToExcel);
-            
-            document.querySelectorAll('.sidebar button[data-seccion]').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    showSection(btn.dataset.seccion);
+
+        async function loadAnimalsForSelects() {
+            const selectPadre = document.getElementById('padre');
+            selectMadre = document.getElementById('madre');
+
+            try {
+                animalesData.forEach(animal => {
+                    const option = document.createElement('option');
+                    option.value = animal.id;
+                    option.textContent = `${animal.nombre} (${animal.id})`;
+                    selectPadre.appendChild(option);
+                    selectMadre.appendChild(option);
                 });
-            });
-            
-            document.getElementById('busqueda').addEventListener('input', searchAnimals);
-            
-            showSection('registro');
-            startSyncInterval();
-        }
-        
-        function toggleMenu() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('show');
-        }
-        
-        function showSection(id) {
-            document.querySelectorAll('.seccion').forEach(sec => sec.classList.remove('active'));
-            document.querySelectorAll('.sidebar button').forEach(btn => btn.classList.remove('active'));
-            
-            const target = document.getElementById(id);
-            if (target) target.classList.add('active');
-            
-            const btn = document.querySelector(`.sidebar button[data-seccion="${id}"]`);
-            if (btn) btn.classList.add('active');
-            
-            document.getElementById('fichaIndividual').style.display = 'none';
-            
-            if (window.innerWidth < 768) {
-                document.getElementById('sidebar').classList.remove('show');
+                
+                if (!isOnline) loadTratamientosHistorial(); // Cargar historial de tratamientos solo si offline
+            } catch (error) {
+                console.error("Error cargando animales para selects: ", error);
+                showNotification(`Error cargando animales para los selectores: ${error.message}`, 'error');
             }
-            
-            if (id === 'estadisticas') renderEstadisticas();
         }
-        
-        function closeAnimalCard() {
-            document.getElementById('fichaIndividual').style.display = 'none';
-        }
-        
-        function searchAnimals() {
-            const searchTerm = document.getElementById('busqueda').value.toLowerCase();
-            const rows = document.querySelectorAll('#tablaAnimales tr');
-            
-            rows.forEach(row => {
-                const cells = row.querySelectorAll('td');
-                let found = false;
-                
-                if (cells.length > 0) {
-                    cells.forEach(cell => {
-                        if (cell.textContent.toLowerCase().includes(searchTerm)) {
-                            found = true;
-                        }
-                    });
-                }
-                
-                row.style.display = found ? '' : 'none';
-            });
-        }
-        
-        async function exportToExcel() {
+
+        async function loadTratamientosHistorial() {
+            const cont = document.getElementById('historialSanidad');
+            if (!cont) return;
+
             try {
                 const user = auth.currentUser;
                 if (!user) return;
-                
-                if (animalesData.length === 0) {
-                    showNotification('No hay datos para exportar', 'warning');
+
+                tratamientosData = getLocalData(`tratamientos_${user.uid}`);
+
+                if (tratamientosData.length === 0) {
+                    cont.innerHTML = '<p>No hay tratamientos registrados</p>';
                     return;
                 }
+
+                let html = '';
+                tratamientosData.forEach(tratamiento => {
+                    const fecha = new Date(tratamiento.createdAt).toLocaleDateString();
+                    html += `
+                        <div class="alerta-card">
+                            <h4>
+                                ${tratamiento.animalNombre} - ${tratamiento.tipo}
+                                ${isOnline ? '' : tratamiento.offlineId && `<span class="offline-badge">(offline)</span>`}</h4>
+                            <p>${calcularEdad(tratamiento.fechaNacimiento)} - 
+                            ${tratamiento.estado} (${tratamiento.categoria})
+                            ${tratamiento.padre && tratamiento.sexo === 'Macho' ? '<span class="stat-male">(Padre)</span>' : ''}
+                            ${tratamiento.madre && tratamiento.sexo === 'Hembra' ? '<span class="stat-female">(Madre)</span>' : ''}</p>
+                        </div>
+                    `;
+                });
                 
-                const data = animalesData.map(animal => ({
+                cont.innerHTML = html;
+            } catch (error) {
+                console.error("Error cargando tratamientos historial: ", error);
+                showNotification(`Error cargando el historial de tratamientos: ${error.message}`, 'error');
+            }
+        }
+
+        // ======================
+        // INICIALIZACIÓN DE LA APP
+        // ======================
+
+        function initApp() {
+            loadPendingWrites();
+            
+            db.collection('users').doc(user.uid).collection('animales').onSnapshot(snapshot => {
+                let hasChanges = false;
+                snapshot.docChanges().forEach(change => {
+                    const animalData = change.doc.data();
+
+                    if (change.type === 'added' || change.type === 'modified') {
+                        hasChanges = true;
+
+                        // Actualizar o agregar en animalesData según sea necesario
+                        const existingAnimalIndex = animalesData.findIndex(a => a.id === animalData.id);
+                        if (existingAnimalIndex !== -1) {
+                            animalesData[existingAnimalIndex] = animalData;
+                        } else {
+                            animalesData.push(animalData);
+                        }
+                    } else if (change.type === 'removed') {
+                        hasChanges = true;
+
+                        const index = animalesData.findIndex(a => a.id === animalData.id);
+                        if (index !== -1) {
+                            animalesData.splice(index, 1);
+                        }
+                    }
+
+                    // Actualizar UI solo si estamos online
+                    if (!isOnline && hasChanges) showNotification('Datos sincronizados correctamente', 'success');
+                });
+
+                // Guardar datos locales al completar snapshot
+                saveLocalData(`animales_${user.uid}`, animalesData);
+
+                // Configurar event listeners para navegación solo en secciones activas
+                const activeSections = ['registro', 'lista', 'sanidad'];
+                activeSections.forEach(sectionId => {
+                    if (document.getElementById(sectionId).classList.contains('active')) {
+                        document.querySelectorAll(`.sidebar button[data-seccion="${sectionId}"]`).forEach(btn => {
+                            btn.addEventListener('click', () => showSection(btn.dataset.seccion));
+                        });
+                        
+                        // Evento de búsqueda
+                        document.getElementById('busqueda').addEventListener('input', searchAnimals);
+                    }
+                });
+            });
+
+        function viewAnimal(id) {
+            try {
+                const animal = animalesData.find(a => a.id === id);
+
+                if (animal) {
+                    const cont = document.getElementById('fichaContent');
+                    cont.innerHTML = `
+                        <h3>${animal.nombre} (${animal.categoria})</h3>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div>
+                                <p><strong>ID:</strong> ${animal.id}</p>
+                                <p><strong>Arete:</strong> ${animal.arete || '-'}</p>
+                                <p><strong>Raza:</strong> ${animal.raza}</p>
+                                <p><strong>Peso:</strong> ${animal.peso.toFixed(1)} kg</p>
+                                <p><strong>Sexo:</strong> ${animal.sexo}</p>
+                            </div>
+                            
+                            <div>
+                                <p><strong>Edad:</strong> ${calcularEdad(animal.fechaNacimiento)}</p>
+                                <p>${animal.padre ? `<span class="stat-male">(Padre)</span>` : ''}</p>
+                                <p>${animal.madre ? `<span class="stat-female">(Madre)</span>` : ''}</p>
+                                <p><strong>Estado:</strong> ${animal.estado}</p>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 20px;">
+                            <p><strong>Observaciones:</strong></p>
+                            <p>${animal.observaciones || 'Ninguna'}</p>
+                        </div>
+                    `;
+                } else {
+                    showNotification('Animal no encontrado', 'error');
+                }
+
+                document.getElementById('fichaIndividual').style.display = 'block';
+            } catch (error) {
+                console.error("Error cargando animal: ", error);
+                showNotification(`Error cargando la ficha del animal: ${error.message}`, 'error');
+            }
+        }
+
+        // ======================
+        // MÓDULO DE ELIMINACIÓN EN LA LISTA
+        // ======================
+
+        async function deleteAnimal(id) {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            try {
+                const animalIndex = animalesData.findIndex(a => a.id === id);
+                
+                if (animalIndex !== -1 && !isOnline) {
+                    showNotification('Este animal no se ha sincronizado aún. ¿Desea eliminarlo localmente?', 'warning');
+                    const confirmDelete = await new Promise((resolve, reject) => {
+                        const areteInput = document.getElementById('arete');
+                        const nombreInput = document.getElementById('nombre');
+
+                        const areteError = document.createElement('span');
+                        areteError.textContent = 'Arete';
+                        areteInput.parentElement.appendChild(areteError);
+
+                        const nombreError = document.createElement('span');
+                        nombreError.textContent = 'Nombre';
+                        nombreInput.parentElement.appendChild(nombreError);
+
+                        resolve(confirmDelete);
+                    });
+                    
+                    if (confirmDelete) {
+                        animalesData.splice(animalIndex, 1);
+                        saveLocalData(`animales_${user.uid}`, animalesData);
+                        
+                        // Actualizar historial de tratamientos si el animal se eliminó offline
+                        tratamientosData = tratamientosData.filter(tratamiento => tratamiento.animalId !== id);
+
+                        showNotification('Animal eliminado localmente', 'success');
+                    } else {
+                        showNotification('Operación cancelada', 'info');
+                    }
+                } else if (animalIndex !== -1 && isOnline) {
+                    await db.collection('users').doc(user.uid).collection('animales').doc(id).delete();
+                    animalesData = animalesData.filter(a => a.id !== id);
+
+                    showNotification('Animal eliminado', 'success');
+                }
+                
+                renderAnimalList();
+
+            } catch (error) {
+                console.error("Error eliminando animal: ", error);
+                showNotification(`Error al eliminar animal: ${error.message}`, 'error');
+            }
+        }
+
+        // ======================
+        // MÓDULO DE EXPORTACIÓN A EXCEL
+        // ======================
+
+        function exportToExcel() {
+            try {
+                const user = auth.currentUser;
+                if (!user) return;
+
+                let data = animalesData.map(animal => ({
                     'ID': animal.id,
                     'Arete': animal.arete || '',
                     'Nombre': animal.nombre,
                     'Categoría': animal.categoria,
                     'Sexo': animal.sexo,
-                    'Raza': animal.raza,
-                    'Peso (kg)': animal.peso,
-                    'Fecha Nacimiento': animal.fechaNacimiento,
+                    'Raza': animal.raza || '',
+                    'Peso (kg)': parseFloat(animal.peso) || 0,
+                    'Fecha Nacimiento': animal.fechaNacimiento ? new Date(animal.fechaNacimiento).toISOString() : '',
                     'Estado': animal.estado,
                     'Padre': animal.padre || '',
-                    'Madre': animal.madre || '',
-                    'Observaciones': animal.observaciones || ''
+                    'Madre': animal.madre || ''
                 }));
-                
+
+                if (!data.length) {
+                    showNotification('No hay datos para exportar', 'warning');
+                    return;
+                }
+
                 const wb = XLSX.utils.book_new();
                 const ws = XLSX.utils.json_to_sheet(data);
-                XLSX.utils.book_append_sheet(wb, ws, 'Animales');
-                
-                XLSX.writeFile(wb, 'ganado.xlsx');
-                showNotification('Datos exportados a Excel', 'success');
-                
+
+                let fileName = 'ganado';
+                if (isOnline) fileName += '-online.xlsx';
+
+                XLSX.writeFile(wb, `${fileName}.xlsx`);
+                showNotification('Datos exportados a Excel', isOnline ? 'success' : 'info');
             } catch (error) {
-                showNotification('Error exportando datos: ' + error.message, 'error');
+                console.error("Error exportando datos: ", error);
+                showNotification(`Error al exportar datos: ${error.message}`, 'error');
             }
         }
-        
-        function renderEstadisticas() {
+
+        // ======================
+        // MÓDULO DE USUARIOS
+        // ======================
+
+        async function cargarUsuarios() {
+            const cont = document.getElementById('usuarios-container');
+            if (!cont) return;
+
             try {
-                document.getElementById('totalAnimales').textContent = animalesData.length;
+                const usuariosRef = db.collection('users');
 
-                const vacas = animalesData.filter(a => a.categoria === 'Vaca');
-                document.getElementById('totalVacas').textContent = vacas.length;
+                let html = `
+                    <table class="permisos-table">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Fecha Registro</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                const snapshot = await usuariosRef.get();
+                snapshot.docs.forEach(doc => {
+                    const usuarioData = doc.data();
 
-                const toros = animalesData.filter(a => a.categoria === 'Toro');
-                document.getElementById('totalToros').textContent = toros.length;
+                    let fechaRegistro = usuarioData.createdAt ? 
+                        new Date(usuarioData.createdAt.seconds * 1000).toLocaleDateString() : 'N/A';
 
-                const machosPeq = animalesData.filter(a => 
-                    a.sexo === 'Macho' && 
-                    (a.categoria === 'Ternero' || a.categoria === 'Novillo' || a.categoria === 'Becerro')
-                );
-                document.getElementById('totalMachosPeq').textContent = machosPeq.length;
+                    html += `
+                        <tr>
+                            <td>${usuarioData.nombre} ${doc.id === ADMIN_UID ? '<span class="admin-badge">Admin</span>' : ''}</td>
+                            <td>${usuarioData.email}</td>
+                            <td>${fechaRegistro}</td>
+                            <td>
+                                ${doc.id !== ADMIN_UID ? 
+                                    `<button class="btn btn-danger btn-eliminar-usuario" data-id="${doc.id}">
+                                        <i class="fas fa-trash"></i> Eliminar
+                                    </button>` : 
+                                    '<span class="btn btn-disabled">Administrador</span>'
+                                }
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                html += `</tbody></table>`;
+                cont.innerHTML = html;
 
-                const hembrasPeq = animalesData.filter(a => 
-                    a.sexo === 'Hembra' && 
-                    (a.categoria === 'Ternero' || a.categoria === 'Novillo' || a.categoria === 'Becerro')
-                );
-                document.getElementById('totalHembrasPeq').textContent = hembrasPeq.length;
-
-                const totalMachos = animalesData.filter(a => a.sexo === 'Macho').length;
-                const totalHembras = animalesData.filter(a => a.sexo === 'Hembra').length;
-                document.getElementById('totalMachos').textContent = totalMachos;
-                document.getElementById('totalHembras').textContent = totalHembras;
-
-                const pesos = animalesData.map(a => a.peso || 0).filter(p => p > 0);
-                const promedioPeso = pesos.length > 0 ? 
-                    (pesos.reduce((a, b) => a + b, 0) / pesos.length).toFixed(1) : 0;
-                document.getElementById('promedioPeso').textContent = promedioPeso;
-
-                const categorias = {};
-                animalesData.forEach(animal => {
-                    categorias[animal.categoria] = (categorias[animal.categoria] || 0) + 1;
+                document.querySelectorAll('.btn-eliminar-usuario').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const userId = btn.dataset.id;
+                        
+                        if (confirm(`¿Eliminar este usuario ${userId}? Esta acción no se puede deshacer.`)) {
+                            try {
+                                await db.collection('users').doc(userId).delete();
+                                showNotification(`Usuario ${userId} eliminado`, 'success');
+                                cargarUsuarios();
+                            } catch (error) {
+                                console.error("Error eliminando usuario: ", error);
+                                showNotification(`Error al eliminar usuario ${userId}: ${error.message}`, 'error');
+                            }
+                        }
+                    });
                 });
 
-                const grafico = document.getElementById('graficoDistribucion');
-                grafico.innerHTML = '';
+            } catch (error) {
+                console.error("Error cargando usuarios: ", error);
+                showNotification(`Error cargando el historial de movimientos: ${error.message}`, 'error');
+            }
+        }
 
-                for (const categoria in categorias) {
-                    const porcentaje = Math.round((categorias[categoria] / animalesData.length) * 100);
-                    grafico.innerHTML += `
-                        <div style="margin-bottom: 15px;">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                                <span style="font-weight: 500;">${categoria}</span>
-                                <span>${categorias[categoria]} (${porcentaje}%)</span>
-                            </div>
-                            <div style="height: 24px; background: #e0e0e0; border-radius: 12px; overflow: hidden;">
-                                <div style="height: 100%; width: ${porcentaje}%; background: var(--secondary); border-radius: 12px;"></div>
-                            </div>
-                        </div>
-                    `;
+        // ======================
+        // MÓDULO DE ARBOL GENEALÓGICO
+        // ======================
+
+        async function renderArbolGenealogico() {
+            const user = auth.currentUser;
+            if (!user) return;
+
+            try {
+                const animalSelect = document.getElementById('animalRaiz');
+
+                const animalId = animalSelect.value;
+                
+                if (animalId) {
+                    let raiz, padre, madre;
+
+                    raiz = animalesData.find(a => a.id === animalId);
+                    
+                    if (!raiz) {
+                        showNotification('Animal no encontrado', 'offline');
+                        return;
+                    }
+
+                    const nodoRaiz = crearNodoArbol(raiz, '', true);
+
+                    let abuelosPaterno, abuelosMaterna;
+
+                    abuelosPaterno = raiz.padre && animalesData.find(a => a.id === raiz.padre?.padre);
+                    abuelosMaterna = raiz.madre && animalesData.find(a => a.id === raiz.madre?.madre);
+
+                    if (abuelosPaterno) {
+                        let abuelaPaterna;
+                        for (let i = 0; i < animalSelect.options.length; i++) {
+                            const option = animalSelect.options[i];
+                            if (!option.value || option.value === abuelosPaterno.id) continue;
+
+                            const animal = animalesData.find(a => a.id === option.value);
+                            if (!animal) continue;
+
+                            abuelaPaterna = crearNodoArbol(animal, 'Abuela', false);
+
+                        }
+
+                        const grupoPadres = document.createElement('div');
+                        grupoPadres.className = 'grupo-padres';
+                        grupoPadres.appendChild(nodoRaiz);
+                        grupoPadres.appendChild(abuelaPaterna);
+                    } else {
+                        let abuelosMaterna;
+                        for (let i = 0; i < animalSelect.options.length; i++) {
+                            const option = animalSelect.options[i];
+                            if (!option.value || option.value === abuelosMaterna.id) continue;
+
+                            const animal = animalesData.find(a => a.id === option.value);
+                            if (!animal) continue;
+
+                            abuelaMaterna = crearNodoArbol(animal, 'Abuela', false);
+
+                        }
+
+                        const grupoPadres = document.createElement('div');
+                        grupoPadres.className = 'grupo-padres';
+                        grupoPadres.appendChild(nodoRaiz);
+                        grupoPadres.appendChild(abuelaMaterna);
+                    }
+                    
+                    const conexionVertical1 = document.createElement('div');
+                    conexionVertical1.className = 'conexion vertical';
+
+                    cont.innerHTML = '';
+                    cont.appendChild(grupoPadres);
+                    cont.appendChild(conexionVertical1);
+                } else {
+                    showNotification('No hay animal seleccionado', 'offline');
                 }
 
             } catch (error) {
-                showNotification('Error cargando estadísticas: ' + error.message, 'error');
+                console.error("Error cargando árbol genealógico: ", error);
+                showNotification(`Error al cargar el árbol genealógico: ${error.message}`, 'offline');
+            }
+        }
+
+        // ======================
+        // MÓDULO DE ESTADÍSTICAS
+        // ======================
+
+        async function renderEstadisticas() {
+            try {
+                const user = auth.currentUser;
+                if (!user) return;
+
+                let vacas, toros, machosPeq, hembrasPeq, totalMachos, totalHembras, promedioPeso;
+
+                vacas = animalesData.filter(a => a.categoria === 'Vaca');
+                toros = animalesData.filter(a => a.categoria === 'Toro');
+                machosPeq = animalesData.filter(a => 
+                    (a.categoria === 'Ternero' || a.categoria === 'Novillo' || a.categoria === 'Becerro') && a.sexo === 'Macho'
+                );
+                hembrasPeq = animalesData.filter(a => 
+                    (a.categoria === 'Ternero' || a.categoria === 'Novillo' || a.categoria === 'Becerro') && a.sexo === 'Hembra'
+                );
+
+                totalMachos = vacas.length + toros.length;
+                totalHembras = vacas.length + hembrasPeq.length;
+
+                promedioPeso = vacas.reduce((acc, animal) => acc + parseFloat(animal.peso || 0), 0);
+                if (promedioPeso > 0) promedioPeso /= vacas.length;
+                else promedioPeso = 0;
+
+                const totalAnimalesElement = document.getElementById('totalAnimales');
+                totalAnimalesElement.textContent = `Total de Animales: ${animalesData.length}`;
+
+                const totalVacasElement = document.getElementById('totalVacas');
+                totalVacasElement.textContent = `Total de Vacas: ${vacas.length}`;
+
+                const totalTorosElement = document.getElementById('totalToros');
+                totalTorosElement.textContent = `Total de Toros: ${toros.length}`;
+
+                const totalMachosPeqElement = document.getElementById('totalMachosPeq');
+                totalMachosPeqElement.textContent = `Total de Machos Pequeños: ${machosPeq.length}`;
+
+                const totalHembrasPeqElement = document.getElementById('totalHembrasPeq');
+                totalHembrasPeqElement.textContent = `Total de Hembras Pequeñas: ${hembrasPeq.length}`;
+
+                const totalMachosElement = document.getElementById('totalMachos');
+                totalMachosElement.textContent = `Total de Machos: ${totalMachos} (${calcularPorcentaje(totalMachos, animalesData.length)})`;
+
+                const totalHembrasElement = document.getElementById('totalHembras');
+                totalHembrasElement.textContent = `Total de Hembras: ${totalHembras} (${calcularPorcentaje(totalHembras, animalesData.length)})`;
+
+                const promedioPesoElement = document.getElementById('promedioPeso');
+                promedioPesoElement.textContent = `Promedio de Peso: ${promedioPeso.toFixed(1)} kg (${calcularPorcentaje(promedioPeso, vacas.reduce((acc, animal) => acc + parseFloat(animal.peso || 0), 0))})`;
+
+                function calcularPorcentaje(total, totalData) {
+                    return (total / totalData * 100).toFixed(2);
+                }
+
+            } catch (error) {
+                console.error("Error cargando estadísticas: ", error);
+                showNotification(`Error al cargar las estadísticas: ${error.message}`, 'error');
             }
         }
     </script>
